@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Fanior</title>
+    <base href="/" />
+    <link href="style.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div id="app">Loading...</div>
+
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script>navigator.serviceWorker.register('service-worker.js');</script>
+    <script type="text/javascript">
+        window.getDimensions = function () {
+            return {
+                width: window.innerWidth,
+                height: window.innerHeight
+            };
+        };
+    </script>
+    <script>
+        window.SetFocusToElement = (element) => {
+            element.focus();
+        };
+    </script>
+    <script type="text/javascript">
+        window.Alert = function (message) {
+            alert(message);
+        }
+    </script>
+</body>
+
+</html>

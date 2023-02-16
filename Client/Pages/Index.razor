@@ -1,0 +1,74 @@
+﻿@page "/"
+@using Fanior.Shared
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+@if ((id == -1 || player == null))
+{
+    <h2>@info</h2>
+    <button @onclick=Start>"Start connection"</button>
+}
+<svg x=0 y=0 width="@width" height="@(height)" tabindex="-1" @onkeydown=KeyDown @onkeyup=KeyUp @onmousedown=MouseDown @ref="mySvg">
+    
+    @if (id != -1 && player != null)
+    {
+        <rect x=0 y=0 width="@width" height="@(height)" fill="#CDCDCD"></rect>
+        <rect x=@(-Math.Round(player.X) + width/2-player.Shape.ImageWidth/2) y=@(-Math.Round(player.Y) + height/2-player.Shape.ImageHeight/2) width=@(gvars.ArenaWidth) height=@(gvars.ArenaHeight) fill="#D8EAED"></rect>
+        const int LINESPACE = 25;
+
+        //vodorovné
+        for (int i = 0; i < (gvars.ArenaHeight) / LINESPACE; i++)
+        {
+            if (i % 10 == 0)
+            {
+                <line x1="0" x2=@width y1=@(i * LINESPACE - Math.Round(player.Y) + height / 2) y2=@(i * LINESPACE - Math.Round(player.Y) + height / 2) stroke-width="0.5" stroke="lightgrey"></line>
+            }
+            else
+            {
+                <line x1="0" x2=@width y1=@(i * LINESPACE - Math.Round(player.Y) + height / 2) y2=@(i * LINESPACE - Math.Round(player.Y) + height / 2) stroke-width="0.4" stroke="lightgrey"></line>
+            }
+        }
+        //svislé
+        for (int i = 0; i < (gvars.ArenaWidth) / LINESPACE; i++)
+        {
+            if (i % 10 == 0)
+            {
+                <line x1=@(i * LINESPACE -Math.Round(player.X) + width / 2) x2=@(i * LINESPACE -Math.Round(player.X) + width / 2) y1="0" y2=@height stroke-width="0.5" stroke="lightgrey"></line>
+            }
+            else
+            {
+                <line x1=@(i * LINESPACE -Math.Round(player.X) + width / 2) x2=@(i * LINESPACE -Math.Round(player.X) + width / 2) y1="0" y2=@height stroke-width="0.4" stroke="lightgrey"></line>
+            }
+        }
+        string strokeColor;
+        string fillColor;
+        @foreach (Item item in gvars.Items.Values)
+        {
+
+            if (item.Id == id || (item is Shot s && id == s.CharacterId))
+            {
+                strokeColor = item.Shape.StrokeColor;
+                fillColor = item.Shape.FillColor;
+            }
+            else
+            {
+                strokeColor = item.Shape.StrokeColorEnemy;
+                fillColor = item.Shape.FillColorEnemy;
+            }
+            if (item.Shape.Geometry == Shape.GeometryEnum.circle)
+            {
+
+                var centerX = (item.X - Math.Round(player.X) + width / 2).ToString().Replace(',', '.');
+                var centerY = (item.Y - Math.Round(player.Y) + height / 2).ToString().Replace(',', '.');
+
+
+                <circle cx=@(centerX) cy=@(centerY) r=@(item.Shape.ImageHeight / 2) stroke=@strokeColor stroke-width=@item.Shape.StrokeWidth fill=@fillColor />
+
+            }
+            else if (item.Shape.Geometry == Shape.GeometryEnum.rectange)
+            {
+                <rect x=@item.X y=@item.Y width=@item.Shape.ImageWidth height=@item.Shape.ImageHeight stroke=@strokeColor fill=@fillColor stroke-width=@item.Shape.StrokeWidth></rect>
+            }
+        }
+    }
+</svg>
