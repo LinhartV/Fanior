@@ -15,6 +15,7 @@ namespace Fanior.Client.Pages
 {
     public partial class Index
     {
+        //time for tracking actions
         long now;
         List<Action> actions = new List<Action>();
         Dictionary<string, ClientKey> keys = new Dictionary<string, ClientKey>();
