@@ -6,33 +6,36 @@ using System.Numerics;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using Newtonsoft.Json;
+using System.Reflection;
+using System;
 
 namespace Fanior.Server.Hubs
 {
     public class MyHub : Hub
     {
-        private GameControl game;
+        private GameControl gameControl;
 
         public MyHub(GameControl game)
         {
-            this.game = game;
+            this.gameControl = game;
         }
 
         public async Task OnLogin(string gameId)
         {
             if (gameId == "@@@")
-                await NewPlayer(game.AddPlayer());
+                await NewPlayer(gameControl.AddPlayer());
             else
-                await NewPlayer(game.AddPlayer(gameId));
+                await NewPlayer(gameControl.AddPlayer(gameId));
         }
         public async Task NewPlayer(Gvars gvars)
         {
-            await Clients.Caller.SendAsync("JoinGame", ToolsGame.CreateNewPlayer(gvars).Id, game.sw.ElapsedMilliseconds);
+            await Clients.Caller.SendAsync("JoinGame", ToolsGame.CreateNewPlayer(gvars).Id, gameControl.sw.ElapsedMilliseconds);
         }
-        public async Task KeyDown(string gameId, int playerId, string key)
+        public async Task Execute(string actionMethodName, string gameId, int playerId)
         {
-            //Commands.KeyDown(key, Game.games[gameId], Game.games[gameId].ItemsPlayers[playerId]);
-
+            Type thisType = typeof(PlayerAction);
+            MethodInfo theMethod = thisType.GetMethod(actionMethodName, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+            theMethod.Invoke(null, new object[]{ playerId, gameControl.games[gameId]});
         }
 
         //je to dobrej nápad? Nebude server přehlcenej?

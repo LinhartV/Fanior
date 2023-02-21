@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Fanior.Shared;
+
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -15,23 +16,27 @@ namespace Fanior.Client.Pages
 {
     public partial class Index
     {
+
         //time for tracking actions
         long now;
         List<Action> actions = new List<Action>();
-        Dictionary<string, ClientKey> keys = new Dictionary<string, ClientKey>();
         int id;
+        //just for testing
+        int counter = 0;
         private string info = "0";
         private Player player;
         private Gvars gvars;
         private int width = 500;
         private int height = 500;
         public ElementReference mySvg;
-        private HubConnection hubConnection;
+        public HubConnection hubConnection;
+
         public async Task Start()
         {
             Task t1 = SetConnection();
             Task t2 = GetDimensions();
             await Task.WhenAll(t1, t2);
+            DefaultAssingOfKeys();
             await InvokeAsync(() => this.StateHasChanged());
         }
 
@@ -48,9 +53,16 @@ namespace Fanior.Client.Pages
             }
         }
 
-        public void SetKeys()
+        private async Task SendKeyToServer(string actionMethodName)
+        {
+            await hubConnection.SendAsync("Execute", actionMethodName, gvars.GameId, this.id);
+        }
+
+        public void DefaultAssingOfKeys()
         {
             //set keys here
+            KeyController.AddKey("w", new RegisteredKey(PlayerAction.MoveUp, null, null, SendKeyToServer));
+            KeyController.AddKey("s", new RegisteredKey(null, null, PlayerAction.MoveDown, SendKeyToServer));
         }
 
         public async Task SetConnection()
@@ -67,7 +79,7 @@ namespace Fanior.Client.Pages
             {
                 JoinGame(id, now);
             });
-            
+
             hubConnection.On<string, int>("ReceiveGvars", (just, now) =>
             {
                 try
@@ -82,10 +94,9 @@ namespace Fanior.Client.Pages
                     };
 
                     gvars = JsonConvert.DeserializeObject<Gvars>(just, jsonSerializerSettings);
-                    if (player == null)
-                    {
-                        player = gvars.ItemsPlayers[id];
-                    }
+
+                    player = gvars.ItemsPlayers[id];
+
                 }
                 catch (Exception e)
                 {
@@ -104,6 +115,7 @@ namespace Fanior.Client.Pages
                 await JS.InvokeVoidAsync("Alert", e.Message);
             }
             info = "1";
+            await JS.InvokeVoidAsync("SetFocus", mySvg);
         }
 
         private void JoinGame(int id, long now)
@@ -115,10 +127,9 @@ namespace Fanior.Client.Pages
             ExecuteAsync(new CancellationToken(false));
         }
 
-        protected async Task KeyDown(KeyboardEventArgs e)
+        protected void KeyDown(KeyboardEventArgs e)
         {
-            //Commands.KeyDown(e.Key.ToString(), gvars, Player);
-            await hubConnection.SendAsync("KeyDown", e.Key.ToString());
+            KeyController.GetRegisteredKey(e.Key)?.KeyDown(id, gvars);
         }
         protected async Task KeyUp(KeyboardEventArgs e)
         {
@@ -139,10 +150,18 @@ namespace Fanior.Client.Pages
         }
         protected async override Task OnAfterRenderAsync(bool firstRender)
         {
-            if (firstRender)
+            try
             {
-                await JS.InvokeVoidAsync("SetFocusToElement", mySvg);
-                await Start();
+                if (firstRender)
+                {
+                    await Start();
+                }
+
+            }
+            catch (Exception e)
+            {
+
+                throw;
             }
         }
         public bool IsConnected =>
@@ -170,7 +189,7 @@ namespace Fanior.Client.Pages
 
         private async Task Frame()
         {
-            await hubConnection.SendAsync("ClientActions", actions, id);
+            //await hubConnection.SendAsync("ClientActions", actions, id);
         }
 
     }

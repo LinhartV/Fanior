@@ -1,6 +1,6 @@
 ﻿
 using System.Collections.Generic;
-using Fanior.Shared.Items.HelperClasses;
+using Fanior.Shared;
 
 namespace Fanior.Shared
 {

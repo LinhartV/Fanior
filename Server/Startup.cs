@@ -28,7 +28,7 @@ namespace Fanior.Server
             services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddSingleton<GameControl>();
-            //services.AddHostedService<FrameRenderer>();
+            services.AddHostedService<FrameRenderer>();
             services.AddResponseCompression(opts =>
             {
                 opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fanior.Shared.Items.HelperClasses
+namespace Fanior.Shared
 {
     public class ItemAction
     {
@@ -15,7 +15,7 @@ namespace Fanior.Shared.Items.HelperClasses
         public ItemAction(Action action, int repeat, Item item)
         {
             Action = action;
-            this.repeat = repeat;
+            Repeat = repeat;
             Item = item;
         }
 
@@ -24,7 +24,7 @@ namespace Fanior.Shared.Items.HelperClasses
             get { return repeat; }
             set
             {
-                if (value >= 0)
+                if (value > 0)
                 {
                     if (value <= Constants.FRAME_TIME)
                     {
