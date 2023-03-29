@@ -22,22 +22,33 @@ namespace Fanior.Server.Hubs
 
         public async Task OnLogin(string gameId)
         {
-            if (gameId == "@@@")
-                await NewPlayer(gameControl.AddPlayer());
-            else
-                await NewPlayer(gameControl.AddPlayer(gameId));
+            for (int i = 0; i < 1; i++)
+            {
+                if (gameId == "@@@")
+                    await NewPlayer(gameControl.AddPlayer());
+                else
+                    await NewPlayer(gameControl.AddPlayer(gameId));
+            }
         }
         public async Task NewPlayer(Gvars gvars)
         {
             await Clients.Caller.SendAsync("JoinGame", ToolsGame.CreateNewPlayer(gvars).Id, gameControl.sw.ElapsedMilliseconds);
+            string json = JsonConvert.SerializeObject(gvars, ToolsGame.jsonSerializerSettings);
+            await Clients.Caller.SendAsync("ReceiveGvars", json);
         }
-        public async Task Execute(string actionMethodName, string gameId, int playerId)
+        public void Execute(string actionMethodName, string gameId, int playerId)
         {
             Type thisType = typeof(PlayerAction);
             MethodInfo theMethod = thisType.GetMethod(actionMethodName, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
             theMethod.Invoke(null, new object[]{ playerId, gameControl.games[gameId]});
         }
-
+        public void ExecuteList(List<string> actionMethodNames, string gameId, int playerId)
+        {
+            foreach (var item in actionMethodNames)
+            {
+                Execute(item, gameId, playerId);
+            }
+        }
         //je to dobrej nápad? Nebude server přehlcenej?
         /*public async Task FetchData(string gameId, int playerId)
         {

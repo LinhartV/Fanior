@@ -1,11 +1,13 @@
 ﻿
 using System.Collections.Generic;
 using Fanior.Shared;
+using Newtonsoft.Json;
 
 namespace Fanior.Shared
 {
     public class Gvars
     {
+        
         public Dictionary<int, Item> Items { get; set; } = new Dictionary<int, Item>();
         //derived dictionaries
         public Dictionary<int, Item> ItemsStep { get; set; } = new Dictionary<int, Item>();

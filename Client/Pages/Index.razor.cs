@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,10 +17,12 @@ namespace Fanior.Client.Pages
 {
     public partial class Index
     {
-
-        //time for tracking actions
+        #region Variables
+        long actionId = 0;
+        List<string> pressedKeys = new List<string>();
+        //time for tracking actions which are sent to server
         long now;
-        List<Action> actions = new List<Action>();
+        List<string> actions = new();
         int id;
         //just for testing
         int counter = 0;
@@ -30,7 +33,7 @@ namespace Fanior.Client.Pages
         private int height = 500;
         public ElementReference mySvg;
         public HubConnection hubConnection;
-
+        #endregion
         public async Task Start()
         {
             Task t1 = SetConnection();
@@ -39,7 +42,85 @@ namespace Fanior.Client.Pages
             DefaultAssingOfKeys();
             await InvokeAsync(() => this.StateHasChanged());
         }
+        #region Input control
+        private async Task SendKeyToServer(string actionMethodName)
+        {
+            actions.Add(actionMethodName);
+        }
 
+        public void DefaultAssingOfKeys()
+        {
+            //set keys here
+            KeyController.AddKey("w", new RegisteredKey(null, null, PlayerAction.MoveUp, SendKeyToServer));
+            KeyController.AddKey("s", new RegisteredKey(null, null, PlayerAction.MoveDown, SendKeyToServer));
+            KeyController.AddKey("d", new RegisteredKey(null, null, PlayerAction.MoveRight, SendKeyToServer));
+            KeyController.AddKey("a", new RegisteredKey(null, null, PlayerAction.MoveLeft, SendKeyToServer));
+
+        }
+
+        protected void KeyDown(KeyboardEventArgs e)
+        {
+            KeyController.GetRegisteredKey(e.Key.ToLower())?.KeyDown(id, gvars);
+            if (!pressedKeys.Contains(e.Key.ToLower()))
+            {
+                pressedKeys.Add(e.Key.ToLower());
+            }
+        }
+        protected void KeyUp(KeyboardEventArgs e)
+        {
+            KeyController.GetRegisteredKey(e.Key.ToLower())?.KeyUp(id, gvars);
+            if (pressedKeys.Contains(e.Key.ToLower()))
+            {
+                pressedKeys.Remove(e.Key.ToLower());
+            }
+        }
+        protected async Task MouseDown(MouseEventArgs e)
+        {
+
+            
+        }
+        #endregion
+        #region Frame
+
+        protected Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            return Task.Run(async () =>
+            {
+                while (stoppingToken.IsCancellationRequested == false)
+                {
+                    await Frame();
+                    await Task.Delay(1000 / 60, stoppingToken);
+                }
+            });
+        }
+
+        private async Task Frame()
+        {
+            try
+            {
+                foreach (var pressedKey in pressedKeys)
+                {
+                    if (KeyController.GetRegisteredKey(pressedKey).KeyPressed != null)
+                    {
+                        KeyController.GetRegisteredKey(pressedKey).KeyPressed(id, gvars);
+                    }
+                }
+                if (actions.Count > 0)
+                {
+                    await hubConnection.SendAsync("ExecuteList", actions, gvars.GameId, this.id);
+                    actions.Clear();
+                }
+                StateHasChanged();
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+            
+        }
+        #endregion
+        #region Other
         async Task GetDimensions()
         {
             try
@@ -52,19 +133,26 @@ namespace Fanior.Client.Pages
             {
             }
         }
-
-        private async Task SendKeyToServer(string actionMethodName)
+        protected async override Task OnAfterRenderAsync(bool firstRender)
         {
-            await hubConnection.SendAsync("Execute", actionMethodName, gvars.GameId, this.id);
-        }
+            try
+            {
+                if (firstRender)
+                {
+                    await Start();
+                }
 
-        public void DefaultAssingOfKeys()
-        {
-            //set keys here
-            KeyController.AddKey("w", new RegisteredKey(PlayerAction.MoveUp, null, null, SendKeyToServer));
-            KeyController.AddKey("s", new RegisteredKey(null, null, PlayerAction.MoveDown, SendKeyToServer));
-        }
+            }
+            catch (Exception e)
+            {
 
+                throw;
+            }
+        }
+        #endregion
+        #region Set connection
+        bool firstConnect = true;
+        Stopwatch sw = new Stopwatch();
         public async Task SetConnection()
         {
             hubConnection = new HubConnectionBuilder()
@@ -80,23 +168,27 @@ namespace Fanior.Client.Pages
                 JoinGame(id, now);
             });
 
-            hubConnection.On<string, int>("ReceiveGvars", (just, now) =>
+            hubConnection.On<string, int>("ReceiveCommands", (just, now) =>
+            {
+
+            });
+
+            hubConnection.On<string>("ReceiveGvars", (just) =>
             {
                 try
                 {
-                    this.now = now;
-                    var jsonSerializerSettings = new JsonSerializerSettings()
-                    {
-                        TypeNameHandling = TypeNameHandling.All,
-                        Formatting = Newtonsoft.Json.Formatting.Indented,
-                        NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore
-
-                    };
-
-                    gvars = JsonConvert.DeserializeObject<Gvars>(just, jsonSerializerSettings);
-
+                    sw.Start();
+                    gvars = JsonConvert.DeserializeObject<Gvars>(just, ToolsGame.jsonSerializerSettings);
+                    sw.Stop();
+                    Console.WriteLine(sw.ElapsedMilliseconds);
+                    sw.Reset();
                     player = gvars.ItemsPlayers[id];
 
+                    if (firstConnect)
+                    {
+                        ExecuteAsync(new CancellationToken(false));
+                        firstConnect = false;
+                    }
                 }
                 catch (Exception e)
                 {
@@ -124,46 +216,9 @@ namespace Fanior.Client.Pages
             this.id = id;
             info = "2";
             this.StateHasChanged();
-            ExecuteAsync(new CancellationToken(false));
         }
 
-        protected void KeyDown(KeyboardEventArgs e)
-        {
-            KeyController.GetRegisteredKey(e.Key)?.KeyDown(id, gvars);
-        }
-        protected async Task KeyUp(KeyboardEventArgs e)
-        {
-            //Commands.KeyDown(e.Key.ToString(), gvars, Player);
-            await hubConnection.SendAsync("KeyUp", e.Key.ToString());
-        }
-        string color = "white";
-        bool ready = true;
-        protected async Task MouseDown(MouseEventArgs e)
-        {
 
-            //await JS.InvokeVoidAsync("Alert", "Pressed");
-            //Commands.KeyDown(e.Key.ToString(), gvars, Player);
-            if (ready == true)
-            {
-                await hubConnection.SendAsync("MouseDown", this.id);
-            }
-        }
-        protected async override Task OnAfterRenderAsync(bool firstRender)
-        {
-            try
-            {
-                if (firstRender)
-                {
-                    await Start();
-                }
-
-            }
-            catch (Exception e)
-            {
-
-                throw;
-            }
-        }
         public bool IsConnected =>
             hubConnection.State == HubConnectionState.Connected;
 
@@ -174,23 +229,11 @@ namespace Fanior.Client.Pages
                 await hubConnection.DisposeAsync();
             }
         }
+        #endregion
 
-        protected Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            return Task.Run(async () =>
-            {
-                while (stoppingToken.IsCancellationRequested == false)
-                {
-                    await Frame();
-                    await Task.Delay(1000 / 60, stoppingToken);
-                }
-            });
-        }
 
-        private async Task Frame()
-        {
-            //await hubConnection.SendAsync("ClientActions", actions, id);
-        }
+
+
 
     }
 }

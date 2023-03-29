@@ -12,7 +12,6 @@ namespace Fanior.Client
 {
     static class ToolsSystem
     {
-        public static ClientKey mouse;
         /*static public void PressedKeys()
         {
             for (int i = 0; i < keys.Count; i++)

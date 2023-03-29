@@ -20,6 +20,14 @@ namespace Fanior.Shared
         {
             gvars.ItemsPlayers[playerId].Y += 5;
         }
+        public static void MoveRight(int playerId, Gvars gvars)
+        {
+            gvars.ItemsPlayers[playerId].X += 5;
+        }
+        public static void MoveLeft(int playerId, Gvars gvars)
+        {
+            gvars.ItemsPlayers[playerId].X -= 5;
+        }
     }
 
 }

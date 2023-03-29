@@ -1,0 +1,15 @@
+	Èasy deserializace json u clienta:
+A) Vše všem:
+Poèet_hráèù èas[ms]
+1 2-3
+2 4-5
+3 6
+4 7-8
+5 9
+6 11
+7 13
+8 14
+9 16
+10 17-18
+
+B) Posílat zmìny

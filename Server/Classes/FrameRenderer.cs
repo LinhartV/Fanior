@@ -21,17 +21,10 @@ namespace Fanior.Server
     {
         private readonly IServiceProvider _serviceProvider;
 
-        Newtonsoft.Json.JsonSerializer serializer = new Newtonsoft.Json.JsonSerializer();
-        JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings()
-        {
-            TypeNameHandling = TypeNameHandling.All,
-            Formatting = Newtonsoft.Json.Formatting.Indented,
-            NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore
-
-        };
+        
         public FrameRenderer(IServiceProvider serviceProvider)
         {
-            serializer.Converters.Add(new Newtonsoft.Json.Converters.JavaScriptDateTimeConverter());
+            ToolsGame.serializer.Converters.Add(new Newtonsoft.Json.Converters.JavaScriptDateTimeConverter());
 
             _serviceProvider = serviceProvider;
 
@@ -44,7 +37,7 @@ namespace Fanior.Server
                 while (stoppingToken.IsCancellationRequested == false)
                 {
                     await DoWork();
-                    await Task.Delay(1000 / 60, stoppingToken);
+                    await Task.Delay(1000 / 1, stoppingToken);
                 }
             });
         }
@@ -75,7 +68,7 @@ namespace Fanior.Server
             List<Task> tasks = new List<Task>();
             foreach (Gvars gvars in game.games.Values)
             {
-                ProcedeActions(now, gvars);
+                //ProcedeActions(now, gvars);
                 tasks.Add(Task.Run(()=>SendData(game, hub, now)));
             }
             Task.WaitAll(tasks.ToArray());
@@ -108,8 +101,8 @@ namespace Fanior.Server
             {
                 try
                 {
-                    string json = JsonConvert.SerializeObject(gvars, jsonSerializerSettings);
-                    await hub?.Clients.All.SendAsync("ReceiveGvars", json, now);
+                    string json = JsonConvert.SerializeObject(gvars, ToolsGame.jsonSerializerSettings);
+                    await hub?.Clients.All.SendAsync("ReceiveCommands", json, now);
                 }
                 catch (Exception e)
                 {

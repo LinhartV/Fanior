@@ -24,11 +24,11 @@ namespace Fanior.Client
             if (registeredKeys.ContainsKey(keyName) && registeredKeys[keyName].Count > 0)
                 registeredKeys[keyName].Pop();
         }
-        public static void AddKey(string keyName, RegisteredKey key)
+        public static void AddKey(string keyName, RegisteredKey registeredKey)
         {
             if (!registeredKeys.ContainsKey(keyName))
                 registeredKeys.Add(keyName, new Stack<RegisteredKey>());
-            registeredKeys[keyName].Push(key);
+            registeredKeys[keyName].Push(registeredKey);
         }
         //Zajímavý nápad, ale ne.
         /* private Dictionary<string, RegisteredKey> registeredKeys = new();
