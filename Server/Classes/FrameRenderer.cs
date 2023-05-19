@@ -13,10 +13,14 @@ using MessagePack;
 using Fanior.Shared;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using Microsoft.Extensions.Options;
 
 
 namespace Fanior.Server
 {
+    /// <summary>
+    /// Class taking care of actions to be done each frame.
+    /// </summary>
     public class FrameRenderer : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
@@ -24,7 +28,7 @@ namespace Fanior.Server
         
         public FrameRenderer(IServiceProvider serviceProvider)
         {
-            ToolsGame.serializer.Converters.Add(new Newtonsoft.Json.Converters.JavaScriptDateTimeConverter());
+            ToolsSystem.serializer.Converters.Add(new Newtonsoft.Json.Converters.JavaScriptDateTimeConverter());
 
             _serviceProvider = serviceProvider;
 
@@ -37,11 +41,14 @@ namespace Fanior.Server
                 while (stoppingToken.IsCancellationRequested == false)
                 {
                     await DoWork();
-                    await Task.Delay(1000 / 1, stoppingToken);
+                    await Task.Delay(1000 / 60, stoppingToken);
                 }
             });
         }
 
+        /// <summary>
+        /// Get current hub and use it in Frame
+        /// </summary>
         private async Task DoWork()
         {
             try
@@ -61,23 +68,52 @@ namespace Fanior.Server
         }
 
 
-
+        /// <summary>
+        /// Algorithms to be done each frame
+        /// </summary>
         private async Task Frame(GameControl game, IHubContext<Hubs.MyHub> hub)
         {
             long now = game.sw.ElapsedMilliseconds;
-            List<Task> tasks = new List<Task>();
             foreach (Gvars gvars in game.games.Values)
             {
-                //ProcedeActions(now, gvars);
-                tasks.Add(Task.Run(()=>SendData(game, hub, now)));
+
+                ProcedeGameAlgorithms(gvars);
+                ProcedePlayerActions(gvars);
+                ProcedeItemActions(now, gvars);
+
+                gvars.messageId++;
             }
-            Task.WaitAll(tasks.ToArray());
+            await SendData(game, hub);
         }
 
-
-        private void ProcedeActions(long now, Gvars gvars)
+        /// <summary>
+        /// Procede algorithm of game logic (collision detection etc.)
+        /// </summary>
+        private void ProcedeGameAlgorithms(Gvars gvars)
         {
-            List<(long, ItemAction)> temp = new List<(long, ItemAction)>(gvars.Actions);
+
+        }
+
+        /// <summary>
+        /// Procede actions that players just did
+        /// </summary>
+        private void ProcedePlayerActions(Gvars gvars)
+        {
+            foreach (int playerId in gvars.PlayerActions.Keys)
+            {
+                foreach (var action in gvars.PlayerActions[playerId])
+                {
+                    PlayerAction.InvokeAction(action.Item1, action.Item2, playerId, gvars);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handles all actions of every item (excluding player actions)
+        /// </summary>
+        private void ProcedeItemActions(long now, Gvars gvars)
+        {
+            List<(long, ItemAction)> temp = new List<(long, ItemAction)>(gvars.ItemActions);
             for (int i = 0; i < temp.Count; i++)
             {
                 if (temp[i].Item1 <= now)
@@ -95,20 +131,26 @@ namespace Fanior.Server
             gvars.Actions.Sort();
         }
 
-        private async Task SendData(GameControl game, IHubContext<Hubs.MyHub> hub, long now)
+        /// <summary>
+        /// Send all received actions to all clients for them to know, who did what.
+        /// </summary>
+        private async Task SendData(GameControl game, IHubContext<Hubs.MyHub> hub)
         {
             foreach (Gvars gvars in game.games.Values)
             {
                 try
                 {
-                    string json = JsonConvert.SerializeObject(gvars, ToolsGame.jsonSerializerSettings);
-                    await hub?.Clients.All.SendAsync("ReceiveCommands", json, now);
+                    if (gvars.PlayerActions.Count>0)
+                    {
+                        await hub?.Clients.Group(gvars.GameId).SendAsync("ExecuteList", gvars.PlayerActions, JsonConvert.SerializeObject(gvars.PlayerActions[gvars], ToolsSystem.jsonSerializerSettings));
+                        gvars.PlayerActions.Clear();
+                    }
+                    
                 }
                 catch (Exception e)
                 {
-                    string str = e.Message;
+                    Console.WriteLine(e.Message);
                 }
-
             }
         }
 

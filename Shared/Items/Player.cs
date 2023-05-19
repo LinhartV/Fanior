@@ -5,28 +5,33 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Fanior.Shared
 {
     public class Player : Character
     {
         public bool MovementEnabled { get; set; } = true;
+        public string ConnectionId { get; set; }
 
         public Player() { }
-        public Player(Gvars gvars, float x, float y, Shape shape, Mask mask, Type defaultMovement, float movementSpeed, float lives, bool isVisible = true)
+        public Player(string connectionId, Gvars gvars, float x, float y, Shape shape, Mask mask, Type defaultMovement, float movementSpeed, float lives, bool isVisible = true)
             : base(gvars, x, y, shape, mask, movementSpeed, lives, defaultMovement, isVisible)
         {
-            SetPlayer(gvars);
+            this.ConnectionId = connectionId;
+            SetItem(gvars);
         }
 
-        public Player(Gvars gvars, float x, float y, Shape shape, Type defaultMovement, float movementSpeed, float lives, bool isVisible = true)
+        public Player(string connectionId, Gvars gvars, float x, float y, Shape shape, Type defaultMovement, float movementSpeed, float lives, bool isVisible = true)
             : base(gvars, x, y, shape, new Mask(shape.ImageWidth, shape.ImageHeight, shape.Geometry), movementSpeed, lives, defaultMovement, isVisible)
         {
-            SetPlayer(gvars);
+            this.ConnectionId = connectionId;
+            SetItem(gvars);
         }
 
-        private void SetPlayer(Gvars gvars)
+        override public void SetItem(Gvars gvars)
         {
+            base.SetItem(gvars);
             Weapon = new BasicWeapon(true, 100, 1, 0.7f, this.Id);
             Solid = true;
             gvars.ItemsPlayers.Add(this.Id, this);

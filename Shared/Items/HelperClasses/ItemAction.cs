@@ -6,10 +6,16 @@ using System.Threading.Tasks;
 
 namespace Fanior.Shared
 {
+    /// <summary>
+    /// Actions that can be assigned to Items - controlled by game itself.
+    /// </summary>
     public class ItemAction
     {
+        //Action to be executed
         public Action Action { get; private set; }
+        //whether the action will be repeated and if so, how often
         private int repeat;
+        //Item the action is assigned to
         public Item Item { get; private set; }
 
         public ItemAction(Action action, int repeat, Item item)

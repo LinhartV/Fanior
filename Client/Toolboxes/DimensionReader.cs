@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Fanior.Client
 {
+    /// <summary>
+    /// Reads the dimensions of the window the game is in.
+    /// </summary>
     public class DimensionReader
     {
         public class BrowserService

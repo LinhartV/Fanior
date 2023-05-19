@@ -18,43 +18,51 @@ namespace Fanior.Client.Pages
     public partial class Index
     {
         #region Variables
-        long actionId = 0;
+        //list of keys that are pressed in the current frame
         List<string> pressedKeys = new List<string>();
-        //time for tracking actions which are sent to server
-        long now;
-        List<string> actions = new();
-        int id;
+        //list of all actions that are going to be proceeded and sent to server along with information, if key for this action was pressed or released
+        List<(PlayerAction.PlayerActionsEnum, bool)> actions = new();
+        //id of this connection
+        int id = 0;
         //just for testing
         int counter = 0;
         private string info = "0";
+        //this player
         private Player player;
+        //game variables for this session
         private Gvars gvars;
+        //dimensions of the window
         private int width = 500;
         private int height = 500;
+        //reference to canvas
         public ElementReference mySvg;
         public HubConnection hubConnection;
         #endregion
+        /// <summary>
+        /// Method containing all stuff that are to be proceeded at the start of the load up.
+        /// </summary>
         public async Task Start()
         {
             Task t1 = SetConnection();
             Task t2 = GetDimensions();
             await Task.WhenAll(t1, t2);
             DefaultAssingOfKeys();
+            PlayerAction.SetupActions();
             await InvokeAsync(() => this.StateHasChanged());
         }
         #region Input control
-        private async Task SendKeyToServer(string actionMethodName)
+        private async Task SendKeyToServer(PlayerAction.PlayerActionsEnum actionMethodName, bool keyDown)
         {
-            actions.Add(actionMethodName);
+            actions.Add((actionMethodName, keyDown));
         }
 
         public void DefaultAssingOfKeys()
         {
             //set keys here
-            KeyController.AddKey("w", new RegisteredKey(null, null, PlayerAction.MoveUp, SendKeyToServer));
-            KeyController.AddKey("s", new RegisteredKey(null, null, PlayerAction.MoveDown, SendKeyToServer));
+            KeyController.AddKey("w", new RegisteredKey(PlayerAction.PlayerActionsEnum.none, PlayerAction.PlayerActionsEnum.none, PlayerAction.PlayerActionsEnum.moveUp, SendKeyToServer));
+            /*KeyController.AddKey("s", new RegisteredKey(null, null, PlayerAction.MoveDown, SendKeyToServer));
             KeyController.AddKey("d", new RegisteredKey(null, null, PlayerAction.MoveRight, SendKeyToServer));
-            KeyController.AddKey("a", new RegisteredKey(null, null, PlayerAction.MoveLeft, SendKeyToServer));
+            KeyController.AddKey("a", new RegisteredKey(null, null, PlayerAction.MoveLeft, SendKeyToServer));*/
 
         }
 
@@ -77,7 +85,7 @@ namespace Fanior.Client.Pages
         protected async Task MouseDown(MouseEventArgs e)
         {
 
-            
+
         }
         #endregion
         #region Frame
@@ -96,6 +104,7 @@ namespace Fanior.Client.Pages
 
         private async Task Frame()
         {
+            string json;
             try
             {
                 foreach (var pressedKey in pressedKeys)
@@ -107,7 +116,8 @@ namespace Fanior.Client.Pages
                 }
                 if (actions.Count > 0)
                 {
-                    await hubConnection.SendAsync("ExecuteList", actions, gvars.GameId, this.id);
+                    json = JsonConvert.SerializeObject(actions, ToolsSystem.jsonSerializerSettings);
+                    await hubConnection.SendAsync("ExecuteList", json, gvars.GameId, this.id);
                     actions.Clear();
                 }
                 StateHasChanged();
@@ -117,7 +127,7 @@ namespace Fanior.Client.Pages
 
                 throw;
             }
-            
+
         }
         #endregion
         #region Other
@@ -160,41 +170,61 @@ namespace Fanior.Client.Pages
            .Build();
             hubConnection.On<int>("ReceiveMessage", (str) =>
             {
-                info = str.ToString();
+               // info = str.ToString();
                 StateHasChanged();
             });
-            hubConnection.On<int, long>("JoinGame", (id, now) =>
+            //list of actions to be proceeded that server sent to client 
+            hubConnection.On<long, string>("ExecuteList", (messageId, actionMethodNamesJson) =>
             {
-                JoinGame(id, now);
-            });
+                Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>> actionMethodNames = JsonConvert.DeserializeObject<Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
 
-            hubConnection.On<string, int>("ReceiveCommands", (just, now) =>
-            {
-
-            });
-
-            hubConnection.On<string>("ReceiveGvars", (just) =>
-            {
-                try
+                foreach (int itemId in actionMethodNames.Keys)
                 {
-                    sw.Start();
-                    gvars = JsonConvert.DeserializeObject<Gvars>(just, ToolsGame.jsonSerializerSettings);
-                    sw.Stop();
-                    Console.WriteLine(sw.ElapsedMilliseconds);
-                    sw.Reset();
-                    player = gvars.ItemsPlayers[id];
-
-                    if (firstConnect)
+                    foreach (var item in actionMethodNames[itemId])
                     {
-                        ExecuteAsync(new CancellationToken(false));
-                        firstConnect = false;
+                        PlayerAction.InvokeAction(item.Item1, item.Item2, itemId, gvars);
                     }
                 }
-                catch (Exception e)
+            });
+            //this player joined game
+            hubConnection.On<int, string>("JoinGame", (idReceived, gvarsJson) =>
+            {
+                if (this.id == 0)
                 {
-                    throw;
+                    JoinGame(idReceived);
+                    ReceiveGvars(gvarsJson);
                 }
-                StateHasChanged();
+            });
+            //new player joined game
+            hubConnection.On<string, int>("PlayerJoinGame", (playerJson, idConnectedPlayer) =>
+            {
+                if (id != idConnectedPlayer)
+                {
+                    ToolsSystem.DeserializePlayer(playerJson, gvars);
+                }
+            });
+            //Dictionary of list of actions assigned to object id along with information, if it's keydown or keyup (true = keydown).
+            //+messageId to check if connection was lost.
+            hubConnection.On<Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>, int>("ExecuteList", (actionMethodNames, messageId) =>
+            {
+                //skončil jsem tady - teď musím udělat, aby se posílali stisky kláves "stisknuto", "released", aby na serveru to mohlo jet plynule jako tady.
+                sw.Start();
+                foreach (int playerId in actionMethodNames.Keys)
+                {
+                    foreach (var action in actionMethodNames[playerId])
+                    {
+                        PlayerAction.InvokeAction(action.Item1, action.Item2, playerId, gvars);
+                    }
+                }
+                sw.Stop();
+                Console.WriteLine(sw.ElapsedMilliseconds);
+                sw.Reset();
+            });
+
+            //on login and when connection was lost
+            hubConnection.On<string>("ReceiveGvars", (gvarsJson) =>
+            {
+                ReceiveGvars(gvarsJson);
             });
             try
             {
@@ -209,12 +239,30 @@ namespace Fanior.Client.Pages
             info = "1";
             await JS.InvokeVoidAsync("SetFocus", mySvg);
         }
-
-        private void JoinGame(int id, long now)
+        private void ReceiveGvars(string gvarsJson)
         {
-            this.now = now;
+            try
+            {
+                gvars = JsonConvert.DeserializeObject<Gvars>(gvarsJson, ToolsSystem.jsonSerializerSettings);
+
+                player = gvars.ItemsPlayers[id];
+
+                if (firstConnect)
+                {
+                    ExecuteAsync(new CancellationToken(false));
+                    firstConnect = false;
+                }
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
+            StateHasChanged();
+        }
+        private void JoinGame(int id)
+        {
             this.id = id;
-            info = "2";
+            info = id.ToString();
             this.StateHasChanged();
         }
 

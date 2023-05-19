@@ -5,16 +5,28 @@ using Newtonsoft.Json;
 
 namespace Fanior.Shared
 {
+    /// <summary>
+    /// Class containing game variables of particular arena
+    /// </summary>
     public class Gvars
     {
-        
+        //id of sent messages
+        public long messageId = 0;
+        //milliseconds elapsed from the launch of server
+        public long now;
+
+        //all items
         public Dictionary<int, Item> Items { get; set; } = new Dictionary<int, Item>();
         //derived dictionaries
         public Dictionary<int, Item> ItemsStep { get; set; } = new Dictionary<int, Item>();
         public Dictionary<int, Player> ItemsPlayers { get; set; } = new Dictionary<int, Player>();
-        public List<(long, ItemAction)> Actions { get; set; } = new();
-        //public string DataToSend { get; set; }
 
+        //actions of every item in the game with information when to be executed
+        public List<(long, ItemAction)> ItemActions { get; set; } = new();
+        //actions that players just did
+        public Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>> PlayerActions = new();
+        
+        //size of arena
         public float ArenaWidth { get; set; }
         public float ArenaHeight { get; set; }
 
@@ -23,12 +35,12 @@ namespace Fanior.Shared
 
         //Id for item creation
         public int Id { get; set; } = 1;
-        public Gvars(string gameId)
+        public Gvars(string gameId, long now)
         {
+            this.now = now;
             GameId = gameId;
-            ArenaWidth = 1500;
-            ArenaHeight = 1500;
-            //broadcast1;broadcast2...;@;playerId1;x;y;playerId2;x;y;... 
+            ArenaWidth = 500;
+            ArenaHeight = 500;
         }
         public Gvars()
         { }

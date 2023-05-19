@@ -13,18 +13,10 @@ namespace Fanior.Shared
         public static List<(Action<Item>, Item)> startActionsToPerform = new();
         public static int counter = 0;
         public static Random random = new();
-        public static Newtonsoft.Json.JsonSerializer serializer = new Newtonsoft.Json.JsonSerializer();
-        public static JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings()
+        
+        public static Player CreateNewPlayer(Gvars gvars, string connectionId)
         {
-            TypeNameHandling = TypeNameHandling.All,
-            Formatting = Newtonsoft.Json.Formatting.Indented,
-            NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
-            PreserveReferencesHandling = PreserveReferencesHandling.Objects
-
-        };
-        public static Player CreateNewPlayer(Gvars gvars)
-        {
-            return new Player(gvars, (float)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (float)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", "red", "darkred", 1, 40, 40, Shape.GeometryEnum.circle), typeof(ConstantMovement), 4, 3);
+            return new Player(connectionId, gvars, (float)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (float)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", "red", "darkred", 1, 40, 40, Shape.GeometryEnum.circle), typeof(ConstantMovement), 4, 3);
         }
         public class Coords
         {

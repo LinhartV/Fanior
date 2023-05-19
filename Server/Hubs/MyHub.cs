@@ -14,12 +14,15 @@ namespace Fanior.Server.Hubs
     public class MyHub : Hub
     {
         private GameControl gameControl;
+        
 
         public MyHub(GameControl game)
         {
             this.gameControl = game;
         }
-
+        /// <summary>
+        /// Creation of new player, when he logs in.
+        /// </summary>
         public async Task OnLogin(string gameId)
         {
             for (int i = 0; i < 1; i++)
@@ -30,30 +33,32 @@ namespace Fanior.Server.Hubs
                     await NewPlayer(gameControl.AddPlayer(gameId));
             }
         }
+        
         public async Task NewPlayer(Gvars gvars)
         {
-            await Clients.Caller.SendAsync("JoinGame", ToolsGame.CreateNewPlayer(gvars).Id, gameControl.sw.ElapsedMilliseconds);
-            string json = JsonConvert.SerializeObject(gvars, ToolsGame.jsonSerializerSettings);
+            Player player = ToolsGame.CreateNewPlayer(gvars, Context.ConnectionId);
+            string json = JsonConvert.SerializeObject(gvars, ToolsSystem.jsonSerializerSettings);
+
+            await Groups.AddToGroupAsync(Context.ConnectionId, gvars.GameId);
+            await Clients.Caller.SendAsync("JoinGame", player.Id, json);
+            await Clients.All.SendAsync("PlayerJoinGame", JsonConvert.SerializeObject(player, ToolsSystem.jsonSerializerSettings), player.Id);
+        }
+        
+        /// <summary>
+        /// Listens to incoming messages from clients, which are then proceeded in the Frame. It also joins actions of this player in the list of his actions, which are subsequently sent to every usery (done every frame).
+        /// </summary>
+        public void ExecuteList(string actionMethodNamesJson, string gameId, int itemId)
+        {
+            List<(PlayerAction.PlayerActionsEnum, bool)> actionMethodNames = JsonConvert.DeserializeObject<List<(PlayerAction.PlayerActionsEnum, bool)>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
+            gameControl.games[gameId].PlayerActions.Add(itemId, actionMethodNames);
+        }
+        /// <summary>
+        /// Sends all GVars to caller.
+        /// </summary>
+        public async void SendGvars(string gameId)
+        {
+            string json = JsonConvert.SerializeObject(gameControl.games[gameId], ToolsSystem.jsonSerializerSettings);
             await Clients.Caller.SendAsync("ReceiveGvars", json);
         }
-        public void Execute(string actionMethodName, string gameId, int playerId)
-        {
-            Type thisType = typeof(PlayerAction);
-            MethodInfo theMethod = thisType.GetMethod(actionMethodName, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
-            theMethod.Invoke(null, new object[]{ playerId, gameControl.games[gameId]});
-        }
-        public void ExecuteList(List<string> actionMethodNames, string gameId, int playerId)
-        {
-            foreach (var item in actionMethodNames)
-            {
-                Execute(item, gameId, playerId);
-            }
-        }
-        //je to dobrej nápad? Nebude server přehlcenej?
-        /*public async Task FetchData(string gameId, int playerId)
-        {
-            //nejvíc moc nejhlavnější
-            await Clients.Caller.SendAsync("ReceiveData", Game.games[gameId].DataToSend);
-        }*/
     }
 }

@@ -33,6 +33,11 @@ namespace Fanior.Shared
         {
             
         }
+        public virtual void SetItem(Gvars gvars)
+        {
+            this.Id = gvars.Id++;
+            gvars.Items.Add(Id, this);
+        }
         public Item() {}
         public Item(Gvars gvars, float x, float y, Shape shape ,Mask mask, bool isVisible = true, bool justGraphics = false)
         {
@@ -40,11 +45,8 @@ namespace Fanior.Shared
             this.Mask = mask;
             this.X = x;
             this.Y = y;
-            this.Id = gvars.Id++;
             this.IsVisible = isVisible;
-            gvars.Items.Add(Id,this);
             Solid = !justGraphics;
-
           
 
         }

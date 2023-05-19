@@ -38,15 +38,11 @@ namespace Fanior.Shared
         public Movable() { }
         public Movable(Gvars gvars, float x, float y, Shape shape, Mask mask, float baseSpeed, Type defaultMovement = null, bool isVisible = true) : base(gvars, x, y, shape, mask, isVisible)
         {
-            SetMovable(defaultMovement, baseSpeed);
-        }
-
-        private void SetMovable(Type defaultMovement, float baseSpeed)
-        {
-            //this.AddAction((Item item) => { (item as Movable).movement.Move(); }, "SetMovable");
             this.DefaultMovement = defaultMovement;
             this.BaseSpeed = baseSpeed;
+            //this.AddAction((Item item) => { (item as Movable).movement.Move(); }, "SetMovable");
         }
+
 
         public virtual void AddMovement(string movementName, float movementSpeed, double angle, Type type = null)
         {
