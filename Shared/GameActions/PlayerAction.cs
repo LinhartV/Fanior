@@ -16,43 +16,23 @@ namespace Fanior.Shared
     {
         private class KeyCommand
         {
-            public bool Pressed { get; set; } = false;
             public Action<int, Gvars> KeyDown { get; set; }
             public Action<int, Gvars> KeyUp { get; set; }
-            public Action<int, Gvars> KeyPressed { get; set; }
-
-            public KeyCommand(Action<int, Gvars> keyDown, Action<int, Gvars> keyUp, Action<int, Gvars> keyPressed)
+            //int = id, Gvars = gvars
+            public KeyCommand(Action<int, Gvars> keyDown, Action<int, Gvars> keyUp)
             {
                 this.KeyDown = new Action<int, Gvars>(async (int a, Gvars g) =>
                 {
-                    if (Pressed == false || true)
+                    if (keyDown != null)
                     {
-                        if (keyDown != null)
-                        {
-                            keyDown(a, g);
-                        }
-                        if (keyPressed!=null)
-                        {
-                            //g.Actions.Add(((long)5, new ItemAction());
-
-                        }
+                        keyDown(a, g);
                     }
-                    Pressed = true;
                 });
                 this.KeyUp = new Action<int, Gvars>(async (int a, Gvars g) =>
                 {
                     if (keyUp != null)
                     {
                         keyUp(a, g);
-                    }
-                    Pressed = false;
-                });
-
-                this.KeyPressed = new Action<int, Gvars>(async (int a, Gvars g) =>
-                {
-                    if (keyPressed != null)
-                    {
-                        keyPressed(a, g);
                     }
                 });
             }
@@ -88,7 +68,7 @@ namespace Fanior.Shared
 
         public static void SetupActions()
         {
-            actions.Add(PlayerActionsEnum.moveUp, new KeyCommand((id, gvars) => { gvars.Items[id].Y -= 5; }, (id, gvars) => { }, (id, gvars) => { }));
+            actions.Add(PlayerActionsEnum.moveUp, new KeyCommand((id, gvars) => { gvars.ItemsPlayers[id].AddMovement("moveUp", gvars.ItemsPlayers[id].BaseSpeed, 0); }, (id, gvars) => { gvars.ItemsPlayers[id].Movements["moveUp"].SmoothStop(gvars.ItemsPlayers[id].Friction); }));
         }
 
     }

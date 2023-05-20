@@ -9,8 +9,8 @@ namespace Fanior.Shared
     public abstract class Shot : Movable
     {
         public int CharacterId { get; set; }
-        public float Damage { get; set; }
-        public Shot(Gvars gvars, float x, float y, Shape shape, Mask mask, float movementSpeed, Type movement, float damage, int characterId, double angle, bool isVisible = true)
+        public double Damage { get; set; }
+        public Shot(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, Type movement, double damage, int characterId, double angle, bool isVisible = true)
             : base(gvars, x, y, shape, mask, movementSpeed, movement, isVisible)
         {
             this.Damage = damage;

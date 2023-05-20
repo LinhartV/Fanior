@@ -7,14 +7,21 @@ using System.Threading.Tasks;
 
 namespace Fanior.Shared
 {
-    public class ConstantMovement : IMovement
+    public class AcceleratedMovement : IMovement
     {
-        public ConstantMovement(string movementName, double movementSpeed, double angle) : base(movementName, movementSpeed, angle)
+        private double maxSpeed;
+        private double acceleration;
+        private double deceleration;
+        public AcceleratedMovement(string movementName, double initialSpeed, double angle, double acceleration, double deceleration, double maxSpeed) : base(movementName, initialSpeed, angle)
         {
+            this.acceleration = acceleration;
+            this.deceleration = deceleration;
+            this.maxSpeed = maxSpeed;
         }
 
         public override (double, double) Move()
         {
+            MovementSpeed *= acc
             return ((double)(MovementSpeed * Math.Sin(Angle)), (double)(MovementSpeed * Math.Cos(Angle)));
 
         }

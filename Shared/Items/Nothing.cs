@@ -9,7 +9,7 @@ namespace Fanior.Shared
     public class Nothing :Movable
     {
         public Nothing():base(){}
-        public Nothing(Gvars gvars, float x, float y, Shape shape, Mask mask)
+        public Nothing(Gvars gvars, double x, double y, Shape shape, Mask mask)
             : base(gvars, x, y, shape, mask, 5) { }
     }
 }

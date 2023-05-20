@@ -24,11 +24,11 @@ namespace Fanior.Shared
         //actions of every item in the game with information when to be executed
         public List<(long, ItemAction)> ItemActions { get; set; } = new();
         //actions that players just did
-        public Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>> PlayerActions = new();
+        public Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>> PlayerActions { get; set; } = new();
         
         //size of arena
-        public float ArenaWidth { get; set; }
-        public float ArenaHeight { get; set; }
+        public double ArenaWidth { get; set; }
+        public double ArenaHeight { get; set; }
 
         //Game id
         public string GameId { get; set; }

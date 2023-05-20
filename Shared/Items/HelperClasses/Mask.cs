@@ -9,11 +9,11 @@ namespace Fanior.Shared
     //ještě předělám na interface. Něco bude kolo, něco čtverec, něco zvláštní maska, ale vždy budu prvně checkovat šířku a výšku.
     public class Mask
     {
-        public float Width {get; }
-        public float Height { get; }
+        public double Width {get; }
+        public double Height { get; }
         Shape.GeometryEnum Geometry { get; }
 
-        public Mask(float width, float height, Shape.GeometryEnum geometry)
+        public Mask(double width, double height, Shape.GeometryEnum geometry)
         {
             this.Width = width;
             this.Height = height;

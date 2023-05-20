@@ -16,7 +16,7 @@ namespace Fanior.Shared
         
         public static Player CreateNewPlayer(Gvars gvars, string connectionId)
         {
-            return new Player(connectionId, gvars, (float)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (float)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", "red", "darkred", 1, 40, 40, Shape.GeometryEnum.circle), typeof(ConstantMovement), 4, 3);
+            return new Player(connectionId, gvars, (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", "red", "darkred", 1, 40, 40, Shape.GeometryEnum.circle), typeof(AcceleratedMovement), 4, 3);
         }
         public class Coords
         {
@@ -29,31 +29,55 @@ namespace Fanior.Shared
                 this.y = y;
             }
         }
-        public static void ProcedeActions()
+        public static void ProceedFrame(Gvars gvars, long now)
         {
-           /* for (int i = 0; i < itemsStep.Count; i++)
-            {
-                for (int j = 0; j < itemsStep[i].itemActions.Count; j++)
-                {
-                    itemsStep[i].itemActions[j].RunAction();
-                }
-                foreach (var action in actionsToDelete)
-                {
-                    itemsStep[i].itemActions.Remove(action);
-                }
-                foreach (var action in startActionsToPerform)
-                {
-                    action.Item1.Invoke(action.Item2);
-                }
-                startActionsToPerform.Clear();
-                actionsToDelete.Clear();
-            }
+            ProcedeGameAlgorithms(gvars);
+            ProcedePlayerActions(gvars);
+            ProcedeItemActions(now, gvars);
+        }
+        /// <summary>
+        /// Procede algorithm of game logic (collision detection etc.)
+        /// </summary>
+        private static void ProcedeGameAlgorithms(Gvars gvars)
+        {
 
-            foreach (var item in itemsToDelete)
+        }
+
+        /// <summary>
+        /// Procede actions that players just did
+        /// </summary>
+        private static void ProcedePlayerActions(Gvars gvars)
+        {
+            foreach (int playerId in gvars.PlayerActions.Keys)
             {
-                itemsStep.Remove(item);
+                foreach (var action in gvars.PlayerActions[playerId])
+                {
+                    PlayerAction.InvokeAction(action.Item1, action.Item2, playerId, gvars);
+                }
             }
-            itemsToDelete.Clear();*/
+        }
+
+        /// <summary>
+        /// Handles all actions of every item (excluding player actions)
+        /// </summary>
+        private static void ProcedeItemActions(long now, Gvars gvars)
+        {
+            List<(long, ItemAction)> temp = new List<(long, ItemAction)>(gvars.ItemActions);
+            for (int i = 0; i < temp.Count; i++)
+            {
+                if (temp[i].Item1 <= now)
+                {
+                    temp[i].Item2.Action();
+                    gvars.ItemActions.Remove(temp[i]);
+                    if (temp[i].Item2.Repeat > 0)
+                    {
+                        gvars.ItemActions.Add((now + temp[i].Item2.Repeat, temp[i].Item2));
+                    }
+                }
+                else
+                    break;
+            }
+            gvars.ItemActions.Sort();
         }
 
 

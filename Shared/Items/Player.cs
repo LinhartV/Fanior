@@ -15,14 +15,14 @@ namespace Fanior.Shared
         public string ConnectionId { get; set; }
 
         public Player() { }
-        public Player(string connectionId, Gvars gvars, float x, float y, Shape shape, Mask mask, Type defaultMovement, float movementSpeed, float lives, bool isVisible = true)
+        public Player(string connectionId, Gvars gvars, double x, double y, Shape shape, Mask mask, Type defaultMovement, double movementSpeed, double lives, bool isVisible = true)
             : base(gvars, x, y, shape, mask, movementSpeed, lives, defaultMovement, isVisible)
         {
             this.ConnectionId = connectionId;
             SetItem(gvars);
         }
 
-        public Player(string connectionId, Gvars gvars, float x, float y, Shape shape, Type defaultMovement, float movementSpeed, float lives, bool isVisible = true)
+        public Player(string connectionId, Gvars gvars, double x, double y, Shape shape, Type defaultMovement, double movementSpeed, double lives, bool isVisible = true)
             : base(gvars, x, y, shape, new Mask(shape.ImageWidth, shape.ImageHeight, shape.Geometry), movementSpeed, lives, defaultMovement, isVisible)
         {
             this.ConnectionId = connectionId;
@@ -63,13 +63,13 @@ namespace Fanior.Shared
                     myPlayer.movementEnabled = false;
                     double newAngle;
                     newAngle = 2 * angle - pm.angle - Math.PI;
-                    float xspeed = (float)(pm.movementSpeed * Math.Sin(newAngle));
-                    float zspeed = (float)(pm.movementSpeed * Math.Cos(newAngle));
+                    double xspeed = (double)(pm.movementSpeed * Math.Sin(newAngle));
+                    double zspeed = (double)(pm.movementSpeed * Math.Cos(newAngle));
                     myPlayer.movement = new DirectionalMovement();
                     if (Math.Abs(angle - epm.angle) < Math.PI / 2 || Math.Abs(angle - epm.angle) > 3 * Math.PI / 2)
                     {
-                        xspeed += (float)(epm.movementSpeed * Math.Sin(epm.angle));
-                        zspeed += (float)(epm.movementSpeed * Math.Cos(epm.angle));
+                        xspeed += (double)(epm.movementSpeed * Math.Sin(epm.angle));
+                        zspeed += (double)(epm.movementSpeed * Math.Cos(epm.angle));
                     }
                     newAngle = ToolsMath.GetAngleFromLengts(xspeed, zspeed);
                     myPlayer.movement.AddMovement("rebounce", myPlayer.baseSpeed + 1f, newAngle);

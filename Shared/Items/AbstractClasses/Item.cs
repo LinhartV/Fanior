@@ -11,8 +11,8 @@ namespace Fanior.Shared
 {
     public abstract class Item
     {
-        public float X { get; set; }
-        public float Y { get; set; }
+        public double X { get; set; }
+        public double Y { get; set; }
         public int Id { get; set; }
         public bool Solid { get; set; }
         public bool IsVisible { get; set; }
@@ -39,7 +39,7 @@ namespace Fanior.Shared
             gvars.Items.Add(Id, this);
         }
         public Item() {}
-        public Item(Gvars gvars, float x, float y, Shape shape ,Mask mask, bool isVisible = true, bool justGraphics = false)
+        public Item(Gvars gvars, double x, double y, Shape shape ,Mask mask, bool isVisible = true, bool justGraphics = false)
         {
             this.Shape = shape;
             this.Mask = mask;

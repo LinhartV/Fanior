@@ -9,14 +9,14 @@ namespace Fanior.Shared
 {
     public abstract class IMovement
     {
-        public IMovement(string movementName, float movementSpeed, double angle)
+        public IMovement(string movementName, double movementSpeed, double angle)
         {
             this.Angle = angle;
             this.MovementSpeed = movementSpeed;
             MovementName = movementName;
         }
         public string MovementName { get; }
-        public float MovementSpeed { get; set; }
+        public double MovementSpeed { get; set; }
         private double angle;
         public double Angle
         {
@@ -26,7 +26,12 @@ namespace Fanior.Shared
                 angle = value % (Math.PI * 2);
             }
         }
-        public abstract (float, float) Move();
-
+        public abstract (double, double) Move();
+        public abstract void SmoothStop(double friction);
+        public abstract void RenewMovement(double angle, double speed);
+        public virtual void SuddenStop()
+        {
+            this.MovementSpeed = 0;
+        }
     }
 }

@@ -77,59 +77,14 @@ namespace Fanior.Server
             foreach (Gvars gvars in game.games.Values)
             {
 
-                ProcedeGameAlgorithms(gvars);
-                ProcedePlayerActions(gvars);
-                ProcedeItemActions(now, gvars);
+                ToolsGame.ProceedFrame(gvars, now);
 
                 gvars.messageId++;
             }
             await SendData(game, hub);
         }
 
-        /// <summary>
-        /// Procede algorithm of game logic (collision detection etc.)
-        /// </summary>
-        private void ProcedeGameAlgorithms(Gvars gvars)
-        {
-
-        }
-
-        /// <summary>
-        /// Procede actions that players just did
-        /// </summary>
-        private void ProcedePlayerActions(Gvars gvars)
-        {
-            foreach (int playerId in gvars.PlayerActions.Keys)
-            {
-                foreach (var action in gvars.PlayerActions[playerId])
-                {
-                    PlayerAction.InvokeAction(action.Item1, action.Item2, playerId, gvars);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Handles all actions of every item (excluding player actions)
-        /// </summary>
-        private void ProcedeItemActions(long now, Gvars gvars)
-        {
-            List<(long, ItemAction)> temp = new List<(long, ItemAction)>(gvars.ItemActions);
-            for (int i = 0; i < temp.Count; i++)
-            {
-                if (temp[i].Item1 <= now)
-                {
-                    temp[i].Item2.Action();
-                    gvars.Actions.Remove(temp[i]);
-                    if (temp[i].Item2.Repeat > 0)
-                    {
-                        gvars.Actions.Add((now + temp[i].Item2.Repeat, temp[i].Item2));
-                    }
-                }
-                else
-                    break;
-            }
-            gvars.Actions.Sort();
-        }
+       
 
         /// <summary>
         /// Send all received actions to all clients for them to know, who did what.
@@ -140,11 +95,9 @@ namespace Fanior.Server
             {
                 try
                 {
-                    if (gvars.PlayerActions.Count>0)
-                    {
-                        await hub?.Clients.Group(gvars.GameId).SendAsync("ExecuteList", gvars.PlayerActions, JsonConvert.SerializeObject(gvars.PlayerActions[gvars], ToolsSystem.jsonSerializerSettings));
-                        gvars.PlayerActions.Clear();
-                    }
+                    await hub?.Clients.Group(gvars.GameId).SendAsync("ExecuteList", game.sw.ElapsedMilliseconds ,gvars.messageId, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings));
+                    gvars.PlayerActions.Clear();
+                    
                     
                 }
                 catch (Exception e)

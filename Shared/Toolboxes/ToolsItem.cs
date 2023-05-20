@@ -155,7 +155,7 @@ namespace Fanior.Shared
             }
         }*/
         /*
-        static public (List<double>, bool) CheckCollision(Item item, float xspeed, float zspeed)
+        static public (List<double>, bool) CheckCollision(Item item, double xspeed, double zspeed)
         {
             bool fromRight;
             bool fromLeft;
@@ -183,7 +183,7 @@ namespace Fanior.Shared
                 {
                     if (fromLeft && item.z < myItem.z + myItem.coords.size.depth && item.z > myItem.z - item.coords.size.depth)
                     {
-                        angle = (float)Math.PI / 2;
+                        angle = (double)Math.PI / 2;
                     }
                     if (fromBottom && item.x < myItem.x + myItem.coords.size.width && item.x > myItem.x - item.coords.size.width)
                     {
@@ -191,11 +191,11 @@ namespace Fanior.Shared
                     }
                     if (fromRight && item.z < myItem.z + myItem.coords.size.depth && item.z > myItem.z - item.coords.size.depth)
                     {
-                        angle = (float)Math.PI * 3 / 2;
+                        angle = (double)Math.PI * 3 / 2;
                     }
                     if (fromTop && item.x < myItem.x + myItem.coords.size.width && item.x > myItem.x - item.coords.size.width)
                     {
-                        angle = (float)Math.PI;
+                        angle = (double)Math.PI;
                     }
                     if (angle == -1)
                         continue;
@@ -217,7 +217,7 @@ namespace Fanior.Shared
             {
                 if(xspeed>0)
                 {
-                    float min = possibleCollisions[0].Item1.x;
+                    double min = possibleCollisions[0].Item1.x;
                     for (int i = 0; i < possibleCollisions.Count; i++)
                     {
                         if(possibleCollisions[i].Item1.x < min)
@@ -236,7 +236,7 @@ namespace Fanior.Shared
                 }
                 else if(xspeed<0)
                 {
-                    float min = possibleCollisions[0].Item1.x;
+                    double min = possibleCollisions[0].Item1.x;
                     for (int i = 0; i < possibleCollisions.Count; i++)
                     {
                         if (possibleCollisions[i].Item1.x > min)
@@ -255,7 +255,7 @@ namespace Fanior.Shared
                 }
                 else if (zspeed < 0)
                 {
-                    float min = possibleCollisions[0].Item1.z;
+                    double min = possibleCollisions[0].Item1.z;
                     for (int i = 0; i < possibleCollisions.Count; i++)
                     {
                         if (possibleCollisions[i].Item1.z > min)
@@ -274,7 +274,7 @@ namespace Fanior.Shared
                 }
                 else if (zspeed > 0)
                 {
-                    float min = possibleCollisions[0].Item1.z;
+                    double min = possibleCollisions[0].Item1.z;
                     for (int i = 0; i < possibleCollisions.Count; i++)
                     {
                         if (possibleCollisions[i].Item1.z < min)

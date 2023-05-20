@@ -9,8 +9,8 @@ namespace Fanior.Shared
 {
     public abstract class Character : Movable
     {
-        private float lives { get; set; }
-        public float Lives
+        private double lives { get; set; }
+        public double Lives
         {
             get => lives; set
             {
@@ -22,7 +22,7 @@ namespace Fanior.Shared
         }
         public Weapon Weapon { get; set; }
         public Character() { }
-        public Character(Gvars gvars, float x, float y, Shape shape, Mask mask, float movementSpeed, float lives, Type defaultMovement = null, bool isVisible = true) :
+        public Character(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, double lives, Type defaultMovement = null, bool isVisible = true) :
             base(gvars, x, y, shape, mask, movementSpeed, defaultMovement, isVisible)
         {
             this.Lives = lives;

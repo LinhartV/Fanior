@@ -9,7 +9,7 @@ namespace Fanior.Shared
 {
     class BasicWeapon : Weapon
     {
-        public BasicWeapon(bool autoFire, int reloadTime, int shotSpeed, float damage, int characterId) : base(autoFire, reloadTime, shotSpeed, damage, characterId)
+        public BasicWeapon(bool autoFire, int reloadTime, int shotSpeed, double damage, int characterId) : base(autoFire, reloadTime, shotSpeed, damage, characterId)
         {
 
         }

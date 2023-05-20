@@ -40,7 +40,7 @@ namespace Fanior.Server.Hubs
             string json = JsonConvert.SerializeObject(gvars, ToolsSystem.jsonSerializerSettings);
 
             await Groups.AddToGroupAsync(Context.ConnectionId, gvars.GameId);
-            await Clients.Caller.SendAsync("JoinGame", player.Id, json);
+            await Clients.Caller.SendAsync("JoinGame", player.Id, json, gameControl.sw.ElapsedMilliseconds);
             await Clients.All.SendAsync("PlayerJoinGame", JsonConvert.SerializeObject(player, ToolsSystem.jsonSerializerSettings), player.Id);
         }
         

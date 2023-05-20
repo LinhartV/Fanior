@@ -1,5 +1,5 @@
 ﻿
-/*using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +10,7 @@ using Fanior.Shared;
 
 namespace Fanior.Client
 {
-    static class ToolsSystem
+    static class ToolsClientSystem
     {
         /*static public void PressedKeys()
         {
@@ -82,7 +82,6 @@ namespace Fanior.Client
                     mouse.keyDown();
                 mouse.pressed = false;
             }
-        }*//*
+        }*/
     }
 }
-*/

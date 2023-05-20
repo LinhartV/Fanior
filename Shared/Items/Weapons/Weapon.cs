@@ -8,7 +8,7 @@ namespace Fanior.Shared
 {
     public abstract class Weapon
     {
-        public Weapon(bool autoFire, int reloadTime, int shotSpeed, float damage, int characterId)
+        public Weapon(bool autoFire, int reloadTime, int shotSpeed, double damage, int characterId)
         {
             this.reloadTime = reloadTime;
             this.shotSpeed = shotSpeed;
@@ -19,7 +19,7 @@ namespace Fanior.Shared
         public bool reloaded = true;
         protected int reloadTime;
         protected int shotSpeed;
-        protected float damage;
+        protected double damage;
         protected int characterId;
         internal bool autoFire;
 

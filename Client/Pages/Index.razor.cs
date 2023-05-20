@@ -20,8 +20,7 @@ namespace Fanior.Client.Pages
         #region Variables
         //list of keys that are pressed in the current frame
         List<string> pressedKeys = new List<string>();
-        //list of all actions that are going to be proceeded and sent to server along with information, if key for this action was pressed or released
-        List<(PlayerAction.PlayerActionsEnum, bool)> actions = new();
+        long now;
         //id of this connection
         int id = 0;
         //just for testing
@@ -37,6 +36,9 @@ namespace Fanior.Client.Pages
         //reference to canvas
         public ElementReference mySvg;
         public HubConnection hubConnection;
+
+        public List<(PlayerAction.PlayerActionsEnum, bool)> myActions = new();
+
         #endregion
         /// <summary>
         /// Method containing all stuff that are to be proceeded at the start of the load up.
@@ -51,15 +53,12 @@ namespace Fanior.Client.Pages
             await InvokeAsync(() => this.StateHasChanged());
         }
         #region Input control
-        private async Task SendKeyToServer(PlayerAction.PlayerActionsEnum actionMethodName, bool keyDown)
-        {
-            actions.Add((actionMethodName, keyDown));
-        }
+        
 
         public void DefaultAssingOfKeys()
         {
             //set keys here
-            KeyController.AddKey("w", new RegisteredKey(PlayerAction.PlayerActionsEnum.none, PlayerAction.PlayerActionsEnum.none, PlayerAction.PlayerActionsEnum.moveUp, SendKeyToServer));
+            KeyController.AddKey("w", new RegisteredKey(PlayerAction.PlayerActionsEnum.moveUp, PlayerAction.PlayerActionsEnum.none,myActions));
             /*KeyController.AddKey("s", new RegisteredKey(null, null, PlayerAction.MoveDown, SendKeyToServer));
             KeyController.AddKey("d", new RegisteredKey(null, null, PlayerAction.MoveRight, SendKeyToServer));
             KeyController.AddKey("a", new RegisteredKey(null, null, PlayerAction.MoveLeft, SendKeyToServer));*/
@@ -68,17 +67,19 @@ namespace Fanior.Client.Pages
 
         protected void KeyDown(KeyboardEventArgs e)
         {
-            KeyController.GetRegisteredKey(e.Key.ToLower())?.KeyDown(id, gvars);
             if (!pressedKeys.Contains(e.Key.ToLower()))
             {
+                counter++;
+                KeyController.GetRegisteredKey(e.Key.ToLower())?.KeyDown();
+            
                 pressedKeys.Add(e.Key.ToLower());
             }
         }
         protected void KeyUp(KeyboardEventArgs e)
         {
-            KeyController.GetRegisteredKey(e.Key.ToLower())?.KeyUp(id, gvars);
             if (pressedKeys.Contains(e.Key.ToLower()))
             {
+                KeyController.GetRegisteredKey(e.Key.ToLower())?.KeyUp();
                 pressedKeys.Remove(e.Key.ToLower());
             }
         }
@@ -107,19 +108,14 @@ namespace Fanior.Client.Pages
             string json;
             try
             {
-                foreach (var pressedKey in pressedKeys)
+                if (myActions.Count > 0)
                 {
-                    if (KeyController.GetRegisteredKey(pressedKey).KeyPressed != null)
-                    {
-                        KeyController.GetRegisteredKey(pressedKey).KeyPressed(id, gvars);
-                    }
-                }
-                if (actions.Count > 0)
-                {
-                    json = JsonConvert.SerializeObject(actions, ToolsSystem.jsonSerializerSettings);
+                    json = JsonConvert.SerializeObject(myActions, ToolsSystem.jsonSerializerSettings);
                     await hubConnection.SendAsync("ExecuteList", json, gvars.GameId, this.id);
-                    actions.Clear();
+                    myActions.Clear();
                 }
+                ToolsGame.ProceedFrame(gvars, now);
+                gvars.PlayerActions.Clear();
                 StateHasChanged();
             }
             catch (Exception e)
@@ -173,24 +169,25 @@ namespace Fanior.Client.Pages
                // info = str.ToString();
                 StateHasChanged();
             });
-            //list of actions to be proceeded that server sent to client 
-            hubConnection.On<long, string>("ExecuteList", (messageId, actionMethodNamesJson) =>
+            //Actions to be proceeded that server sent to client 
+            //Dictionary of list of actions assigned to object id along with information, if it's keydown or keyup (true = keydown).
+            //+messageId to check if connection was lost.
+            hubConnection.On<long, long, string>("ExecuteList", (now, messageId, actionMethodNamesJson) =>
             {
+                this.now = now;
                 Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>> actionMethodNames = JsonConvert.DeserializeObject<Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
 
                 foreach (int itemId in actionMethodNames.Keys)
                 {
-                    foreach (var item in actionMethodNames[itemId])
-                    {
-                        PlayerAction.InvokeAction(item.Item1, item.Item2, itemId, gvars);
-                    }
+                    gvars.PlayerActions.Add(itemId, actionMethodNames[itemId]);
                 }
             });
             //this player joined game
-            hubConnection.On<int, string>("JoinGame", (idReceived, gvarsJson) =>
+            hubConnection.On<int, string, long>("JoinGame", (idReceived, gvarsJson, now) =>
             {
                 if (this.id == 0)
                 {
+                    this.now = now;
                     JoinGame(idReceived);
                     ReceiveGvars(gvarsJson);
                 }
@@ -203,9 +200,8 @@ namespace Fanior.Client.Pages
                     ToolsSystem.DeserializePlayer(playerJson, gvars);
                 }
             });
-            //Dictionary of list of actions assigned to object id along with information, if it's keydown or keyup (true = keydown).
-            //+messageId to check if connection was lost.
-            hubConnection.On<Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>, int>("ExecuteList", (actionMethodNames, messageId) =>
+           
+           /* hubConnection.On<Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>, int>("ExecuteList", (actionMethodNames, messageId) =>
             {
                 //skončil jsem tady - teď musím udělat, aby se posílali stisky kláves "stisknuto", "released", aby na serveru to mohlo jet plynule jako tady.
                 sw.Start();
@@ -219,7 +215,7 @@ namespace Fanior.Client.Pages
                 sw.Stop();
                 Console.WriteLine(sw.ElapsedMilliseconds);
                 sw.Reset();
-            });
+            });*/
 
             //on login and when connection was lost
             hubConnection.On<string>("ReceiveGvars", (gvarsJson) =>

@@ -9,7 +9,7 @@ namespace Fanior.Shared
 {
     public class BasicShot : Shot
     {
-        public BasicShot(Gvars gvars, float x, float y, Shape shape, Mask mask, float movementSpeed, float damage, int characterId, float angle, Type defalutMovement = null, bool isVisible = true)
+        public BasicShot(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, double damage, int characterId, double angle, Type defalutMovement = null, bool isVisible = true)
             : base(gvars, x, y, shape, mask, movementSpeed, defalutMovement, damage, characterId, angle, isVisible)
         {
         }

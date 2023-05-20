@@ -19,52 +19,42 @@ namespace Fanior.Client
         public bool Active { get; set; } = true;
         //actions assigned to each event
         //int is ID of player and Gvars are Gvars...
-        public Action<int, Gvars> KeyDown { get; set; }
-        public Action<int, Gvars> KeyUp { get; set; }
-        public Action<int, Gvars> KeyPressed { get; set; }
+        public Action KeyDown { get; set; }
+        public Action KeyUp { get; set; }
+        public Action KeyPressed { get; set; }
 
         //Constroctur for actions proceeded on client side (settings etc.)
         public RegisteredKey(Action keyDown, Action keyUp, Action keyPressed)
         {
-            this.KeyDown = new Action<int, Gvars>((int a, Gvars g) => { keyDown(); });
-            this.KeyUp = new Action<int, Gvars>((int a, Gvars g) => { keyUp(); });
-            this.KeyPressed = new Action<int, Gvars>((int a, Gvars g) => { keyPressed(); });
+            this.KeyDown = keyDown;
+            this.KeyUp = KeyUp;
+            this.KeyPressed = keyPressed;
         }
+
         //Constroctur for actions proceeded on both server and client side. So far only name of action enum sent to server.
-        //Last argument SendToServer is function for sending info to server.
-        public RegisteredKey(PlayerAction.PlayerActionsEnum keyDown, PlayerAction.PlayerActionsEnum keyUp, PlayerAction.PlayerActionsEnum keyPressed, Func<PlayerAction.PlayerActionsEnum, bool, Task> sendToServer)
+        public RegisteredKey(PlayerAction.PlayerActionsEnum keyDown, PlayerAction.PlayerActionsEnum keyUp, List<(PlayerAction.PlayerActionsEnum, bool)> myActions)
         {
-            this.KeyDown = new Action<int, Gvars>(async (int a, Gvars g) =>
+            this.KeyDown = new Action(async() =>
             {
                 if (Pressed == false)
                 {
                     if (keyDown != PlayerAction.PlayerActionsEnum.none)
                     {
-                        await sendToServer(keyDown, true);
+                        myActions.Add((keyDown, true));
                         //PlayerAction.InvokeAction(keyDown, true, a, g);
                     }
                 }
                 Pressed = true;
             });
-            this.KeyUp = new Action<int, Gvars>(async (int a, Gvars g) =>
+            this.KeyUp = new Action(async () =>
             {
                 if (keyUp != PlayerAction.PlayerActionsEnum.none)
                 {
-                    await sendToServer(keyUp, true);
+                    myActions.Add((keyDown, true));
                     //PlayerAction.InvokeAction(keyUp, false, a, g);
                 }
                 Pressed = false;
             });
-
-            this.KeyPressed = new Action<int, Gvars>(async (int a, Gvars g) =>
-            {
-                if (keyPressed != PlayerAction.PlayerActionsEnum.none)
-                {
-                    /*await sendToServer(keyPressed.Method.Name);
-                    keyPressed(a, g);*/
-                }
-            });
-
         }
 
     }
