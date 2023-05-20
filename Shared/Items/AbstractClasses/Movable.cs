@@ -1,4 +1,5 @@
 ﻿
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -17,50 +18,57 @@ namespace Fanior.Shared
         /// Overall speed of the item
         /// </summary>
         public double BaseSpeed { get; set; }
-        private Type defaultMovement { get; set; }
-        public Type DefaultMovement
-        {
-            get => defaultMovement;
-            set
-            {
-                if (typeof(IMovement).IsAssignableFrom(value))
-                {
-                    defaultMovement = value;
-                }
-                else
-                {
-                    defaultMovement = typeof(ConstantMovement);
-                }
-            }
-        }
+        [JsonProperty]
         private double friction;
-        public double Friction { get => friction; set => value = Math.Abs(friction); }
-        public IMovement PartialMovement { get; set; } //movement it's moving right now by;
-        public Dictionary<string, IMovement> Movements { get; set; } = new Dictionary<string, IMovement>();
+        public double Friction { get => friction; set => friction = Math.Abs(value); }
+        public double Acceleration;
+        //Movements once set and controlled just by the movement itself. It deletes itself when speed is 0.
+        [JsonProperty]
+        private List<IMovement> MovementsAutomated { get; set; } = new List<IMovement>();
+        //Movements controlled by other actions, such as player control. Accesed by id and not deleted even when speed is 0.
+        [JsonProperty]
+        private Dictionary<string, IMovement> MovementsControlled { get; set; } = new Dictionary<string, IMovement>();
         public bool ThroughSolid { get; set; } = false;
         public Movable() { }
-        public Movable(Gvars gvars, double x, double y, Shape shape, Mask mask, double baseSpeed, Type defaultMovement = null, bool isVisible = true) : base(gvars, x, y, shape, mask, isVisible)
+        public Movable(Gvars gvars, double x, double y, Shape shape, Mask mask, double baseSpeed, IMovement movement, double acceleration, double friction,bool isVisible = true) : base(gvars, x, y, shape, mask, isVisible)
         {
-            this.DefaultMovement = defaultMovement;
+            this.Friction = friction;
+            this.Acceleration = acceleration;
             this.BaseSpeed = baseSpeed;
-            //this.AddAction((Item item) => { (item as Movable).movement.Move(); }, "SetMovable");
+            if (movement != null)
+            {
+                AddControlledMovement(movement, "default");
+            }
+        }
+        public void SetMovable()
+        {
+            this.AddAction(new ItemAction((Item item, ItemAction itemAction) => { (item as Movable).Move(); }, 1, true), "defaultMovement");
         }
 
         /// <summary>
-        /// Creates new movement or updates existing one
+        /// Creates new movement
         /// </summary>
-        /// <param name="movementName"></param>
-        /// <param name="movementSpeed"></param>
-        /// <param name="angle"></param>
-        /// <param name="type"></param>
-        public virtual void AddMovement(string movementName, double movementSpeed, double angle, Type type = null)
+        public void AddAutomatedMovement(IMovement movement)
         {
-            if (Movements.ContainsKey(movementName))
-            {
-                Movements[movementName].RenewMovement(angle, movementSpeed);
-            }
-            else
-                Movements.Add(movementName, (IMovement)Activator.CreateInstance(type == null ? defaultMovement : type, movementName, movementSpeed, angle));
+            MovementsAutomated.Add(movement);
+        }
+        public void AddControlledMovement(IMovement movement, string movementName)
+        {
+            MovementsControlled.Add(movementName, movement);
+        }
+        /// <summary>
+        /// Calls UpdageMovement of particular movement
+        /// </summary>
+        public void UpdateControlledMovement(string movementName)
+        {
+            MovementsControlled[movementName].UpdateMovement();
+        }
+        /// <summary>
+        /// Rotates particular movement
+        /// </summary>
+        public void RotateControlledMovement(string movementName, double angleRotation)
+        {
+            MovementsControlled[movementName].Angle -= angleRotation;
         }
 
         /// <summary>
@@ -69,18 +77,41 @@ namespace Fanior.Shared
         /// <param name="angle">angle which the movement will be stoped under</param>
         public void StopInDirection(double angle)
         {
-            foreach (var movement in Movements.Values)
+            foreach (var movement in MovementsAutomated)
             {
-                if (Math.Abs(movement.Angle - angle) < Math.PI / 2 || Math.Abs(movement.Angle - angle) > 3 * Math.PI / 2)
-                {
-                    movement.Angle = angle;
-                    movement.MovementSpeed = movement.MovementSpeed * Math.Sin(Math.PI/2 - angle - movement.Angle);
-                }
+                StopMovementInDirection(movement, angle);
+            }
+            foreach (var movement in MovementsControlled.Values)
+            {
+                StopMovementInDirection(movement, angle);
             }
         }
-        
-        /* public override void Move()
-         {
+        private void StopMovementInDirection(IMovement movement, double angle)
+        {
+            if (Math.Abs(movement.Angle - angle) < Math.PI / 2 || Math.Abs(movement.Angle - angle) > 3 * Math.PI / 2)
+            {
+                movement.Angle = angle;
+                movement.MovementSpeed = movement.MovementSpeed * Math.Sin(Math.PI / 2 - angle - movement.Angle);
+            }
+        }
+
+        private void Move()
+        {
+            List<IMovement> allMovements = new List<IMovement>(MovementsAutomated);
+            allMovements.AddRange(MovementsControlled.Values);
+            (double, double) xy;
+            double x = 0;
+            double y = 0;
+            foreach (var movement in allMovements)
+            {
+                movement.Frame(friction);
+                xy = ToolsMath.PolarToCartesian(movement.Angle, movement.MovementSpeed);
+                x += xy.Item1;
+                y += xy.Item2;
+            }
+            this.X += x;
+            this.Y += y;
+            /*
              PartialMovement pm = GetCurrentMovement();
              if (pm.MovementSpeed == 0)
                  return;
@@ -97,11 +128,13 @@ namespace Fanior.Shared
                  Item.Y += zspeed;
              }
              Item.PartialMovement = new PartialMovement(Item.Id, "finalMovement", (double)Math.Sqrt(xspeed * xspeed + zspeed * zspeed), ToolsMath.GetAngleFromLengts(xspeed, zspeed));
-         }*/
+       */
+        }
 
         public void StopAllMovement()
         {
-            Movements.Clear();
+            MovementsAutomated.Clear();
+            MovementsControlled.Clear();
         }
     }
 }

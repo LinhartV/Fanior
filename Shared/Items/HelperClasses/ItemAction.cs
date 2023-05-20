@@ -12,17 +12,16 @@ namespace Fanior.Shared
     public class ItemAction
     {
         //Action to be executed
-        public Action Action { get; private set; }
+        public Action<Item, ItemAction> Action { get; private set; }
         //whether the action will be repeated and if so, how often
         private int repeat;
-        //Item the action is assigned to
-        public Item Item { get; private set; }
+        public bool executeOnFirstTime;
 
-        public ItemAction(Action action, int repeat, Item item)
+        public ItemAction(Action<Item, ItemAction> action, int repeat, bool executeOnFirstTime)
         {
             Action = action;
             Repeat = repeat;
-            Item = item;
+            this.executeOnFirstTime = executeOnFirstTime;
         }
 
         public int Repeat

@@ -9,8 +9,8 @@ namespace Fanior.Shared
 {
     public class BasicShot : Shot
     {
-        public BasicShot(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, double damage, int characterId, double angle, Type defalutMovement = null, bool isVisible = true)
-            : base(gvars, x, y, shape, mask, movementSpeed, defalutMovement, damage, characterId, angle, isVisible)
+        public BasicShot(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, double damage, int characterId, double angle, IMovement defalutMovement,double acceleration, double friction, bool isVisible = true)
+            : base(gvars, x, y, shape, mask, movementSpeed, defalutMovement,acceleration, friction, damage, characterId, angle, isVisible)
         {
         }
         /*public override void Collide(Item collider, double angle, params Globals.ActionsAtCollision[] actionsNotToPerform)

@@ -15,15 +15,15 @@ namespace Fanior.Shared
         public string ConnectionId { get; set; }
 
         public Player() { }
-        public Player(string connectionId, Gvars gvars, double x, double y, Shape shape, Mask mask, Type defaultMovement, double movementSpeed, double lives, bool isVisible = true)
-            : base(gvars, x, y, shape, mask, movementSpeed, lives, defaultMovement, isVisible)
+        public Player(string connectionId, Gvars gvars, double x, double y, Shape shape, Mask mask, IMovement defaultMovement, double movementSpeed, double acceleration, double friction, double lives, bool isVisible = true)
+            : base(gvars, x, y, shape, mask, movementSpeed, lives, acceleration, friction, defaultMovement, isVisible)
         {
             this.ConnectionId = connectionId;
             SetItem(gvars);
         }
 
-        public Player(string connectionId, Gvars gvars, double x, double y, Shape shape, Type defaultMovement, double movementSpeed, double lives, bool isVisible = true)
-            : base(gvars, x, y, shape, new Mask(shape.ImageWidth, shape.ImageHeight, shape.Geometry), movementSpeed, lives, defaultMovement, isVisible)
+        public Player(string connectionId, Gvars gvars, double x, double y, Shape shape, IMovement defaultMovement, double movementSpeed, double acceleration, double friction, double lives, bool isVisible = true)
+            : base(gvars, x, y, shape, new Mask(shape.ImageWidth, shape.ImageHeight, shape.Geometry), movementSpeed, lives, acceleration, friction, defaultMovement, isVisible)
         {
             this.ConnectionId = connectionId;
             SetItem(gvars);
@@ -35,6 +35,10 @@ namespace Fanior.Shared
             Weapon = new BasicWeapon(true, 100, 1, 0.7f, this.Id);
             Solid = true;
             gvars.ItemsPlayers.Add(this.Id, this);
+            this.AddControlledMovement(new AcceleratedMovement(0, 0, this.Acceleration, BaseSpeed), "up");
+            this.AddControlledMovement(new AcceleratedMovement(0, Math.PI / 2, this.Acceleration, BaseSpeed), "right");
+            this.AddControlledMovement(new AcceleratedMovement(0, Math.PI, this.Acceleration, BaseSpeed), "down");
+            this.AddControlledMovement(new AcceleratedMovement(0, 3 * Math.PI / 2, this.Acceleration, BaseSpeed), "left");
         }
 
         public override void Death()

@@ -1,4 +1,5 @@
 ﻿
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,14 +10,13 @@ namespace Fanior.Shared
 {
     public abstract class IMovement
     {
-        public IMovement(string movementName, double movementSpeed, double angle)
+        public IMovement(double movementSpeed, double angle)
         {
             this.Angle = angle;
             this.MovementSpeed = movementSpeed;
-            MovementName = movementName;
         }
-        public string MovementName { get; }
         public double MovementSpeed { get; set; }
+        [JsonProperty]
         private double angle;
         public double Angle
         {
@@ -27,8 +27,12 @@ namespace Fanior.Shared
             }
         }
         public abstract (double, double) Move();
-        public abstract void SmoothStop(double friction);
-        public abstract void RenewMovement(double angle, double speed);
+        //what will happen every frame
+        public abstract void Frame(double friction);
+        //change properties of this movement
+        public abstract void ResetMovement(double angle, double speed);
+        //proceed action of this movement on call (eg. player keeps on pressing arrow up)
+        public abstract void UpdateMovement();
         public virtual void SuddenStop()
         {
             this.MovementSpeed = 0;

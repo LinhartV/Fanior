@@ -1,4 +1,5 @@
 ﻿
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,32 +10,46 @@ namespace Fanior.Shared
 {
     public class AcceleratedMovement : IMovement
     {
+        [JsonProperty]
         private double maxSpeed;
+        [JsonProperty]
         private double acceleration;
-        private double deceleration;
-        public AcceleratedMovement(string movementName, double initialSpeed, double angle, double acceleration, double deceleration, double maxSpeed) : base(movementName, initialSpeed, angle)
+        public AcceleratedMovement(double initialSpeed, double angle, double acceleration, double maxSpeed) : base(initialSpeed, angle)
         {
             this.acceleration = acceleration;
-            this.deceleration = deceleration;
             this.maxSpeed = maxSpeed;
+        }
+
+        public override void Frame(double friction)
+        {
+            if (this.MovementSpeed > 0.05)
+                MovementSpeed -= friction;
+            else
+                MovementSpeed = 0;
         }
 
         public override (double, double) Move()
         {
-            MovementSpeed *= acc
             return ((double)(MovementSpeed * Math.Sin(Angle)), (double)(MovementSpeed * Math.Cos(Angle)));
 
         }
 
-        public override void RenewMovement(double angle, double speed)
+        public override void ResetMovement(double angle, double speed)
         {
             this.Angle = angle;
             MovementSpeed = speed;
         }
 
-        public override void SmoothStop(double friction)
+        public override void UpdateMovement()
         {
-            this.SuddenStop();
+            if (MovementSpeed < maxSpeed)
+            {
+                MovementSpeed += acceleration;
+            }
+            else
+            {
+                MovementSpeed = maxSpeed;
+            }
         }
     }
 }

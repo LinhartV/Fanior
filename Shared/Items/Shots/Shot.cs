@@ -10,14 +10,15 @@ namespace Fanior.Shared
     {
         public int CharacterId { get; set; }
         public double Damage { get; set; }
-        public Shot(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, Type movement, double damage, int characterId, double angle, bool isVisible = true)
-            : base(gvars, x, y, shape, mask, movementSpeed, movement, isVisible)
+        public Shot(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, IMovement movement, double acceleration, double friction, double damage, int characterId, double angle, bool isVisible = true)
+            : base(gvars, x, y, shape, mask, movementSpeed, movement, acceleration, friction, isVisible)
         {
             this.Damage = damage;
             ThroughSolid = true;
             this.CharacterId = characterId;
             Solid = false;
-            //movement.AddMovement("bulletMovement", movementSpeed, angle);
+            this.AddAutomatedMovement(new AcceleratedMovement(7, angle, 0, 7));
+            this.AddAction(new ItemAction((Item item, ItemAction itemAction) => { this.Dispose(); },30, false), "bulletDeletion");
         }
         /*public override void Collide(Item collider, double angle, params Globals.ActionsAtCollision[] actionsNotToPerform)
         {

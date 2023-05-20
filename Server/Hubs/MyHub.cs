@@ -36,12 +36,20 @@ namespace Fanior.Server.Hubs
         
         public async Task NewPlayer(Gvars gvars)
         {
-            Player player = ToolsGame.CreateNewPlayer(gvars, Context.ConnectionId);
-            string json = JsonConvert.SerializeObject(gvars, ToolsSystem.jsonSerializerSettings);
+            try
+            {
+                Player player = ToolsGame.CreateNewPlayer(gvars, Context.ConnectionId);
+                string json = JsonConvert.SerializeObject(gvars, ToolsSystem.jsonSerializerSettings);
 
-            await Groups.AddToGroupAsync(Context.ConnectionId, gvars.GameId);
-            await Clients.Caller.SendAsync("JoinGame", player.Id, json, gameControl.sw.ElapsedMilliseconds);
-            await Clients.All.SendAsync("PlayerJoinGame", JsonConvert.SerializeObject(player, ToolsSystem.jsonSerializerSettings), player.Id);
+                await Groups.AddToGroupAsync(Context.ConnectionId, gvars.GameId);
+                await Clients.Caller.SendAsync("JoinGame", player.Id, json, gameControl.sw.ElapsedMilliseconds);
+                await Clients.All.SendAsync("PlayerJoinGame", JsonConvert.SerializeObject(player, ToolsSystem.jsonSerializerSettings), player.Id);
+            }
+            catch (Exception e)
+            {
+
+            }
+           
         }
         
         /// <summary>

@@ -16,7 +16,7 @@ namespace Fanior.Shared
         
         public static Player CreateNewPlayer(Gvars gvars, string connectionId)
         {
-            return new Player(connectionId, gvars, (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", "red", "darkred", 1, 40, 40, Shape.GeometryEnum.circle), typeof(AcceleratedMovement), 4, 3);
+            return new Player(connectionId, gvars, (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", "red", "darkred", 1, 40, 40, Shape.GeometryEnum.circle), null, 4, 0.5, 0.1, 3);
         }
         public class Coords
         {
@@ -34,9 +34,11 @@ namespace Fanior.Shared
             ProcedeGameAlgorithms(gvars);
             ProcedePlayerActions(gvars);
             ProcedeItemActions(now, gvars);
+            gvars.ExecuteActions(now);
         }
+
         /// <summary>
-        /// Procede algorithm of game logic (collision detection etc.)
+        /// Proceeds algorithm of game logic (collision detection etc.)
         /// </summary>
         private static void ProcedeGameAlgorithms(Gvars gvars)
         {
@@ -44,7 +46,7 @@ namespace Fanior.Shared
         }
 
         /// <summary>
-        /// Procede actions that players just did
+        /// Proceeds actions that players just did
         /// </summary>
         private static void ProcedePlayerActions(Gvars gvars)
         {
@@ -62,22 +64,10 @@ namespace Fanior.Shared
         /// </summary>
         private static void ProcedeItemActions(long now, Gvars gvars)
         {
-            List<(long, ItemAction)> temp = new List<(long, ItemAction)>(gvars.ItemActions);
-            for (int i = 0; i < temp.Count; i++)
+            foreach (var item in gvars.Items.Values)
             {
-                if (temp[i].Item1 <= now)
-                {
-                    temp[i].Item2.Action();
-                    gvars.ItemActions.Remove(temp[i]);
-                    if (temp[i].Item2.Repeat > 0)
-                    {
-                        gvars.ItemActions.Add((now + temp[i].Item2.Repeat, temp[i].Item2));
-                    }
-                }
-                else
-                    break;
+                item.ExecuteActions(now);
             }
-            gvars.ItemActions.Sort();
         }
 
 
@@ -89,11 +79,11 @@ namespace Fanior.Shared
 
         /*static public bool ResetActionByName(Item item, string actionName, bool invokeStartAction)
         {
-            for (int i = 0; i < item.itemActions.Count; i++)
+            for (int i = 0; i < item.gameActions.Count; i++)
             {
-                if (item.itemActions[i].actionName == actionName)
+                if (item.gameActions[i].actionName == actionName)
                 {
-                    item.itemActions[i].ResetAction(invokeStartAction);
+                    item.gameActions[i].ResetAction(invokeStartAction);
                     return true;
                 }
             }

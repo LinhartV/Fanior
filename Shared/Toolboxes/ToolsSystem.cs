@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,14 +17,15 @@ namespace Fanior.Shared
             TypeNameHandling = TypeNameHandling.All,
             Formatting = Newtonsoft.Json.Formatting.Indented,
             NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
-            PreserveReferencesHandling = PreserveReferencesHandling.Objects
-
+            PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+            ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
         };
 
         public static Player DeserializePlayer(string jsonText, Gvars gvars)
         {
             Player item = JsonConvert.DeserializeObject<Player>(jsonText, jsonSerializerSettings);
             item.SetItem(gvars);
+            item.SetMovable();
             return item;
         }
 

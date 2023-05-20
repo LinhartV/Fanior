@@ -8,7 +8,7 @@ namespace Fanior.Shared
 {
     public static class ToolsMovable
     {
-        public static List<IMovement> ChangeMovementClass<T>(List<IMovement> movements) where T : IMovement
+        /*public static List<IMovement> ChangeMovementClass<T>(List<IMovement> movements) where T : IMovement
         {
             List<IMovement> result = new List<IMovement>();
 
@@ -17,6 +17,6 @@ namespace Fanior.Shared
                 result.Add((T)Activator.CreateInstance(typeof(T), movement.MovementName, movement.MovementSpeed, movement.Angle));
             }
             return result;
-        }
+        }*/
     }
 }

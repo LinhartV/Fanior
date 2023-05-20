@@ -9,8 +9,13 @@ namespace Fanior.Shared
 {
     public class ConstantMovement : IMovement
     {
-        public ConstantMovement(string movementName, double movementSpeed, double angle) : base(movementName, movementSpeed, angle)
+        public ConstantMovement(double movementSpeed, double angle) : base(movementSpeed, angle)
         {
+        }
+
+        public override void Frame(double friction)
+        {
+            
         }
 
         public override (double, double) Move()
@@ -19,15 +24,15 @@ namespace Fanior.Shared
 
         }
 
-        public override void RenewMovement(double angle, double speed)
+        public override void ResetMovement(double angle, double speed)
         {
             this.Angle = angle;
             MovementSpeed = speed;
         }
 
-        public override void SmoothStop(double friction)
+        public override void UpdateMovement()
         {
-            this.SuddenStop();
+            
         }
     }
 }

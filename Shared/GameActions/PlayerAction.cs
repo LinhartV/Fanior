@@ -38,11 +38,11 @@ namespace Fanior.Shared
             }
         }
         [JsonConverter(typeof(StringEnumConverter))]
-        public enum PlayerActionsEnum { none = 0, moveUp = 1, moveDown = 2, moveLeft = 3, moveRight = 4, fire = 5, ability1 = 6, ability2 = 7, other = 8}
+        public enum PlayerActionsEnum { none = 0, moveUp = 1, moveDown = 2, moveLeft = 3, moveRight = 4, fire = 5, ability1 = 6, ability2 = 7, other = 8 }
 
-        static Dictionary<PlayerActionsEnum, KeyCommand> actions = new ();
+        static Dictionary<PlayerActionsEnum, KeyCommand> actions = new();
 
-        
+
         public static void InvokeAction(PlayerActionsEnum actionName, bool keyDown, int itemId, Gvars gvars)
         {
             try
@@ -58,7 +58,7 @@ namespace Fanior.Shared
                         actions[actionName]?.KeyUp(itemId, gvars);
                     }
 
-                } 
+                }
             }
             catch (Exception e)
             {
@@ -68,7 +68,63 @@ namespace Fanior.Shared
 
         public static void SetupActions()
         {
-            actions.Add(PlayerActionsEnum.moveUp, new KeyCommand((id, gvars) => { gvars.ItemsPlayers[id].AddMovement("moveUp", gvars.ItemsPlayers[id].BaseSpeed, 0); }, (id, gvars) => { gvars.ItemsPlayers[id].Movements["moveUp"].SmoothStop(gvars.ItemsPlayers[id].Friction); }));
+            actions.Add(PlayerActionsEnum.moveUp, new KeyCommand((id, gvars) =>
+            {
+                gvars.ItemsPlayers[id].AddAction(new ItemAction((Item item, ItemAction itemAction) =>
+                {
+                    (item as Player).UpdateControlledMovement("up");
+
+                }, 1, true), "up");
+
+            },
+            (id, gvars) =>
+            {
+                gvars.ItemsPlayers[id].DeleteAction("up");
+            }));
+
+            actions.Add(PlayerActionsEnum.moveDown, new KeyCommand((id, gvars) =>
+            {
+                gvars.ItemsPlayers[id].AddAction(new ItemAction((Item item, ItemAction itemAction) =>
+                {
+                    (item as Player).UpdateControlledMovement("down");
+
+                }, 1, true), "down");
+
+            },
+            (id, gvars) =>
+            {
+                gvars.ItemsPlayers[id].DeleteAction("down");
+            }));
+
+            actions.Add(PlayerActionsEnum.moveRight, new KeyCommand((id, gvars) =>
+            {
+                gvars.ItemsPlayers[id].AddAction(new ItemAction((Item item, ItemAction itemAction) =>
+                {
+                    (item as Player).UpdateControlledMovement("right");
+
+                }, 1, true), "right");
+
+            },
+            (id, gvars) =>
+            {
+                gvars.ItemsPlayers[id].DeleteAction("right");
+            }));
+
+            actions.Add(PlayerActionsEnum.moveLeft, new KeyCommand((id, gvars) =>
+            {
+                gvars.ItemsPlayers[id].AddAction(new ItemAction((Item item, ItemAction itemAction) =>
+                {
+                    (item as Player).UpdateControlledMovement("left");
+
+                }, 1, true), "left");
+
+            },
+            (id, gvars) =>
+            {
+                gvars.ItemsPlayers[id].DeleteAction("left");
+            }));
+
+
         }
 
     }

@@ -73,15 +73,22 @@ namespace Fanior.Server
         /// </summary>
         private async Task Frame(GameControl game, IHubContext<Hubs.MyHub> hub)
         {
-            long now = game.sw.ElapsedMilliseconds;
-            foreach (Gvars gvars in game.games.Values)
+            try
             {
 
-                ToolsGame.ProceedFrame(gvars, now);
+                long now = game.sw.ElapsedMilliseconds;
+                foreach (Gvars gvars in game.games.Values)
+                {
 
-                gvars.messageId++;
+                    //ToolsGame.ProceedFrame(gvars, now);
+
+                    gvars.messageId++;
+                }
+                await SendData(game, hub);
             }
-            await SendData(game, hub);
+            catch (Exception e)
+            {
+            }
         }
 
        

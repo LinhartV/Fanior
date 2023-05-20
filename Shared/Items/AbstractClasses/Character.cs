@@ -22,8 +22,8 @@ namespace Fanior.Shared
         }
         public Weapon Weapon { get; set; }
         public Character() { }
-        public Character(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, double lives, Type defaultMovement = null, bool isVisible = true) :
-            base(gvars, x, y, shape, mask, movementSpeed, defaultMovement, isVisible)
+        public Character(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, double acceleration, double friction, double lives, IMovement defaultMovement = null, bool isVisible = true) :
+            base(gvars, x, y, shape, mask, movementSpeed, defaultMovement, acceleration, friction, isVisible)
         {
             this.Lives = lives;
         }

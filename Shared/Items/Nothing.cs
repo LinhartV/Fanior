@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Fanior.Shared
 {
-    public class Nothing :Movable
+    public class Nothing : Item
     {
         public Nothing():base(){}
         public Nothing(Gvars gvars, double x, double y, Shape shape, Mask mask)
-            : base(gvars, x, y, shape, mask, 5) { }
+            : base(gvars, x, y, shape, mask) { }
     }
 }

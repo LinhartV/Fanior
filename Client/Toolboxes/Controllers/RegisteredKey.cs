@@ -50,7 +50,7 @@ namespace Fanior.Client
             {
                 if (keyUp != PlayerAction.PlayerActionsEnum.none)
                 {
-                    myActions.Add((keyDown, true));
+                    myActions.Add((keyDown, false));
                     //PlayerAction.InvokeAction(keyUp, false, a, g);
                 }
                 Pressed = false;

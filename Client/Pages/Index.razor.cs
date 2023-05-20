@@ -53,12 +53,15 @@ namespace Fanior.Client.Pages
             await InvokeAsync(() => this.StateHasChanged());
         }
         #region Input control
-        
+
 
         public void DefaultAssingOfKeys()
         {
             //set keys here
-            KeyController.AddKey("w", new RegisteredKey(PlayerAction.PlayerActionsEnum.moveUp, PlayerAction.PlayerActionsEnum.none,myActions));
+            KeyController.AddKey("w", new RegisteredKey(PlayerAction.PlayerActionsEnum.moveUp, PlayerAction.PlayerActionsEnum.moveUp, myActions));
+            KeyController.AddKey("s", new RegisteredKey(PlayerAction.PlayerActionsEnum.moveDown, PlayerAction.PlayerActionsEnum.moveDown, myActions));
+            KeyController.AddKey("d", new RegisteredKey(PlayerAction.PlayerActionsEnum.moveRight, PlayerAction.PlayerActionsEnum.moveRight, myActions));
+            KeyController.AddKey("a", new RegisteredKey(PlayerAction.PlayerActionsEnum.moveLeft, PlayerAction.PlayerActionsEnum.moveLeft, myActions));
             /*KeyController.AddKey("s", new RegisteredKey(null, null, PlayerAction.MoveDown, SendKeyToServer));
             KeyController.AddKey("d", new RegisteredKey(null, null, PlayerAction.MoveRight, SendKeyToServer));
             KeyController.AddKey("a", new RegisteredKey(null, null, PlayerAction.MoveLeft, SendKeyToServer));*/
@@ -71,7 +74,6 @@ namespace Fanior.Client.Pages
             {
                 counter++;
                 KeyController.GetRegisteredKey(e.Key.ToLower())?.KeyDown();
-            
                 pressedKeys.Add(e.Key.ToLower());
             }
         }
@@ -79,6 +81,7 @@ namespace Fanior.Client.Pages
         {
             if (pressedKeys.Contains(e.Key.ToLower()))
             {
+                counter--;
                 KeyController.GetRegisteredKey(e.Key.ToLower())?.KeyUp();
                 pressedKeys.Remove(e.Key.ToLower());
             }
@@ -166,7 +169,7 @@ namespace Fanior.Client.Pages
            .Build();
             hubConnection.On<int>("ReceiveMessage", (str) =>
             {
-               // info = str.ToString();
+                // info = str.ToString();
                 StateHasChanged();
             });
             //Actions to be proceeded that server sent to client 
@@ -183,7 +186,7 @@ namespace Fanior.Client.Pages
                 }
             });
             //this player joined game
-            hubConnection.On<int, string, long>("JoinGame", (idReceived, gvarsJson, now) =>
+            hubConnection.On<int, string, long>("JoinGame", async (idReceived, gvarsJson, now) =>
             {
                 if (this.id == 0)
                 {
@@ -200,22 +203,22 @@ namespace Fanior.Client.Pages
                     ToolsSystem.DeserializePlayer(playerJson, gvars);
                 }
             });
-           
-           /* hubConnection.On<Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>, int>("ExecuteList", (actionMethodNames, messageId) =>
-            {
-                //skončil jsem tady - teď musím udělat, aby se posílali stisky kláves "stisknuto", "released", aby na serveru to mohlo jet plynule jako tady.
-                sw.Start();
-                foreach (int playerId in actionMethodNames.Keys)
-                {
-                    foreach (var action in actionMethodNames[playerId])
-                    {
-                        PlayerAction.InvokeAction(action.Item1, action.Item2, playerId, gvars);
-                    }
-                }
-                sw.Stop();
-                Console.WriteLine(sw.ElapsedMilliseconds);
-                sw.Reset();
-            });*/
+
+            /* hubConnection.On<Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>, int>("ExecuteList", (actionMethodNames, messageId) =>
+             {
+                 //skončil jsem tady - teď musím udělat, aby se posílali stisky kláves "stisknuto", "released", aby na serveru to mohlo jet plynule jako tady.
+                 sw.Start();
+                 foreach (int playerId in actionMethodNames.Keys)
+                 {
+                     foreach (var action in actionMethodNames[playerId])
+                     {
+                         PlayerAction.InvokeAction(action.Item1, action.Item2, playerId, gvars);
+                     }
+                 }
+                 sw.Stop();
+                 Console.WriteLine(sw.ElapsedMilliseconds);
+                 sw.Reset();
+             });*/
 
             //on login and when connection was lost
             hubConnection.On<string>("ReceiveGvars", (gvarsJson) =>
@@ -242,10 +245,14 @@ namespace Fanior.Client.Pages
                 gvars = JsonConvert.DeserializeObject<Gvars>(gvarsJson, ToolsSystem.jsonSerializerSettings);
 
                 player = gvars.ItemsPlayers[id];
-
+                player.SetMovable();
                 if (firstConnect)
                 {
-                    ExecuteAsync(new CancellationToken(false));
+                    Task.Run(async () =>
+                    {
+                        ExecuteAsync(new CancellationToken(false));
+                    });
+                        
                     firstConnect = false;
                 }
             }
