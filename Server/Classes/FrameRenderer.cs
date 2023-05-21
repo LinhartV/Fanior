@@ -25,7 +25,7 @@ namespace Fanior.Server
     {
         private readonly IServiceProvider _serviceProvider;
 
-        
+
         public FrameRenderer(IServiceProvider serviceProvider)
         {
             ToolsSystem.serializer.Converters.Add(new Newtonsoft.Json.Converters.JavaScriptDateTimeConverter());
@@ -58,7 +58,11 @@ namespace Fanior.Server
                     var provider = scope.ServiceProvider;
                     var hub = provider.GetService<IHubContext<Fanior.Server.Hubs.MyHub>>();
                     var game = provider.GetService<GameControl>();
-                    await Frame(game, hub);
+
+                    lock (game.actionLock)
+                    {
+                        Frame(game, hub);
+                    }
                 }
             }
             catch (Exception e)
@@ -91,7 +95,7 @@ namespace Fanior.Server
             }
         }
 
-       
+
 
         /// <summary>
         /// Send all received actions to all clients for them to know, who did what.
@@ -102,10 +106,10 @@ namespace Fanior.Server
             {
                 try
                 {
-                    await hub?.Clients.Group(gvars.GameId).SendAsync("ExecuteList", game.sw.ElapsedMilliseconds ,gvars.messageId, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings));
+                    hub?.Clients.Group(gvars.GameId).SendAsync("ExecuteList", game.sw.ElapsedMilliseconds, gvars.messageId, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings));
                     gvars.PlayerActions.Clear();
-                    
-                    
+                    //hub?.Clients.Group(gvars.GameId).SendAsync("DelegateListening", () => { Console.WriteLine("ahoj"); });
+
                 }
                 catch (Exception e)
                 {

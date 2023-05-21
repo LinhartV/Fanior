@@ -36,8 +36,11 @@ namespace Fanior.Client.Pages
         //reference to canvas
         public ElementReference mySvg;
         public HubConnection hubConnection;
-
+        private readonly object sendActionLock = new object();
+        private readonly object receiveActionLock = new object();
         public List<(PlayerAction.PlayerActionsEnum, bool)> myActions = new();
+
+        private DotNetObjectReference<Index> selfReference;
 
         #endregion
         /// <summary>
@@ -58,34 +61,54 @@ namespace Fanior.Client.Pages
         public void DefaultAssingOfKeys()
         {
             //set keys here
-            KeyController.AddKey("w", new RegisteredKey(PlayerAction.PlayerActionsEnum.moveUp, PlayerAction.PlayerActionsEnum.moveUp, myActions));
-            KeyController.AddKey("s", new RegisteredKey(PlayerAction.PlayerActionsEnum.moveDown, PlayerAction.PlayerActionsEnum.moveDown, myActions));
-            KeyController.AddKey("d", new RegisteredKey(PlayerAction.PlayerActionsEnum.moveRight, PlayerAction.PlayerActionsEnum.moveRight, myActions));
-            KeyController.AddKey("a", new RegisteredKey(PlayerAction.PlayerActionsEnum.moveLeft, PlayerAction.PlayerActionsEnum.moveLeft, myActions));
+            KeyController.AddKey("w", new RegisteredKey(PlayerAction.PlayerActionsEnum.moveUp, myActions));
+            KeyController.AddKey("s", new RegisteredKey(PlayerAction.PlayerActionsEnum.moveDown, myActions));
+            KeyController.AddKey("d", new RegisteredKey(PlayerAction.PlayerActionsEnum.moveRight, myActions));
+            KeyController.AddKey("a", new RegisteredKey(PlayerAction.PlayerActionsEnum.moveLeft, myActions));
+            KeyController.AddKey(" ", new RegisteredKey(PlayerAction.PlayerActionsEnum.fire, myActions));
             /*KeyController.AddKey("s", new RegisteredKey(null, null, PlayerAction.MoveDown, SendKeyToServer));
             KeyController.AddKey("d", new RegisteredKey(null, null, PlayerAction.MoveRight, SendKeyToServer));
             KeyController.AddKey("a", new RegisteredKey(null, null, PlayerAction.MoveLeft, SendKeyToServer));*/
 
         }
 
-        protected void KeyDown(KeyboardEventArgs e)
+
+
+        
+
+        [JSInvokable]
+        public void HandleMouseMove(int x, int y)
         {
-            if (!pressedKeys.Contains(e.Key.ToLower()))
+            this.player.Angle = ToolsMath.GetAngleFromLengts(x - width / 2, height / 2 - y);
+            counter = (int)(player.Angle * 180 / Math.PI);
+            StateHasChanged();
+        }
+        [JSInvokable]
+        public void HandleKeyDown(string keycode)
+        {
+            if (!pressedKeys.Contains(keycode))
             {
-                counter++;
-                KeyController.GetRegisteredKey(e.Key.ToLower())?.KeyDown();
-                pressedKeys.Add(e.Key.ToLower());
+                lock (sendActionLock)
+                {
+                    KeyController.GetRegisteredKey(keycode)?.KeyDown();
+                }
+                pressedKeys.Add(keycode);
+            }
+            StateHasChanged();
+        }
+        [JSInvokable]
+        public void HandleKeyUp(string keycode)
+        {
+            if (pressedKeys.Contains(keycode))
+            {
+                lock (sendActionLock)
+                {
+                    KeyController.GetRegisteredKey(keycode)?.KeyUp();
+                }
+                pressedKeys.Remove(keycode);
             }
         }
-        protected void KeyUp(KeyboardEventArgs e)
-        {
-            if (pressedKeys.Contains(e.Key.ToLower()))
-            {
-                counter--;
-                KeyController.GetRegisteredKey(e.Key.ToLower())?.KeyUp();
-                pressedKeys.Remove(e.Key.ToLower());
-            }
-        }
+        public void Dispose() => selfReference?.Dispose();
         protected async Task MouseDown(MouseEventArgs e)
         {
 
@@ -111,15 +134,22 @@ namespace Fanior.Client.Pages
             string json;
             try
             {
-                if (myActions.Count > 0)
+                lock (sendActionLock)
                 {
-                    json = JsonConvert.SerializeObject(myActions, ToolsSystem.jsonSerializerSettings);
-                    await hubConnection.SendAsync("ExecuteList", json, gvars.GameId, this.id);
-                    myActions.Clear();
+                    if (myActions.Count > 0)
+                    {
+                        json = JsonConvert.SerializeObject(myActions, ToolsSystem.jsonSerializerSettings);
+                        hubConnection.SendAsync("ExecuteList", json, gvars.GameId, this.id);
+                        myActions.Clear();
+                    }
                 }
-                ToolsGame.ProceedFrame(gvars, now);
-                gvars.PlayerActions.Clear();
+                lock (receiveActionLock)
+                {
+                    ToolsGame.ProceedFrame(gvars, now);
+                    gvars.PlayerActions.Clear();
+                }
                 StateHasChanged();
+
             }
             catch (Exception e)
             {
@@ -148,7 +178,16 @@ namespace Fanior.Client.Pages
             {
                 if (firstRender)
                 {
+                    selfReference = DotNetObjectReference.Create(this);
+                    var minInterval = 20;
+                    await JS.InvokeVoidAsync("onThrottledMouseMove",
+                        mySvg, selfReference, minInterval);
+                    await JS.InvokeVoidAsync("onKeyDown",
+                        mySvg, selfReference);
+                    await JS.InvokeVoidAsync("onKeyUp",
+                        mySvg, selfReference);
                     await Start();
+                    
                 }
 
             }
@@ -175,15 +214,23 @@ namespace Fanior.Client.Pages
             //Actions to be proceeded that server sent to client 
             //Dictionary of list of actions assigned to object id along with information, if it's keydown or keyup (true = keydown).
             //+messageId to check if connection was lost.
+            /*hubConnection.On<Action>("DelegateListening", (action) =>
+            {
+                Console.WriteLine(action.ToString());
+            });*/
             hubConnection.On<long, long, string>("ExecuteList", (now, messageId, actionMethodNamesJson) =>
             {
                 this.now = now;
                 Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>> actionMethodNames = JsonConvert.DeserializeObject<Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
 
-                foreach (int itemId in actionMethodNames.Keys)
+                lock (receiveActionLock)
                 {
-                    gvars.PlayerActions.Add(itemId, actionMethodNames[itemId]);
+                    foreach (int itemId in actionMethodNames.Keys)
+                    {
+                        gvars.PlayerActions.Add(itemId, actionMethodNames[itemId]);
+                    }
                 }
+
             });
             //this player joined game
             hubConnection.On<int, string, long>("JoinGame", async (idReceived, gvarsJson, now) =>
@@ -245,14 +292,14 @@ namespace Fanior.Client.Pages
                 gvars = JsonConvert.DeserializeObject<Gvars>(gvarsJson, ToolsSystem.jsonSerializerSettings);
 
                 player = gvars.ItemsPlayers[id];
-                player.SetMovable();
+                player.SetItemFromClient(gvars);
                 if (firstConnect)
                 {
                     Task.Run(async () =>
                     {
                         ExecuteAsync(new CancellationToken(false));
                     });
-                        
+
                     firstConnect = false;
                 }
             }
@@ -280,6 +327,9 @@ namespace Fanior.Client.Pages
                 await hubConnection.DisposeAsync();
             }
         }
+
+
+
         #endregion
 
 

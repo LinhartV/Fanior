@@ -18,14 +18,14 @@ namespace Fanior.Shared
             Formatting = Newtonsoft.Json.Formatting.Indented,
             NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
             PreserveReferencesHandling = PreserveReferencesHandling.Objects,
-            ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
+            ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+            ReferenceLoopHandling = ReferenceLoopHandling.Serialize
         };
 
         public static Player DeserializePlayer(string jsonText, Gvars gvars)
         {
             Player item = JsonConvert.DeserializeObject<Player>(jsonText, jsonSerializerSettings);
-            item.SetItem(gvars);
-            item.SetMovable();
+            item.SetItemFromClient(gvars);
             return item;
         }
 

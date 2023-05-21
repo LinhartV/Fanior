@@ -57,8 +57,18 @@ namespace Fanior.Server.Hubs
         /// </summary>
         public void ExecuteList(string actionMethodNamesJson, string gameId, int itemId)
         {
-            List<(PlayerAction.PlayerActionsEnum, bool)> actionMethodNames = JsonConvert.DeserializeObject<List<(PlayerAction.PlayerActionsEnum, bool)>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
-            gameControl.games[gameId].PlayerActions.Add(itemId, actionMethodNames);
+            lock (gameControl.actionLock)
+            {
+                List<(PlayerAction.PlayerActionsEnum, bool)> actionMethodNames = JsonConvert.DeserializeObject<List<(PlayerAction.PlayerActionsEnum, bool)>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
+                if (gameControl.games[gameId].PlayerActions.ContainsKey(itemId))
+                {
+                    gameControl.games[gameId].PlayerActions[itemId].AddRange(actionMethodNames);
+                }
+                else
+                {
+                    gameControl.games[gameId].PlayerActions.Add(itemId, actionMethodNames);
+                }
+            }
         }
         /// <summary>
         /// Sends all GVars to caller.

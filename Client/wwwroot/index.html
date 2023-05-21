@@ -11,9 +11,9 @@
 
 <body>
     <div id="app">Loading...</div>
-
     <script src="_framework/blazor.webassembly.js"></script>
     <script>navigator.serviceWorker.register('service-worker.js');</script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.20/lodash.min.js"></script>
     <script type="text/javascript">
         window.getDimensions = function () {
             return {
@@ -32,6 +32,26 @@
             alert(message);
         }
     </script>
+    <script type="text/javascript">
+        function onThrottledMouseMove(elem, component, interval) {
+            elem.addEventListener('mousemove', _.throttle(e => {
+                component.invokeMethodAsync('HandleMouseMove', e.offsetX, e.offsetY);
+            }, interval));
+        }
+    </script>
+    <script type="text/javascript">
+        function onKeyDown(elem, component) {
+            elem.addEventListener('keydown', e => {
+                component.invokeMethodAsync('HandleKeyDown', e.key);
+            });
+        }
+        function onKeyUp(elem, component) {
+            elem.addEventListener('keyup', e => {
+                component.invokeMethodAsync('HandleKeyUp', e.key);
+            });
+        }
+    </script>
+
 </body>
 
 </html>

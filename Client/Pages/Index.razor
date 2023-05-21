@@ -3,14 +3,15 @@
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
 @implements IAsyncDisposable
+@implements IDisposable
 @if ((id == -1 || player == null))
 {
     <h2>@info</h2>
     <button @onclick=Start>"Start connection"</button>
 }
 <h2>@counter</h2>
-<svg x=0 y=0 width="@width" height="@(height)" tabindex="-1" @onkeypress=KeyDown @onkeyup=KeyUp @onmousedown=MouseDown @ref="mySvg">
-    
+<svg x=0 y=0 width="@width" height="@(height)" tabindex="-1" @ref="mySvg">
+
     @if (id != -1 && player != null)
     {
         <rect x=0 y=0 width="@width" height="@(height)" fill="#CDCDCD"></rect>
@@ -63,7 +64,20 @@
                 var centerY = (item.Y - Math.Round(player.Y) + height / 2).ToString().Replace(',', '.');
 
 
-                <circle cx=@(centerX) cy=@(centerY) r=@(item.Shape.ImageHeight / 2) stroke=@strokeColor stroke-width=@item.Shape.StrokeWidth fill=@fillColor />
+                <circle cx=@(centerX) cy=@(centerY) r=@(item.Shape.ImageHeight / 2) stroke=@strokeColor stroke-width=@(item.Shape.StrokeWidth/2) fill=@fillColor />
+                if (item is Character c)
+                {
+                    var leftEyeX = (item.X - Math.Round(player.X) + width / 2 + item.Shape.ImageHeight / 2.5 * Math.Cos(c.Angle - Math.PI / 6)).ToString().Replace(',', '.');
+                    var rightEyeX = (item.X - Math.Round(player.X) + width / 2 + item.Shape.ImageHeight / 2.5 * Math.Cos(c.Angle + Math.PI / 6)).ToString().Replace(',', '.');
+                    var leftEyeY = (item.Y - Math.Round(player.Y) + height / 2 - item.Shape.ImageHeight / 2.5 * Math.Sin(c.Angle - Math.PI / 6)).ToString().Replace(',', '.');
+                    var rightEyeY = (item.Y - Math.Round(player.Y) + height / 2 - item.Shape.ImageHeight / 2.5 * Math.Sin(c.Angle + Math.PI / 6)).ToString().Replace(',', '.');
+
+                    <circle cx=@(leftEyeX) cy=@(leftEyeY) r=@(item.Shape.ImageHeight / 9) stroke="white" stroke-width=1 fill=@fillColor tabindex="-2" />
+                    <circle cx=@(rightEyeX) cy=@(rightEyeY) r=@(item.Shape.ImageHeight / 9) stroke="white" stroke-width=1 fill=@fillColor tabindex="-2" />
+                    <circle cx=@(leftEyeX) cy=@(leftEyeY) r=@(item.Shape.ImageHeight / 15) stroke="blue" stroke-width=1 fill="blue" tabindex="-3" />
+                    <circle cx=@(rightEyeX) cy=@(rightEyeY) r=@(item.Shape.ImageHeight / 15) stroke="blue" stroke-width=1 fill="blue" tabindex="-3" />
+                }
+
 
             }
             else if (item.Shape.Geometry == Shape.GeometryEnum.rectange)

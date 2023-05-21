@@ -20,9 +20,8 @@ namespace Fanior.Shared
         public Mask Mask { get; set; }
         public Shape Shape { get; set; }
         //actions of this item with information when to be execuded, accessed by name.
-        private Dictionary<string,(long, ItemAction)> actions = new();
 
-
+        private Dictionary<string, (long, ItemAction)> actions = new();
 
         /*public virtual void Collide(Item collider, double angle, params Globals.ActionsAtCollision[] actionsNotToPerform)
         {
@@ -42,11 +41,11 @@ namespace Fanior.Shared
             {
                 if (tempActions[actionName].Item1 < now)
                 {
-                    if (actions[actionName].Item2.executeOnFirstTime)
+                    if (actions[actionName].Item2.executionType == ItemAction.ExecutionType.EveryTime)
                     {
                         try
                         {
-                            actions[actionName].Item2.Action(this, actions[actionName].Item2);
+                            actions[actionName].Item2.Action();
                         }
                         catch (Exception e)
                         {
@@ -54,34 +53,53 @@ namespace Fanior.Shared
                             throw;
                         }
                     }
-                    else 
+                    else
                     {
-                        actions[actionName].Item2.executeOnFirstTime = true;
+                        if (actions[actionName].Item2.executionType == ItemAction.ExecutionType.NotFirstTime)
+                            actions[actionName].Item2.executionType = ItemAction.ExecutionType.EveryTime;
                     }
                     actions.Remove(actionName);
-                    if (tempActions[actionName].Item2.Repeat > 0)
+                    if (tempActions[actionName].Item2.Repeat > 0 && tempActions[actionName].Item2.executionType != ItemAction.ExecutionType.OnlyFirstTime)
                     {
-                        actions.Add(actionName,(now + tempActions[actionName].Item2.Repeat, tempActions[actionName].Item2));
+                        actions.Add(actionName, (now + tempActions[actionName].Item2.Repeat, tempActions[actionName].Item2));
                     }
                 }
             }
         }
+        public bool ChangeRepeatTime(int repeat, string actionName)
+        {
+            if (actions.ContainsKey(actionName))
+            {
+                actions[actionName].Item2.Repeat = repeat;
+                return true;
+            }
+            else { return false; }
+        }
         public void AddAction(ItemAction action, string name)
         {
-            actions.Add(name, (0, action));
+            if (!actions.ContainsKey(name))
+                actions.Add(name, (0, action));
         }
         public void DeleteAction(string name)
         {
-            actions[name].Item2.Repeat = 0;
+            if (actions.ContainsKey(name))
+                actions[name].Item2.Repeat = 0;
         }
-        public void Dispose()
+        public void Dispose(Gvars gvars)
+        {
+            gvars.Items.Remove(this.Id);
+            if (gvars.ItemsPlayers.ContainsKey(Id))
+            {
+                gvars.ItemsPlayers.Remove(this.Id);
+            }
+            if (gvars.ItemsStep.ContainsKey(Id))
+            {
+                gvars.ItemsStep.Remove(this.Id);
+            }
+        }
+        public virtual void SetItemFromClient(Gvars gvars)
         {
 
-        }
-        public virtual void SetItem(Gvars gvars)
-        {
-            this.Id = gvars.Id++;
-            gvars.Items.Add(Id, this);
         }
         public Item() { }
         public Item(Gvars gvars, double x, double y, Shape shape, Mask mask, bool isVisible = true, bool justGraphics = false)
@@ -92,8 +110,8 @@ namespace Fanior.Shared
             this.Y = y;
             this.IsVisible = isVisible;
             Solid = !justGraphics;
-
-
+            this.Id = gvars.Id++;
+            gvars.Items.Add(Id, this);
         }
     }
 }

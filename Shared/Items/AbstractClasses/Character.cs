@@ -9,6 +9,7 @@ namespace Fanior.Shared
 {
     public abstract class Character : Movable
     {
+
         private double lives { get; set; }
         public double Lives
         {
@@ -20,12 +21,24 @@ namespace Fanior.Shared
                 }
             }
         }
+        // Angle where the character is "looking" (for picture, shooting and stuff)
+        private double angle;
+        public double Angle
+        {
+            get => angle;
+            set
+            {
+                angle = value % (Math.PI * 2);
+            }
+        }
         public Weapon Weapon { get; set; }
         public Character() { }
-        public Character(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, double acceleration, double friction, double lives, IMovement defaultMovement = null, bool isVisible = true) :
+        public Character(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, double acceleration, double friction, double lives, Weapon weapon, IMovement defaultMovement = null, bool isVisible = true) :
             base(gvars, x, y, shape, mask, movementSpeed, defaultMovement, acceleration, friction, isVisible)
         {
             this.Lives = lives;
+            this.Weapon = weapon;
+            weapon.characterId = this.Id;
         }
         public abstract void Death();
     }

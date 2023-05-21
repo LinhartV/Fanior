@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,29 +9,28 @@ namespace Fanior.Shared
 {
     public abstract class Weapon
     {
-        public Weapon(bool autoFire, int reloadTime, int shotSpeed, double damage, int characterId)
+        public Weapon(Gvars gvars, bool autoFire, int reloadTime, int shotSpeed, double damage)
         {
             this.reloadTime = reloadTime;
             this.shotSpeed = shotSpeed;
             this.damage = damage;
-            this.characterId = characterId;
             this.autoFire = autoFire;
+            this.gvars = gvars;
         }
+        [JsonProperty]
+        protected Gvars gvars;
         public bool reloaded = true;
-        protected int reloadTime;
+        public int reloadTime;
+        [JsonProperty]
         protected int shotSpeed;
+        [JsonProperty]
         protected double damage;
-        protected int characterId;
-        internal bool autoFire;
+        public int characterId;
+        public bool autoFire;
 
         public virtual void Fire()
-        {            
-            if(reloaded)
-            {
-                reloaded = false;
-                //character.AddAction(null, "reload", reloadTime, null, (Item item) => { (item as Character).weapon.reloaded = true; });
-                CreateShot();
-            }
+        {
+            CreateShot();
         }
         protected abstract void CreateShot();
 

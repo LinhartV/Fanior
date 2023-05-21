@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,17 +12,19 @@ namespace Fanior.Shared
     /// </summary>
     public class ItemAction
     {
+        public enum ExecutionType { EveryTime, NotFirstTime, OnlyFirstTime }
         //Action to be executed
-        public Action<Item, ItemAction> Action { get; private set; }
+        public Action Action { get; private set; }
         //whether the action will be repeated and if so, how often
+        [JsonProperty]
         private int repeat;
-        public bool executeOnFirstTime;
+        public ExecutionType executionType;
 
-        public ItemAction(Action<Item, ItemAction> action, int repeat, bool executeOnFirstTime)
+        public ItemAction(Action action, int repeat, ExecutionType executionType = ExecutionType.EveryTime)
         {
             Action = action;
             Repeat = repeat;
-            this.executeOnFirstTime = executeOnFirstTime;
+            this.executionType = executionType;
         }
 
         public int Repeat

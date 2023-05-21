@@ -32,15 +32,15 @@ namespace Fanior.Client
         }
 
         //Constroctur for actions proceeded on both server and client side. So far only name of action enum sent to server.
-        public RegisteredKey(PlayerAction.PlayerActionsEnum keyDown, PlayerAction.PlayerActionsEnum keyUp, List<(PlayerAction.PlayerActionsEnum, bool)> myActions)
+        public RegisteredKey(PlayerAction.PlayerActionsEnum action, List<(PlayerAction.PlayerActionsEnum, bool)> myActions)
         {
             this.KeyDown = new Action(async() =>
             {
                 if (Pressed == false)
                 {
-                    if (keyDown != PlayerAction.PlayerActionsEnum.none)
+                    if (action != PlayerAction.PlayerActionsEnum.none)
                     {
-                        myActions.Add((keyDown, true));
+                        myActions.Add((action, true));
                         //PlayerAction.InvokeAction(keyDown, true, a, g);
                     }
                 }
@@ -48,9 +48,9 @@ namespace Fanior.Client
             });
             this.KeyUp = new Action(async () =>
             {
-                if (keyUp != PlayerAction.PlayerActionsEnum.none)
+                if (action != PlayerAction.PlayerActionsEnum.none)
                 {
-                    myActions.Add((keyDown, false));
+                    myActions.Add((action, false));
                     //PlayerAction.InvokeAction(keyUp, false, a, g);
                 }
                 Pressed = false;

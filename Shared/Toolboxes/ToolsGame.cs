@@ -16,7 +16,7 @@ namespace Fanior.Shared
         
         public static Player CreateNewPlayer(Gvars gvars, string connectionId)
         {
-            return new Player(connectionId, gvars, (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", "red", "darkred", 1, 40, 40, Shape.GeometryEnum.circle), null, 4, 0.5, 0.1, 3);
+            return new Player(connectionId, gvars, (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", "red", "darkred", 1, 40, 40, Shape.GeometryEnum.circle), null, 4, 0.5, 0.1, 3, new BasicWeapon(gvars, true, 100, 20, 3));
         }
         public class Coords
         {
@@ -33,7 +33,15 @@ namespace Fanior.Shared
         {
             ProcedeGameAlgorithms(gvars);
             ProcedePlayerActions(gvars);
-            ProcedeItemActions(now, gvars);
+            try
+            {
+                ProcedeItemActions(now, gvars);
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
             gvars.ExecuteActions(now);
         }
 
@@ -64,7 +72,8 @@ namespace Fanior.Shared
         /// </summary>
         private static void ProcedeItemActions(long now, Gvars gvars)
         {
-            foreach (var item in gvars.Items.Values)
+            var temp = new List<Item>(gvars.Items.Values);
+            foreach (var item in temp)
             {
                 item.ExecuteActions(now);
             }

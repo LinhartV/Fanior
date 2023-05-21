@@ -39,12 +39,13 @@ namespace Fanior.Shared
             {
                 AddControlledMovement(movement, "default");
             }
+            this.AddAction(new ItemAction(() => { this.Move(); }, 1), "defaultMovement");
         }
-        public void SetMovable()
+        public override void SetItemFromClient(Gvars gvars)
         {
-            this.AddAction(new ItemAction((Item item, ItemAction itemAction) => { (item as Movable).Move(); }, 1, true), "defaultMovement");
+            base.SetItemFromClient(gvars);
+            this.AddAction(new ItemAction(() => { this.Move(); }, 1), "defaultMovement");
         }
-
         /// <summary>
         /// Creates new movement
         /// </summary>
@@ -54,7 +55,10 @@ namespace Fanior.Shared
         }
         public void AddControlledMovement(IMovement movement, string movementName)
         {
-            MovementsControlled.Add(movementName, movement);
+            if (!MovementsControlled.ContainsKey(movementName))
+            {
+                MovementsControlled.Add(movementName, movement);
+            }
         }
         /// <summary>
         /// Calls UpdageMovement of particular movement
@@ -107,7 +111,7 @@ namespace Fanior.Shared
                 movement.Frame(friction);
                 xy = ToolsMath.PolarToCartesian(movement.Angle, movement.MovementSpeed);
                 x += xy.Item1;
-                y += xy.Item2;
+                y -= xy.Item2;
             }
             this.X += x;
             this.Y += y;

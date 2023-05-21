@@ -11,6 +11,7 @@ namespace Fanior.Server.Classes
     /// </summary>
     public class GameControl
     {
+        public readonly object actionLock = new object();
         //number of milliseconds from the launch of server
         public Stopwatch sw = new Stopwatch();
         //all games by string (url)
