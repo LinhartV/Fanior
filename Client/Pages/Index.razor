@@ -16,18 +16,18 @@
     {
         <rect x=0 y=0 width="@width" height="@(height)" fill="#CDCDCD"></rect>
         <rect x=@(-Math.Round(player.X) + width/2-player.Shape.ImageWidth/2) y=@(-Math.Round(player.Y) + height/2-player.Shape.ImageHeight/2) width=@(gvars.ArenaWidth) height=@(gvars.ArenaHeight) fill="#D8EAED"></rect>
-        const int LINESPACE = 25;
-
+        const int LINESPACE = 125;
+        const string LINECOLOR = "lightgrey";
         //vodorovné
         for (int i = 0; i < (gvars.ArenaHeight) / LINESPACE; i++)
         {
             if (i % 10 == 0)
             {
-                <line x1="0" x2=@width y1=@(i * LINESPACE - Math.Round(player.Y) + height / 2) y2=@(i * LINESPACE - Math.Round(player.Y) + height / 2) stroke-width="0.5" stroke="lightgrey"></line>
+                <line x1="0" x2=@width y1=@(i * LINESPACE - Math.Round(player.Y) + height / 2) y2=@(i * LINESPACE - Math.Round(player.Y) + height / 2) stroke-width="0.5" stroke=@LINECOLOR></line>
             }
             else
             {
-                <line x1="0" x2=@width y1=@(i * LINESPACE - Math.Round(player.Y) + height / 2) y2=@(i * LINESPACE - Math.Round(player.Y) + height / 2) stroke-width="0.4" stroke="lightgrey"></line>
+                <line x1="0" x2=@width y1=@(i * LINESPACE - Math.Round(player.Y) + height / 2) y2=@(i * LINESPACE - Math.Round(player.Y) + height / 2) stroke-width="0.4" stroke=@LINECOLOR></line>
             }
         }
         //svislé
@@ -35,55 +35,63 @@
         {
             if (i % 10 == 0)
             {
-                <line x1=@(i * LINESPACE -Math.Round(player.X) + width / 2) x2=@(i * LINESPACE -Math.Round(player.X) + width / 2) y1="0" y2=@height stroke-width="0.5" stroke="lightgrey"></line>
+                <line x1=@(i * LINESPACE -Math.Round(player.X) + width / 2) x2=@(i * LINESPACE -Math.Round(player.X) + width / 2) y1="0" y2=@height stroke-width="0.5" stroke=@LINECOLOR></line>
             }
             else
             {
-                <line x1=@(i * LINESPACE -Math.Round(player.X) + width / 2) x2=@(i * LINESPACE -Math.Round(player.X) + width / 2) y1="0" y2=@height stroke-width="0.4" stroke="lightgrey"></line>
+                <line x1=@(i * LINESPACE -Math.Round(player.X) + width / 2) x2=@(i * LINESPACE -Math.Round(player.X) + width / 2) y1="0" y2=@height stroke-width="0.4" stroke=@LINECOLOR></line>
             }
         }
         string strokeColor;
         string fillColor;
         @foreach (Item item in gvars.Items.Values)
         {
-
-            if (item.Id == id || (item is Shot s && id == s.CharacterId))
-            {
-                strokeColor = item.Shape.StrokeColor;
-                fillColor = item.Shape.FillColor;
-            }
-            else
-            {
-                strokeColor = item.Shape.StrokeColorEnemy;
-                fillColor = item.Shape.FillColorEnemy;
-            }
-            if (item.Shape.Geometry == Shape.GeometryEnum.circle)
+            if (item.X - item.Shape.ImageWidth - player.X < width / 2 && item.X + item.Shape.ImageWidth - player.X > -width / 2 && item.Y - item.Shape.ImageHeight - player.Y < height / 2 && item.Y + item.Shape.ImageHeight - player.Y > -height / 2)
             {
 
-                var centerX = (item.X - Math.Round(player.X) + width / 2).ToString().Replace(',', '.');
-                var centerY = (item.Y - Math.Round(player.Y) + height / 2).ToString().Replace(',', '.');
-
-
-                <circle cx=@(centerX) cy=@(centerY) r=@(item.Shape.ImageHeight / 2) stroke=@strokeColor stroke-width=@(item.Shape.StrokeWidth/2) fill=@fillColor />
-                if (item is Character c)
+                if (item.Id == id || (item is Shot s && id == s.CharacterId))
                 {
-                    var leftEyeX = (item.X - Math.Round(player.X) + width / 2 + item.Shape.ImageHeight / 2.5 * Math.Cos(c.Angle - Math.PI / 6)).ToString().Replace(',', '.');
-                    var rightEyeX = (item.X - Math.Round(player.X) + width / 2 + item.Shape.ImageHeight / 2.5 * Math.Cos(c.Angle + Math.PI / 6)).ToString().Replace(',', '.');
-                    var leftEyeY = (item.Y - Math.Round(player.Y) + height / 2 - item.Shape.ImageHeight / 2.5 * Math.Sin(c.Angle - Math.PI / 6)).ToString().Replace(',', '.');
-                    var rightEyeY = (item.Y - Math.Round(player.Y) + height / 2 - item.Shape.ImageHeight / 2.5 * Math.Sin(c.Angle + Math.PI / 6)).ToString().Replace(',', '.');
-
-                    <circle cx=@(leftEyeX) cy=@(leftEyeY) r=@(item.Shape.ImageHeight / 9) stroke="white" stroke-width=1 fill=@fillColor tabindex="-2" />
-                    <circle cx=@(rightEyeX) cy=@(rightEyeY) r=@(item.Shape.ImageHeight / 9) stroke="white" stroke-width=1 fill=@fillColor tabindex="-2" />
-                    <circle cx=@(leftEyeX) cy=@(leftEyeY) r=@(item.Shape.ImageHeight / 15) stroke="blue" stroke-width=1 fill="blue" tabindex="-3" />
-                    <circle cx=@(rightEyeX) cy=@(rightEyeY) r=@(item.Shape.ImageHeight / 15) stroke="blue" stroke-width=1 fill="blue" tabindex="-3" />
+                    strokeColor = item.Shape.StrokeColor;
+                    fillColor = item.Shape.FillColor;
                 }
+                else
+                {
+                    strokeColor = item.Shape.StrokeColorEnemy;
+                    fillColor = item.Shape.FillColorEnemy;
+                }
+                if (item.Shape.Geometry == Shape.GeometryEnum.circle)
+                {
+
+                    var centerX = (item.X - Math.Round(player.X) + width / 2).ToString().Replace(',', '.');
+                    var centerY = (item.Y - Math.Round(player.Y) + height / 2).ToString().Replace(',', '.');
 
 
+                    if (item is Character c)
+                    {
+                        var leftEyeX = (item.X - Math.Round(player.X) + width / 2 + item.Shape.ImageHeight / 2.5 * Math.Cos(c.Angle - Math.PI / 6)).ToString().Replace(',', '.');
+                        var rightEyeX = (item.X - Math.Round(player.X) + width / 2 + item.Shape.ImageHeight / 2.5 * Math.Cos(c.Angle + Math.PI / 6)).ToString().Replace(',', '.');
+                        var leftEyeY = (item.Y - Math.Round(player.Y) + height / 2 - item.Shape.ImageHeight / 2.5 * Math.Sin(c.Angle - Math.PI / 6)).ToString().Replace(',', '.');
+                        var rightEyeY = (item.Y - Math.Round(player.Y) + height / 2 - item.Shape.ImageHeight / 2.5 * Math.Sin(c.Angle + Math.PI / 6)).ToString().Replace(',', '.');
+
+                        <circle cx=@(centerX) cy=@(centerY) r=@(item.Shape.ImageHeight / 2) stroke=@strokeColor stroke-width=@(item.Shape.StrokeWidth/2) fill=@fillColor />
+                        <circle cx=@(leftEyeX) cy=@(leftEyeY) r=@(item.Shape.ImageHeight / 9) stroke="white" stroke-width=1 fill=@fillColor />
+                        <circle cx=@(rightEyeX) cy=@(rightEyeY) r=@(item.Shape.ImageHeight / 9) stroke="white" stroke-width=1 fill=@fillColor />
+                        <circle cx=@(leftEyeX) cy=@(leftEyeY) r=@(item.Shape.ImageHeight / 15) stroke="blue" stroke-width=1 fill="blue" />
+                        <circle cx=@(rightEyeX) cy=@(rightEyeY) r=@(item.Shape.ImageHeight / 15) stroke="blue" stroke-width=1 fill="blue" />
+                    }
+                    else
+                    {
+                        <circle cx=@(centerX) cy=@(centerY) r=@(item.Shape.ImageHeight / 2) stroke=@strokeColor stroke-width=@(item.Shape.StrokeWidth/2) fill=@fillColor />
+                    }
+
+
+                }
+                else if (item.Shape.Geometry == Shape.GeometryEnum.rectange)
+                {
+                    <rect x=@item.X y=@item.Y width=@item.Shape.ImageWidth height=@item.Shape.ImageHeight stroke=@strokeColor fill=@fillColor stroke-width=@item.Shape.StrokeWidth></rect>
+                }
             }
-            else if (item.Shape.Geometry == Shape.GeometryEnum.rectange)
-            {
-                <rect x=@item.X y=@item.Y width=@item.Shape.ImageWidth height=@item.Shape.ImageHeight stroke=@strokeColor fill=@fillColor stroke-width=@item.Shape.StrokeWidth></rect>
-            }
+
         }
     }
 </svg>

@@ -21,6 +21,7 @@ namespace Fanior.Server.Classes
         {
             sw.Start();
             PlayerAction.SetupActions();
+            LambdaActions.setupLambdaActions();
         }
         //adds new player to concrete arena if possible
         public Gvars AddPlayer(string gameId)

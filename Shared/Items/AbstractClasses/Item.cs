@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Collections.Specialized.BitVector32;
 
 
 namespace Fanior.Shared
@@ -20,8 +21,11 @@ namespace Fanior.Shared
         public Mask Mask { get; set; }
         public Shape Shape { get; set; }
         //actions of this item with information when to be execuded, accessed by name.
-
+        [JsonProperty]
         private Dictionary<string, (long, ItemAction)> actions = new();
+        //actions of this item to be executed everyFrame
+        [JsonProperty]
+        private Dictionary<string, ItemAction> actionsEveryFrame = new();
 
         /*public virtual void Collide(Item collider, double angle, params Globals.ActionsAtCollision[] actionsNotToPerform)
         {
@@ -33,9 +37,12 @@ namespace Fanior.Shared
         /// <summary>
         /// Actions to be executed in the current frame. Is action is supposed to repeat, it will be added again to the list.
         /// </summary>
-        /// <returns>List of actions to be executed</returns>
-        public void ExecuteActions(long now)
+        public void ExecuteActions(long now, Gvars gvars)
         {
+            foreach (var action in actionsEveryFrame.Values)
+            {
+                LambdaActions.executeAction(action.ActionName, gvars, this.Id);
+            }
             Dictionary<string, (long, ItemAction)> tempActions = new Dictionary<string, (long, ItemAction)>(actions);
             foreach (var actionName in tempActions.Keys)
             {
@@ -45,7 +52,7 @@ namespace Fanior.Shared
                     {
                         try
                         {
-                            actions[actionName].Item2.Action();
+                            LambdaActions.executeAction(actions[actionName].Item2.ActionName, gvars, this.Id);
                         }
                         catch (Exception e)
                         {
@@ -53,15 +60,19 @@ namespace Fanior.Shared
                             throw;
                         }
                     }
-                    else
+                    else if (actions[actionName].Item2.executionType == ItemAction.ExecutionType.NotFirstTime)
                     {
-                        if (actions[actionName].Item2.executionType == ItemAction.ExecutionType.NotFirstTime)
-                            actions[actionName].Item2.executionType = ItemAction.ExecutionType.EveryTime;
+                        actions[actionName].Item2.executionType = ItemAction.ExecutionType.EveryTime;
                     }
                     actions.Remove(actionName);
-                    if (tempActions[actionName].Item2.Repeat > 0 && tempActions[actionName].Item2.executionType != ItemAction.ExecutionType.OnlyFirstTime)
+                    if (tempActions[actionName].Item2.Repeat > 0 && tempActions[actionName].Item2.executionType != ItemAction.ExecutionType.StopExecuting)
                     {
                         actions.Add(actionName, (now + tempActions[actionName].Item2.Repeat, tempActions[actionName].Item2));
+                    }
+                    if (tempActions[actionName].Item2.executionType == ItemAction.ExecutionType.OnlyFirstTime)
+                    {
+                        tempActions[actionName].Item2.Repeat = 0;
+                        actions[actionName].Item2.executionType = ItemAction.ExecutionType.EveryTime;
                     }
                 }
             }
@@ -71,19 +82,73 @@ namespace Fanior.Shared
             if (actions.ContainsKey(actionName))
             {
                 actions[actionName].Item2.Repeat = repeat;
+
+                if (repeat <= Constants.FRAME_TIME && repeat > 0)
+                {
+                    actionsEveryFrame.Add(actionName, actions[actionName].Item2);
+                    actions.Remove(actionName);
+                }
+                return true;
+            }
+            else if (actionsEveryFrame.ContainsKey(actionName))
+            {
+                if (repeat > Constants.FRAME_TIME)
+                {
+                    actions.Add(actionName, (0, actionsEveryFrame[actionName]));
+                    actionsEveryFrame.Remove(actionName);
+                }
                 return true;
             }
             else { return false; }
         }
-        public void AddAction(ItemAction action, string name)
+        /// <summary>
+        /// Adds a new action to be executed
+        /// </summary>
+        /// <param name="action">ItemAction to add</param>
+        /// <param name="rewrite">Whether to rewrite running action</param>
+        public void AddAction(ItemAction action, bool rewrite = true)
         {
-            if (!actions.ContainsKey(name))
-                actions.Add(name, (0, action));
+            this.AddAction(action, action.ActionName, rewrite);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="action">ItemAction to add</param>
+        /// <param name="storeName">The name the action will be stored in the dictionary under</param>
+        /// <param name="rewrite">Whether to rewrite running action</param>
+        public void AddAction(ItemAction action, string storeName, bool rewrite = true)
+        {
+            if (action.Repeat > Constants.FRAME_TIME)
+            {
+                if (!actions.ContainsKey(storeName))
+                    actions.Add(storeName, (0, action));
+                else if (rewrite)
+                {
+                    actions.Remove(storeName);
+                    actions.Add(storeName, (0, action));
+                }
+            }
+            else
+            {
+                if (!actionsEveryFrame.ContainsKey(storeName))
+                    actionsEveryFrame.Add(storeName, action);
+                else if (rewrite)
+                {
+                    actionsEveryFrame.Remove(storeName);
+                    actionsEveryFrame.Add(storeName, action);
+                }
+            }
+        }
+
         public void DeleteAction(string name)
         {
             if (actions.ContainsKey(name))
-                actions[name].Item2.Repeat = 0;
+            {
+                actions[name].Item2.executionType = ItemAction.ExecutionType.StopExecuting;
+                actions.Remove(name);
+            }
+            if (actionsEveryFrame.ContainsKey(name))
+                actionsEveryFrame.Remove(name);
         }
         public void Dispose(Gvars gvars)
         {
@@ -99,7 +164,11 @@ namespace Fanior.Shared
         }
         public virtual void SetItemFromClient(Gvars gvars)
         {
-
+            if (!gvars.Items.ContainsKey(Id))
+            {
+                gvars.Items.Add(Id, this);
+                gvars.Id++;
+            }
         }
         public Item() { }
         public Item(Gvars gvars, double x, double y, Shape shape, Mask mask, bool isVisible = true, bool justGraphics = false)

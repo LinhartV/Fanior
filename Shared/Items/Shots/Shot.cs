@@ -19,10 +19,7 @@ namespace Fanior.Shared
             this.CharacterId = characterId;
             Solid = false;
             AddMovement(movementSpeed, angle, acceleration);
-            this.AddAction(new ItemAction(() =>
-            {
-                this.Dispose(gvars);
-            }, lifeSpan, ItemAction.ExecutionType.OnlyFirstTime), "bulletDeletion");
+            this.AddAction(new ItemAction("dispose", lifeSpan, ItemAction.ExecutionType.OnlyFirstTime), "dispose");
         }
         /*public override void Collide(Item collider, double angle, params Globals.ActionsAtCollision[] actionsNotToPerform)
         {

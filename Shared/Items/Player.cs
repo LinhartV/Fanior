@@ -40,10 +40,10 @@ namespace Fanior.Shared
         public override void SetItemFromClient(Gvars gvars)
         {
             base.SetItemFromClient(gvars);
-            /*this.AddControlledMovement(new AcceleratedMovement(0, 0, this.Acceleration, BaseSpeed), "up");
-            this.AddControlledMovement(new AcceleratedMovement(0, Math.PI / 2, this.Acceleration, BaseSpeed), "right");
-            this.AddControlledMovement(new AcceleratedMovement(0, Math.PI, this.Acceleration, BaseSpeed), "down");
-            this.AddControlledMovement(new AcceleratedMovement(0, 3 * Math.PI / 2, this.Acceleration, BaseSpeed), "left");*/
+            if (!gvars.ItemsPlayers.ContainsKey(Id))
+            {
+                gvars.ItemsPlayers.Add(this.Id, this);
+            }
         }
 
         public override void Death()

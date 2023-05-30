@@ -38,7 +38,10 @@ namespace Fanior.Shared
         {
             this.Lives = lives;
             this.Weapon = weapon;
-            weapon.characterId = this.Id;
+            if (Weapon != null)
+            {
+                weapon.characterId = this.Id;
+            }
         }
         public abstract void Death();
     }

@@ -12,17 +12,18 @@ namespace Fanior.Shared
     /// </summary>
     public class ItemAction
     {
-        public enum ExecutionType { EveryTime, NotFirstTime, OnlyFirstTime }
+
+        public enum ExecutionType { EveryTime, NotFirstTime, OnlyFirstTime, StopExecuting }
         //Action to be executed
-        public Action Action { get; private set; }
+        public string ActionName { get; private set; }
         //whether the action will be repeated and if so, how often
         [JsonProperty]
         private int repeat;
         public ExecutionType executionType;
 
-        public ItemAction(Action action, int repeat, ExecutionType executionType = ExecutionType.EveryTime)
+        public ItemAction(string actionName, int repeat, ExecutionType executionType = ExecutionType.EveryTime)
         {
-            Action = action;
+            ActionName = actionName;
             Repeat = repeat;
             this.executionType = executionType;
         }

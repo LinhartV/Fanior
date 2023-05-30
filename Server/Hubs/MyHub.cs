@@ -42,7 +42,7 @@ namespace Fanior.Server.Hubs
                 string json = JsonConvert.SerializeObject(gvars, ToolsSystem.jsonSerializerSettings);
 
                 await Groups.AddToGroupAsync(Context.ConnectionId, gvars.GameId);
-                await Clients.Caller.SendAsync("JoinGame", player.Id, json, gameControl.sw.ElapsedMilliseconds);
+                await Clients.Caller.SendAsync("JoinGame", player.Id, json, gameControl.sw.ElapsedMilliseconds, gvars.messageId);
                 await Clients.All.SendAsync("PlayerJoinGame", JsonConvert.SerializeObject(player, ToolsSystem.jsonSerializerSettings), player.Id);
             }
             catch (Exception e)
@@ -55,20 +55,27 @@ namespace Fanior.Server.Hubs
         /// <summary>
         /// Listens to incoming messages from clients, which are then proceeded in the Frame. It also joins actions of this player in the list of his actions, which are subsequently sent to every usery (done every frame).
         /// </summary>
-        public void ExecuteList(string actionMethodNamesJson, string gameId, int itemId)
+        public void ExecuteList(string actionMethodNamesJson, string gameId, int itemId, double angle)
         {
-            lock (gameControl.actionLock)
+            /*if (gameControl.games[gameId].Angles.ContainsKey(itemId))
             {
-                List<(PlayerAction.PlayerActionsEnum, bool)> actionMethodNames = JsonConvert.DeserializeObject<List<(PlayerAction.PlayerActionsEnum, bool)>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
-                if (gameControl.games[gameId].PlayerActions.ContainsKey(itemId))
-                {
-                    gameControl.games[gameId].PlayerActions[itemId].AddRange(actionMethodNames);
-                }
-                else
-                {
-                    gameControl.games[gameId].PlayerActions.Add(itemId, actionMethodNames);
-                }
+                gameControl.games[gameId].Angles[itemId] = angle;
             }
+            else
+            {
+                gameControl.games[gameId].Angles.Add(itemId, angle);
+            }
+            gameControl.games[gameId].ItemsPlayers[itemId].Angle = angle;*/
+            List<(PlayerAction.PlayerActionsEnum, bool)> actionMethodNames = JsonConvert.DeserializeObject<List<(PlayerAction.PlayerActionsEnum, bool)>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
+            if (gameControl.games[gameId].PlayerActions.ContainsKey(itemId))
+            {
+                gameControl.games[gameId].PlayerActions[itemId].AddRange(actionMethodNames);
+            }
+            else
+            {
+                gameControl.games[gameId].PlayerActions.Add(itemId, actionMethodNames);
+            }
+            
         }
         /// <summary>
         /// Sends all GVars to caller.

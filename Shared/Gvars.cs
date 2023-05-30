@@ -39,7 +39,9 @@ namespace Fanior.Shared
 
         //actions that players just did
         public Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>> PlayerActions { get; set; } = new();
-        
+        //angle of all players (id, angle)
+        public Dictionary<int, double> Angles { get; set; } = new();
+
         //size of arena
         public double ArenaWidth { get; set; }
         public double ArenaHeight { get; set; }

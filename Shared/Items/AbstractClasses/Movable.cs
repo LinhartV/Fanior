@@ -39,12 +39,17 @@ namespace Fanior.Shared
             {
                 AddControlledMovement(movement, "default");
             }
-            this.AddAction(new ItemAction(() => { this.Move(); }, 1), "defaultMovement");
+            this.AddAction(new ItemAction("move", 1));
+            gvars.ItemsStep.Add(Id, this);
         }
         public override void SetItemFromClient(Gvars gvars)
         {
+            if (!gvars.ItemsStep.ContainsKey(Id))
+            {
+                gvars.ItemsStep.Add(Id, this);
+            }
             base.SetItemFromClient(gvars);
-            this.AddAction(new ItemAction(() => { this.Move(); }, 1), "defaultMovement");
+            this.AddAction(new ItemAction("move", 1));
         }
         /// <summary>
         /// Creates new movement
@@ -99,7 +104,7 @@ namespace Fanior.Shared
             }
         }
 
-        private void Move()
+        public void Move()
         {
             List<IMovement> allMovements = new List<IMovement>(MovementsAutomated);
             allMovements.AddRange(MovementsControlled.Values);

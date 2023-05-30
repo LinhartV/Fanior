@@ -25,7 +25,7 @@ namespace Fanior.Shared
                 {
                     if (keyDown != null)
                     {
-                        
+
                         keyDown(a, g);
                     }
                 });
@@ -70,65 +70,33 @@ namespace Fanior.Shared
         public static void SetupActions()
         {
             actions.Add(PlayerActionsEnum.fire, new KeyCommand((id, gvars) =>
-            {
-
+              {
                 if (gvars.ItemsPlayers[id].Weapon.reloaded)
                 {
                     if (gvars.ItemsPlayers[id].Weapon.autoFire)
                     {
-                        gvars.ItemsPlayers[id].AddAction(new ItemAction(() =>
-                        {
-                            if (gvars.ItemsPlayers[id].Weapon.reloaded)
-                            {
-                                gvars.ItemsPlayers[id].Weapon.Fire();
-                                gvars.ItemsPlayers[id].Weapon.reloaded = false;
-                            }
-                            else
-                            {
-                                gvars.ItemsPlayers[id].Weapon.reloaded = true;
-                            }
-
-                        }, gvars.ItemsPlayers[id].Weapon.reloadTime, ItemAction.ExecutionType.EveryTime), "fire");
+                        gvars.ItemsPlayers[id].AddAction(new ItemAction("fire1", gvars.ItemsPlayers[id].Weapon.reloadTime, ItemAction.ExecutionType.EveryTime), "fire");
                     }
                     else
                     {
                         gvars.ItemsPlayers[id].Weapon.Fire();
                         gvars.ItemsPlayers[id].Weapon.reloaded = false;
-                        gvars.ItemsPlayers[id].AddAction(new ItemAction(() =>
-                        {
-                            gvars.ItemsPlayers[id].Weapon.reloaded = true;
-
-                        }, gvars.ItemsPlayers[id].Weapon.reloadTime, ItemAction.ExecutionType.OnlyFirstTime), "fire");
+                        gvars.ItemsPlayers[id].AddAction(new ItemAction("fire2", gvars.ItemsPlayers[id].Weapon.reloadTime, ItemAction.ExecutionType.OnlyFirstTime), "fire");
                     }
-                    
                 }
                 else
                 {
-                    if (!gvars.ItemsPlayers[id].ChangeRepeatTime(gvars.ItemsPlayers[id].Weapon.reloadTime, "fire"))
-                    {
-                        gvars.ItemsPlayers[id].AddAction(new ItemAction(() =>
-                        {
-                            gvars.ItemsPlayers[id].Weapon.reloaded = true;
-
-                        }, gvars.ItemsPlayers[id].Weapon.reloadTime, ItemAction.ExecutionType.OnlyFirstTime), "fire");
-                    }
+                    gvars.ItemsPlayers[id].Weapon.reloaded = true;
                 }
-
-
-
             },
             (id, gvars) =>
             {
-                gvars.ItemsPlayers[id].ChangeRepeatTime(0, "fire");
+                gvars.ItemsPlayers[id].Weapon.reloaded = false;
             }));
             //Movements
             actions.Add(PlayerActionsEnum.moveUp, new KeyCommand((id, gvars) =>
             {
-                gvars.ItemsPlayers[id].AddAction(new ItemAction(() =>
-                {
-                    (gvars.ItemsPlayers[id] as Player).UpdateControlledMovement("up");
-
-                }, 1), "up");
+                gvars.ItemsPlayers[id].AddAction(new ItemAction("up", 1));
             },
             (id, gvars) =>
             {
@@ -137,12 +105,7 @@ namespace Fanior.Shared
 
             actions.Add(PlayerActionsEnum.moveDown, new KeyCommand((id, gvars) =>
             {
-                gvars.ItemsPlayers[id].AddAction(new ItemAction(() =>
-                {
-                    (gvars.ItemsPlayers[id] as Player).UpdateControlledMovement("down");
-
-                }, 1), "down");
-
+                gvars.ItemsPlayers[id].AddAction(new ItemAction("down", 1));
             },
             (id, gvars) =>
             {
@@ -151,8 +114,7 @@ namespace Fanior.Shared
 
             actions.Add(PlayerActionsEnum.moveRight, new KeyCommand((id, gvars) =>
             {
-                gvars.ItemsPlayers[id].AddAction(new ItemAction(() => { (gvars.ItemsPlayers[id] as Player).UpdateControlledMovement("right"); }, 1), "right");
-
+                gvars.ItemsPlayers[id].AddAction(new ItemAction("right", 1));
             },
             (id, gvars) =>
             {
@@ -161,8 +123,7 @@ namespace Fanior.Shared
 
             actions.Add(PlayerActionsEnum.moveLeft, new KeyCommand((id, gvars) =>
             {
-                gvars.ItemsPlayers[id].AddAction(new ItemAction(() => { (gvars.ItemsPlayers[id] as Player).UpdateControlledMovement("left"); }, 1), "left");
-
+                gvars.ItemsPlayers[id].AddAction(new ItemAction("left", 1));
             },
             (id, gvars) =>
             {

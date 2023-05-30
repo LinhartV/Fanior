@@ -59,10 +59,10 @@ namespace Fanior.Server
                     var hub = provider.GetService<IHubContext<Fanior.Server.Hubs.MyHub>>();
                     var game = provider.GetService<GameControl>();
 
-                    lock (game.actionLock)
-                    {
-                        Frame(game, hub);
-                    }
+                    
+                    Frame(game, hub);
+                    
+
                 }
             }
             catch (Exception e)
@@ -84,7 +84,7 @@ namespace Fanior.Server
                 foreach (Gvars gvars in game.games.Values)
                 {
 
-                    //ToolsGame.ProceedFrame(gvars, now);
+                    ToolsGame.ProceedFrame(gvars, now);
 
                     gvars.messageId++;
                 }
@@ -106,9 +106,9 @@ namespace Fanior.Server
             {
                 try
                 {
-                    hub?.Clients.Group(gvars.GameId).SendAsync("ExecuteList", game.sw.ElapsedMilliseconds, gvars.messageId, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings));
-                    gvars.PlayerActions.Clear();
-                    //hub?.Clients.Group(gvars.GameId).SendAsync("DelegateListening", () => { Console.WriteLine("ahoj"); });
+                    hub?.Clients.Group(gvars.GameId).SendAsync("ExecuteList", game.sw.ElapsedMilliseconds, gvars.messageId, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings), gvars.Angles);
+                    gvars.PlayerActions.Clear(); 
+                    gvars.Angles.Clear();
 
                 }
                 catch (Exception e)

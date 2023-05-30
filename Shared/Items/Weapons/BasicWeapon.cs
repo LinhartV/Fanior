@@ -19,7 +19,7 @@ namespace Fanior.Shared
         {
             try
             {
-                new BasicShot(this.gvars, gvars.Items[characterId].X, gvars.Items[characterId].Y, new Shape("blue", "darkblue", "red", "darkred", 2, 10, 10, Shape.GeometryEnum.circle), new Mask(10, 10, Shape.GeometryEnum.circle), this.shotSpeed, damage, characterId, (gvars.Items[characterId] as Character).Angle, 0, 0.2, 10);
+                new BasicShot(this.gvars, gvars.Items[characterId].X, gvars.Items[characterId].Y, new Shape("blue", "darkblue", "red", "darkred", 2, 40, 40, Shape.GeometryEnum.circle), new Mask(40, 40, Shape.GeometryEnum.circle), this.shotSpeed, damage, characterId, (gvars.Items[characterId] as Character).Angle, 0, 0.2, 1000);
 
             }
             catch (Exception e)
