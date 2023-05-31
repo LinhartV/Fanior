@@ -8,13 +8,14 @@ using System.Xml.Linq;
 using Newtonsoft.Json;
 using System.Reflection;
 using System;
+using System.Threading;
+using System.Diagnostics.Metrics;
 
 namespace Fanior.Server.Hubs
 {
     public class MyHub : Hub
     {
         private GameControl gameControl;
-        
 
         public MyHub(GameControl game)
         {
@@ -33,7 +34,7 @@ namespace Fanior.Server.Hubs
                     await NewPlayer(gameControl.AddPlayer(gameId));
             }
         }
-        
+
         public async Task NewPlayer(Gvars gvars)
         {
             try
@@ -49,33 +50,42 @@ namespace Fanior.Server.Hubs
             {
 
             }
-           
+
         }
-        
         /// <summary>
         /// Listens to incoming messages from clients, which are then proceeded in the Frame. It also joins actions of this player in the list of his actions, which are subsequently sent to every usery (done every frame).
         /// </summary>
-        public void ExecuteList(string actionMethodNamesJson, string gameId, int itemId, double angle)
+        public void ExecuteList(string actionMethodNamesJson, string gameId, int itemId, double angle, int messageId)
         {
-            /*if (gameControl.games[gameId].Angles.ContainsKey(itemId))
+            if (gameControl.clientMessageId + 1 != messageId)
             {
-                gameControl.games[gameId].Angles[itemId] = angle;
+
             }
-            else
+            gameControl.clientMessageId = messageId;
+            lock (gameControl.actionLock)
             {
-                gameControl.games[gameId].Angles.Add(itemId, angle);
+                gameControl.mre.WaitOne();
+
+                if (gameControl.games[gameId].Angles.ContainsKey(itemId))
+                {
+                    gameControl.games[gameId].Angles[itemId] = angle;
+                }
+                else
+                {
+                    gameControl.games[gameId].Angles.Add(itemId, angle);
+                }
+                gameControl.games[gameId].ItemsPlayers[itemId].Angle = angle;
+                List<(PlayerAction.PlayerActionsEnum, bool)> actionMethodNames = JsonConvert.DeserializeObject<List<(PlayerAction.PlayerActionsEnum, bool)>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
+                if (gameControl.games[gameId].PlayerActions.ContainsKey(itemId))
+                {
+                    gameControl.games[gameId].PlayerActions[itemId].AddRange(actionMethodNames);
+                }
+                else
+                {
+                    gameControl.games[gameId].PlayerActions.Add(itemId, actionMethodNames);
+                }
             }
-            gameControl.games[gameId].ItemsPlayers[itemId].Angle = angle;*/
-            List<(PlayerAction.PlayerActionsEnum, bool)> actionMethodNames = JsonConvert.DeserializeObject<List<(PlayerAction.PlayerActionsEnum, bool)>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
-            if (gameControl.games[gameId].PlayerActions.ContainsKey(itemId))
-            {
-                gameControl.games[gameId].PlayerActions[itemId].AddRange(actionMethodNames);
-            }
-            else
-            {
-                gameControl.games[gameId].PlayerActions.Add(itemId, actionMethodNames);
-            }
-            
+
         }
         /// <summary>
         /// Sends all GVars to caller.

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Fanior.Server.Classes
 {
@@ -11,12 +12,14 @@ namespace Fanior.Server.Classes
     /// </summary>
     public class GameControl
     {
+        public int clientMessageId = -1;
         public readonly object actionLock = new object();
         //number of milliseconds from the launch of server
         public Stopwatch sw = new Stopwatch();
         //all games by string (url)
         public Dictionary<string, Gvars> games = new Dictionary<string, Gvars>();
-       
+        public ManualResetEvent mre = new ManualResetEvent(false);
+
         public GameControl()
         {
             sw.Start();

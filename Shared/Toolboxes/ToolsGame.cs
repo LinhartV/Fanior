@@ -32,14 +32,15 @@ namespace Fanior.Shared
         public static void ProceedFrame(Gvars gvars, long now)
         {
             ProcedeGameAlgorithms(gvars);
-            ProcedePlayerActions(gvars);
             try
             {
+                ProcedePlayerActions(gvars);
                 ProcedeItemActions(now, gvars);
             }
             catch (Exception e)
             {
-                 throw;
+                 
+
             }
             gvars.ExecuteActions(now);
         }

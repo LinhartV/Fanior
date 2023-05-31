@@ -41,11 +41,10 @@ namespace Fanior.Server
                 while (stoppingToken.IsCancellationRequested == false)
                 {
                     await DoWork();
-                    await Task.Delay(1000 / 60, stoppingToken);
+                    await Task.Delay(1000 / 100, stoppingToken);
                 }
             });
         }
-
         /// <summary>
         /// Get current hub and use it in Frame
         /// </summary>
@@ -58,10 +57,12 @@ namespace Fanior.Server
                     var provider = scope.ServiceProvider;
                     var hub = provider.GetService<IHubContext<Fanior.Server.Hubs.MyHub>>();
                     var game = provider.GetService<GameControl>();
-
-                    
-                    Frame(game, hub);
-                    
+                    lock (game.actionLock)
+                    {
+                        game.mre.Reset();
+                        Frame(game, hub);
+                        game.mre.Set();
+                    }
 
                 }
             }
@@ -107,7 +108,7 @@ namespace Fanior.Server
                 try
                 {
                     hub?.Clients.Group(gvars.GameId).SendAsync("ExecuteList", game.sw.ElapsedMilliseconds, gvars.messageId, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings), gvars.Angles);
-                    gvars.PlayerActions.Clear(); 
+                    gvars.PlayerActions.Clear();
                     gvars.Angles.Clear();
 
                 }

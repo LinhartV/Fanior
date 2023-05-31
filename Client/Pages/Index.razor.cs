@@ -38,7 +38,7 @@ namespace Fanior.Client.Pages
         public HubConnection hubConnection;
         long currentMessageId = 0;
         public List<(PlayerAction.PlayerActionsEnum, bool)> myActions = new();
-
+        private ManualResetEvent mre = new ManualResetEvent(false);
         private DotNetObjectReference<Index> selfReference;
 
         #endregion
@@ -59,7 +59,6 @@ namespace Fanior.Client.Pages
         }
         #region Input control
 
-
         public void DefaultAssingOfKeys()
         {
             //set keys here
@@ -68,10 +67,6 @@ namespace Fanior.Client.Pages
             KeyController.AddKey("d", new RegisteredKey(PlayerAction.PlayerActionsEnum.moveRight, myActions));
             KeyController.AddKey("a", new RegisteredKey(PlayerAction.PlayerActionsEnum.moveLeft, myActions));
             KeyController.AddKey(" ", new RegisteredKey(PlayerAction.PlayerActionsEnum.fire, myActions));
-            /*KeyController.AddKey("s", new RegisteredKey(null, null, PlayerAction.MoveDown, SendKeyToServer));
-            KeyController.AddKey("d", new RegisteredKey(null, null, PlayerAction.MoveRight, SendKeyToServer));
-            KeyController.AddKey("a", new RegisteredKey(null, null, PlayerAction.MoveLeft, SendKeyToServer));*/
-
         }
 
 
@@ -82,7 +77,7 @@ namespace Fanior.Client.Pages
         public void HandleMouseMove(int x, int y)
         {
             this.player.Angle = ToolsMath.GetAngleFromLengts(x - width / 2, height / 2 - y);
-            counter = (int)(player.Angle * 180 / Math.PI);
+            //counter = (int)(player.Angle * 180 / Math.PI);
         }
         [JSInvokable]
         public void HandleKeyDown(string keycode)
@@ -91,7 +86,6 @@ namespace Fanior.Client.Pages
             if (!pressedKeys.Contains(keycode))
             {
                 KeyController.GetRegisteredKey(keycode)?.KeyDown();
-                
                 pressedKeys.Add(keycode);
             }
         }
@@ -121,31 +115,39 @@ namespace Fanior.Client.Pages
                 while (stoppingToken.IsCancellationRequested == false)
                 {
                     await Frame();
-                    await Task.Delay(1000 / 60, stoppingToken);
+                    await Task.Delay(1000 / 40, stoppingToken);
                 }
             });
         }
-
+        int sendMessageId = 0;
         private async Task Frame()
         {
             string json;
             try
             {
-                sw.Start();
-                //serialization of actions
-                json = JsonConvert.SerializeObject(myActions, ToolsSystem.jsonSerializerSettings);
-                //send serialized actions, game id, item id and stuff that is sent every frame
-                hubConnection.SendAsync("ExecuteList", json, gvars.GameId, this.id, player.Angle);
-                myActions.Clear();
-                ToolsGame.ProceedFrame(gvars, now);
-                gvars.PlayerActions.Clear();
-                StateHasChanged();
-                sw.Stop();
-                if (sw.ElapsedMilliseconds > 0)
+                //čekat uprostřed framu - změnit lock na semafor
+                lock (frameLock)
                 {
-                    Console.WriteLine(sw.ElapsedMilliseconds);
+                    mre.Reset();
+                    sw.Start();
+                    //serialization of actions
+                    json = JsonConvert.SerializeObject(myActions, ToolsSystem.jsonSerializerSettings);
+                    //send serialized actions, game id, item id and angle of player that is sent every frame
+                    Task.Run(() => hubConnection.SendAsync("ExecuteList", json, gvars.GameId, this.id, player.Angle, sendMessageId));
+                    sendMessageId++;
+                    myActions.Clear();
+                    ToolsGame.ProceedFrame(gvars, now);
+                    gvars.PlayerActions.Clear();
+                    StateHasChanged();
+                    sw.Stop();
+                    if (sw.ElapsedMilliseconds > 0)
+                    {
+                        //Console.WriteLine(sw.ElapsedMilliseconds);
+                    }
+                    sw.Reset();
+                    mre.Set();
+                    //counter=0;
                 }
-                sw.Reset();
             }
             catch (Exception e)
             {
@@ -153,8 +155,55 @@ namespace Fanior.Client.Pages
             }
 
         }
+
+        private async Task ExecuteList(string actionMethodNamesJson, long messageId, Dictionary<int, double> angles, long now)
+        {
+            //await JS.InvokeVoidAsync("Alert", "just");
+            //mre.WaitOne();
+            counter += 1;
+            lock (actionLock)
+            {
+                if (currentMessageId + 1 != messageId)
+                {
+                    Task.Run(async () =>
+                    {
+                        counter = -1;
+                        await Task.Delay(500);
+                        counter = 0;
+                    });
+                }
+                this.currentMessageId = messageId;
+                this.now = now;
+                Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>> actionMethodNames = JsonConvert.DeserializeObject<Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
+
+                foreach (int itemId in actionMethodNames.Keys)
+                {
+                    if (gvars.PlayerActions.ContainsKey(itemId))
+                    {
+                        gvars.PlayerActions[itemId].AddRange(actionMethodNames[itemId]);
+                    }
+                    else
+                        gvars.PlayerActions.Add(itemId, actionMethodNames[itemId]);
+                    if (actionMethodNames[itemId][0].Item1 == PlayerAction.PlayerActionsEnum.fire)
+                    {
+
+                    }
+                }
+                foreach (var id in angles.Keys)
+                {
+                    if (id != this.id)
+                    {
+                        gvars.ItemsPlayers[id].Angle = angles[id];
+                    }
+                }
+
+            }
+        }
+
         #endregion
         #region Set connection
+        private readonly object actionLock = new object();
+        private readonly object frameLock = new object();
         bool firstConnect = true;
         Stopwatch sw = new Stopwatch();
         public async Task SetConnection()
@@ -170,32 +219,19 @@ namespace Fanior.Client.Pages
             //Actions to be proceeded that server sent to client 
             //Dictionary of list of actions assigned to object id along with information, if it's keydown or keyup (true = keydown).
             //+messageId to check if connection was lost.
-            hubConnection.On<long, long, string, Dictionary<int, double>>("ExecuteList", (now, messageId, actionMethodNamesJson, angles) =>
+            hubConnection.On<long, long, string, Dictionary<int, double>>("ExecuteList", async (now, messageId, actionMethodNamesJson, angles) =>
             {
-                if (currentMessageId + 1 != messageId)
+                try
                 {
-                    JS.InvokeVoidAsync("Alert", "POZOR");
-                }
-                this.currentMessageId = messageId;
-                this.now = now;
-                Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>> actionMethodNames = JsonConvert.DeserializeObject<Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
+                    ExecuteList(actionMethodNamesJson, messageId, angles, now);
+                    StateHasChanged();
 
-                foreach (int itemId in actionMethodNames.Keys)
+                }
+                catch (Exception e)
                 {
-                    gvars.PlayerActions.Add(itemId, actionMethodNames[itemId]);
-                    if (actionMethodNames[itemId][0].Item1 == PlayerAction.PlayerActionsEnum.fire)
-                    {
 
-                    }
+                    throw;
                 }
-                 foreach (var id in angles.Keys)
-                {
-                    if (id != this.id)
-                    {
-                        gvars.ItemsPlayers[id].Angle = angles[id];
-                    }
-                }
-                
 
             });
             //this player joined game
@@ -218,7 +254,7 @@ namespace Fanior.Client.Pages
                 }
             });
 
-            
+
 
             //on login and when connection was lost
             hubConnection.On<string>("ReceiveGvars", (gvarsJson) =>
@@ -227,8 +263,13 @@ namespace Fanior.Client.Pages
             });
             try
             {
-                await hubConnection.StartAsync();
-                await hubConnection.SendAsync("OnLogin", "@@@");
+                Task.Run(async () =>
+                {
+                    await hubConnection.StartAsync();
+                    await hubConnection.SendAsync("OnLogin", "@@@");
+                });
+
+
 
             }
             catch (Exception e)
@@ -238,6 +279,7 @@ namespace Fanior.Client.Pages
             info = "1";
             await JS.InvokeVoidAsync("SetFocus", mySvg);
         }
+
         private void ReceiveGvars(string gvarsJson)
         {
             try
