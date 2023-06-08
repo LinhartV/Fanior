@@ -24,7 +24,8 @@ namespace Fanior.Client.Pages
         //id of this connection
         int id = 0;
         //just for testing
-        int counter = 0;
+        public int counter = 0;
+        public int counter2 = 0;
         private string info = "0";
         //this player
         private Player player;
@@ -39,9 +40,14 @@ namespace Fanior.Client.Pages
         long currentMessageId = 0;
         public List<(PlayerAction.PlayerActionsEnum, bool)> myActions = new();
         private ManualResetEvent mre = new ManualResetEvent(false);
+        private ManualResetEvent mre2 = new ManualResetEvent(false);
         private DotNetObjectReference<Index> selfReference;
 
         #endregion
+
+
+
+
         /// <summary>
         /// Method containing all stuff that are to be proceeded at the start of the load up.
         /// </summary>
@@ -53,8 +59,6 @@ namespace Fanior.Client.Pages
             DefaultAssingOfKeys();
             PlayerAction.SetupActions();
             LambdaActions.setupLambdaActions();
-
-
             await InvokeAsync(() => this.StateHasChanged());
         }
         #region Input control
@@ -76,7 +80,10 @@ namespace Fanior.Client.Pages
         [JSInvokable]
         public void HandleMouseMove(int x, int y)
         {
-            this.player.Angle = ToolsMath.GetAngleFromLengts(x - width / 2, height / 2 - y);
+            if (player != null)
+            {
+                this.player.Angle = ToolsMath.GetAngleFromLengts(x - width / 2, height / 2 - y);
+            }
             //counter = (int)(player.Angle * 180 / Math.PI);
         }
         [JSInvokable]
@@ -114,80 +121,74 @@ namespace Fanior.Client.Pages
             {
                 while (stoppingToken.IsCancellationRequested == false)
                 {
-                    await Frame();
-                    await Task.Delay(1000 / 40, stoppingToken);
+                    //sw.Start();
+                    Frame();
+                    await Task.Delay((1), stoppingToken);
+                    /*sw.Stop();
+                    Console.WriteLine(sw.ElapsedMilliseconds);
+                    sw.Reset();*/
                 }
             });
         }
         int sendMessageId = 0;
         private async Task Frame()
         {
-            string json;
             try
             {
-                //čekat uprostřed framu - změnit lock na semafor
+                
+                //serialization of actions
+                //send serialized actions, game id, item id and angle of player that is sent every frame
+                
+                await Task.Run(() => hubConnection.SendAsync("ExecuteList", JsonConvert.SerializeObject(myActions, ToolsSystem.jsonSerializerSettings), gvars.GameId, this.id, player.Angle, sendMessageId));
+                sendMessageId++;
+                myActions.Clear();
                 lock (frameLock)
                 {
-                    mre.Reset();
-                    sw.Start();
-                    //serialization of actions
-                    json = JsonConvert.SerializeObject(myActions, ToolsSystem.jsonSerializerSettings);
-                    //send serialized actions, game id, item id and angle of player that is sent every frame
-                    Task.Run(() => hubConnection.SendAsync("ExecuteList", json, gvars.GameId, this.id, player.Angle, sendMessageId));
-                    sendMessageId++;
-                    myActions.Clear();
                     ToolsGame.ProceedFrame(gvars, now);
                     gvars.PlayerActions.Clear();
-                    StateHasChanged();
-                    sw.Stop();
-                    if (sw.ElapsedMilliseconds > 0)
-                    {
-                        //Console.WriteLine(sw.ElapsedMilliseconds);
-                    }
-                    sw.Reset();
-                    mre.Set();
-                    //counter=0;
                 }
+                StateHasChanged();
             }
             catch (Exception e)
             {
                 throw;
             }
-
         }
-
-        private async Task ExecuteList(string actionMethodNamesJson, long messageId, Dictionary<int, double> angles, long now)
+        Stopwatch sw2 = new Stopwatch();
+        private void ExecuteList(string actionMethodNamesJson, long messageId, Dictionary<int, double> angles, long now)
         {
             //await JS.InvokeVoidAsync("Alert", "just");
-            //mre.WaitOne();
-            counter += 1;
-            lock (actionLock)
+            /*if (counter == 0)
             {
-                if (currentMessageId + 1 != messageId)
-                {
-                    Task.Run(async () =>
-                    {
-                        counter = -1;
-                        await Task.Delay(500);
-                        counter = 0;
-                    });
-                }
-                this.currentMessageId = messageId;
+                counter = (int)messageId;
+            }
+            if (messageId != counter)
+            {
+                counter2++;
+            }
+            counter += 1;*/
+            if (player == null)
+            {
+                return;
+            }
+            try
+            {
                 this.now = now;
                 Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>> actionMethodNames = JsonConvert.DeserializeObject<Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
-
+                    
                 foreach (int itemId in actionMethodNames.Keys)
                 {
+                    if (actionMethodNames[itemId].Count > 0)
+                    {
+                        Console.WriteLine(actionMethodNames[itemId][0].Item1.ToString());
+                        //counter += 1;
+                    }
                     if (gvars.PlayerActions.ContainsKey(itemId))
                     {
                         gvars.PlayerActions[itemId].AddRange(actionMethodNames[itemId]);
                     }
                     else
                         gvars.PlayerActions.Add(itemId, actionMethodNames[itemId]);
-                    if (actionMethodNames[itemId][0].Item1 == PlayerAction.PlayerActionsEnum.fire)
-                    {
-
-                    }
                 }
                 foreach (var id in angles.Keys)
                 {
@@ -196,6 +197,10 @@ namespace Fanior.Client.Pages
                         gvars.ItemsPlayers[id].Angle = angles[id];
                     }
                 }
+                
+            }
+            catch (Exception ex)
+            {
 
             }
         }
@@ -211,21 +216,24 @@ namespace Fanior.Client.Pages
             hubConnection = new HubConnectionBuilder()
            .WithUrl(NavigationManager.ToAbsoluteUri("/myhub"))
            .Build();
-            hubConnection.On<int>("ReceiveMessage", (str) =>
+            hubConnection.On<String>("ReceiveMessage", (str) =>
             {
                 // info = str.ToString();
+                counter++;
                 StateHasChanged();
             });
             //Actions to be proceeded that server sent to client 
             //Dictionary of list of actions assigned to object id along with information, if it's keydown or keyup (true = keydown).
             //+messageId to check if connection was lost.
-            hubConnection.On<long, long, string, Dictionary<int, double>>("ExecuteList", async (now, messageId, actionMethodNamesJson, angles) =>
+            hubConnection.On<long, long, string, Dictionary<int, double>>("ExecuteList", (now, messageId, actionMethodNamesJson, angles) =>
             {
                 try
                 {
+                    //sw2.Start();
                     ExecuteList(actionMethodNamesJson, messageId, angles, now);
-                    StateHasChanged();
-
+                    /*sw2.Stop();
+                    Console.WriteLine("ExecuteList: "+sw2.ElapsedMilliseconds);
+                    sw2.Reset();*/
                 }
                 catch (Exception e)
                 {
@@ -243,15 +251,26 @@ namespace Fanior.Client.Pages
                     this.now = now;
                     JoinGame(idReceived);
                     ReceiveGvars(gvarsJson);
+                    foreach (var item in gvars.Items.Values) 
+                    {
+                        item.SetItemFromClient(gvars);
+                    }
                 }
             });
             //new player joined game
-            hubConnection.On<string, int>("PlayerJoinGame", (playerJson, idConnectedPlayer) =>
+            hubConnection.On<string, int>("PlayerJoinGame", async (playerJson, idConnectedPlayer) =>
             {
+                Console.Clear();
+                Console.WriteLine("New player");
+                sw2.Start();
                 if (id != idConnectedPlayer)
                 {
                     ToolsSystem.DeserializePlayer(playerJson, gvars);
+                    await Task.Delay(1);
                 }
+                sw2.Stop();
+                Console.WriteLine("ExecuteList: " + sw2.ElapsedMilliseconds);
+                sw2.Reset();
             });
 
 
@@ -263,14 +282,8 @@ namespace Fanior.Client.Pages
             });
             try
             {
-                Task.Run(async () =>
-                {
-                    await hubConnection.StartAsync();
-                    await hubConnection.SendAsync("OnLogin", "@@@");
-                });
-
-
-
+                await hubConnection.StartAsync();
+                await hubConnection.SendAsync("OnLogin", "@@@");
             }
             catch (Exception e)
             {
@@ -325,6 +338,32 @@ namespace Fanior.Client.Pages
         }
         #endregion
 
+        /*List<IWorker> workers = new List<IWorker>();
+        List<IWorkerBackgroundService<TaskService>> backgroundServices =
+                new List<IWorkerBackgroundService<TaskService>>();
+        public async Task Try()
+        {
+            try
+            {
+                var worker = await workerFactory.CreateAsync();
+                workers.Add(await workerFactory.CreateAsync());
+                var service = await worker.CreateBackgroundServiceAsync<TaskService>();
+                backgroundServices.Add(service);
+                await service.RegisterEventListenerAsync(nameof(TaskService.Num),
+                    (object s, Return eventInfo) =>
+                    {
+                        counter = eventInfo.Progress;
+                        StateHasChanged();
+                    });
+                Task.Run(()=>service.RunAsync(s => s.TryMethod(5)));
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+            
+        }*/
 
         #region Other
         async Task GetDimensions()

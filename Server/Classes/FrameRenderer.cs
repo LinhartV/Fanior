@@ -14,6 +14,7 @@ using Fanior.Shared;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using Microsoft.Extensions.Options;
+using System.Reflection.Metadata;
 
 
 namespace Fanior.Server
@@ -40,11 +41,12 @@ namespace Fanior.Server
             {
                 while (stoppingToken.IsCancellationRequested == false)
                 {
-                    await DoWork();
-                    await Task.Delay(1000 / 100, stoppingToken);
+                    DoWork();
+                    await Task.Delay(1000 / 60, stoppingToken);
                 }
             });
         }
+
         /// <summary>
         /// Get current hub and use it in Frame
         /// </summary>
@@ -57,11 +59,24 @@ namespace Fanior.Server
                     var provider = scope.ServiceProvider;
                     var hub = provider.GetService<IHubContext<Fanior.Server.Hubs.MyHub>>();
                     var game = provider.GetService<GameControl>();
+
+                    lock (game.tempListsLock)
+                    {
+                        foreach (var angleDict in game.tempAngles)
+                        {
+                            game.games[angleDict.Key].Angles = new Dictionary<int, double>(angleDict.Value);
+                            angleDict.Value.Clear();
+                        }
+                        foreach (var playerDict in game.tempPlayerActions)
+                        {
+                            game.games[playerDict.Key].PlayerActions = new Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>(playerDict.Value);
+                            playerDict.Value.Clear();
+                        }
+                    }
+
                     lock (game.actionLock)
                     {
-                        game.mre.Reset();
                         Frame(game, hub);
-                        game.mre.Set();
                     }
 
                 }
@@ -85,7 +100,7 @@ namespace Fanior.Server
                 foreach (Gvars gvars in game.games.Values)
                 {
 
-                    ToolsGame.ProceedFrame(gvars, now);
+                    //ToolsGame.ProceedFrame(gvars, now);
 
                     gvars.messageId++;
                 }
@@ -106,11 +121,11 @@ namespace Fanior.Server
             foreach (Gvars gvars in game.games.Values)
             {
                 try
-                {
-                    hub?.Clients.Group(gvars.GameId).SendAsync("ExecuteList", game.sw.ElapsedMilliseconds, gvars.messageId, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings), gvars.Angles);
+                {//Group(gvars.GameId)
+                    hub?.Clients.All.SendAsync("ExecuteList", game.sw.ElapsedMilliseconds, gvars.messageId, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings), gvars.Angles);
+                    
                     gvars.PlayerActions.Clear();
                     gvars.Angles.Clear();
-
                 }
                 catch (Exception e)
                 {

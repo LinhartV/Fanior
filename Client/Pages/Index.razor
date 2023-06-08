@@ -6,10 +6,9 @@
 @implements IDisposable
 @if ((id == -1 || player == null))
 {
-    <h2>@info</h2>
     <button @onclick=Start>"Start connection"</button>
 }
-<h2>@counter</h2>
+<h2>@info</h2>
 <svg x=0 y=0 width="@width" height="@(height)" tabindex="-1" @ref="mySvg">
 
     @if (id != -1 && player != null)
@@ -64,6 +63,7 @@
 
                     var centerX = (item.X - Math.Round(player.X) + width / 2).ToString().Replace(',', '.');
                     var centerY = (item.Y - Math.Round(player.Y) + height / 2).ToString().Replace(',', '.');
+                    
 
 
                     if (item is Character c)
@@ -83,12 +83,18 @@
                     {
                         <circle cx=@(centerX) cy=@(centerY) r=@(item.Shape.ImageHeight / 2) stroke=@strokeColor stroke-width=@(item.Shape.StrokeWidth/2) fill=@fillColor />
                     }
-
+                    
 
                 }
                 else if (item.Shape.Geometry == Shape.GeometryEnum.rectange)
                 {
                     <rect x=@item.X y=@item.Y width=@item.Shape.ImageWidth height=@item.Shape.ImageHeight stroke=@strokeColor fill=@fillColor stroke-width=@item.Shape.StrokeWidth></rect>
+                }
+                if (item is ILived)
+                {
+                    var centerX = (item.X - Math.Round(player.X) - item.Shape.ImageWidth/2 + width / 2).ToString().Replace(',', '.');
+                    var centerY = (item.Y - Math.Round(player.Y) + item.Shape.ImageHeight / 2 + height / 2 + item.Shape.ImageWidth / 10).ToString().Replace(',', '.');
+                    <rect x=@(centerX) y=@(centerY) width=@item.Shape.ImageWidth height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="lightgreen"></rect>
                 }
             }
 

@@ -14,12 +14,18 @@ namespace Fanior.Server.Classes
     {
         public int clientMessageId = -1;
         public readonly object actionLock = new object();
+        public readonly object tempListsLock = new object();
         //number of milliseconds from the launch of server
         public Stopwatch sw = new Stopwatch();
         //all games by string (url)
         public Dictionary<string, Gvars> games = new Dictionary<string, Gvars>();
         public ManualResetEvent mre = new ManualResetEvent(false);
-
+        //gvarsId, ItemId, angle
+        public Dictionary<string, Dictionary<int, double>> tempAngles = new();
+        //gvarsId, ItemId, (action, pressed/released)
+        public Dictionary<string, Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>> tempPlayerActions = new();
+        //control
+        public int controlCount;
         public GameControl()
         {
             sw.Start();
@@ -48,6 +54,8 @@ namespace Fanior.Server.Classes
                     return gvars;
             }
             games["someId"] = new Gvars("someId", sw.ElapsedMilliseconds);
+            tempAngles.Add("someId", new Dictionary<int, double>());
+            tempPlayerActions.Add("someId", new Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>());
             return games["someId"];
         }
     }

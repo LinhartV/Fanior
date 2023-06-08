@@ -9,16 +9,13 @@ namespace Fanior.Shared
 {
     public abstract class Weapon
     {
-        public Weapon(Gvars gvars, bool autoFire, int reloadTime, int shotSpeed, double damage)
+        public Weapon(bool autoFire, int reloadTime, int shotSpeed, double damage)
         {
             this.reloadTime = reloadTime;
             this.shotSpeed = shotSpeed;
             this.damage = damage;
             this.autoFire = autoFire;
-            this.gvars = gvars;
         }
-        [JsonProperty]
-        protected Gvars gvars;
         public bool reloaded = true;
         public int reloadTime;
         [JsonProperty]
@@ -28,11 +25,11 @@ namespace Fanior.Shared
         public int characterId;
         public bool autoFire;
 
-        public virtual void Fire()
+        public virtual void Fire(Gvars gvars)
         {
-            CreateShot();
+            CreateShot(gvars);
         }
-        protected abstract void CreateShot();
+        protected abstract void CreateShot(Gvars gvars);
 
     }
 }

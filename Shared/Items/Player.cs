@@ -46,7 +46,7 @@ namespace Fanior.Shared
             }
         }
 
-        public override void Death()
+        public override void Death(Gvars gvars)
         {
             ToolsGame.EndGame();
         }

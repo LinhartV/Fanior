@@ -32,7 +32,7 @@ namespace Fanior.Shared
                 }
                 else
                 {
-                    character.Weapon.Fire();
+                    character.Weapon.Fire(gvars);
                 }
 
             });

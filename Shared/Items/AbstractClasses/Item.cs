@@ -37,7 +37,7 @@ namespace Fanior.Shared
         /// <summary>
         /// Actions to be executed in the current frame. Is action is supposed to repeat, it will be added again to the list.
         /// </summary>
-        public void ExecuteActions(long now, Gvars gvars)
+        public void ExecuteActions(long now, Gvars gvars, bool procedeEveryFrameActions)
         {
             foreach (var action in actionsEveryFrame.Values)
             {

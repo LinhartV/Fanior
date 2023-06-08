@@ -10,6 +10,7 @@ using System.Reflection;
 using System;
 using System.Threading;
 using System.Diagnostics.Metrics;
+using System.Reflection.Metadata;
 
 namespace Fanior.Server.Hubs
 {
@@ -57,35 +58,36 @@ namespace Fanior.Server.Hubs
         /// </summary>
         public void ExecuteList(string actionMethodNamesJson, string gameId, int itemId, double angle, int messageId)
         {
-            if (gameControl.clientMessageId + 1 != messageId)
-            {
 
-            }
             gameControl.clientMessageId = messageId;
-            lock (gameControl.actionLock)
-            {
-                gameControl.mre.WaitOne();
+            
+            Task.Run(async () => {AddActionsToList(gameId, itemId, angle, actionMethodNamesJson); });
+        }
 
-                if (gameControl.games[gameId].Angles.ContainsKey(itemId))
+        private async Task AddActionsToList(string gameId, int itemId, double angle, string actionMethodNamesJson)
+        {
+            lock (gameControl.tempListsLock)
+            {
+                if (gameControl.tempAngles[gameId].ContainsKey(itemId))
                 {
-                    gameControl.games[gameId].Angles[itemId] = angle;
+                    gameControl.tempAngles[gameId][itemId] = angle;
                 }
                 else
                 {
-                    gameControl.games[gameId].Angles.Add(itemId, angle);
+                    gameControl.tempAngles[gameId].Add(itemId, angle);
                 }
                 gameControl.games[gameId].ItemsPlayers[itemId].Angle = angle;
                 List<(PlayerAction.PlayerActionsEnum, bool)> actionMethodNames = JsonConvert.DeserializeObject<List<(PlayerAction.PlayerActionsEnum, bool)>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
-                if (gameControl.games[gameId].PlayerActions.ContainsKey(itemId))
+                
+                if (gameControl.tempPlayerActions[gameId].ContainsKey(itemId))
                 {
-                    gameControl.games[gameId].PlayerActions[itemId].AddRange(actionMethodNames);
+                    gameControl.tempPlayerActions[gameId][itemId].AddRange(actionMethodNames);
                 }
                 else
                 {
-                    gameControl.games[gameId].PlayerActions.Add(itemId, actionMethodNames);
+                    gameControl.tempPlayerActions[gameId].Add(itemId, actionMethodNames);
                 }
             }
-
         }
         /// <summary>
         /// Sends all GVars to caller.

@@ -79,7 +79,7 @@ namespace Fanior.Shared
                     }
                     else
                     {
-                        gvars.ItemsPlayers[id].Weapon.Fire();
+                        gvars.ItemsPlayers[id].Weapon.Fire(gvars);
                         gvars.ItemsPlayers[id].Weapon.reloaded = false;
                         gvars.ItemsPlayers[id].AddAction(new ItemAction("fire2", gvars.ItemsPlayers[id].Weapon.reloadTime, ItemAction.ExecutionType.OnlyFirstTime), "fire");
                     }
