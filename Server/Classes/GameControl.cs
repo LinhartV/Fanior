@@ -22,7 +22,7 @@ namespace Fanior.Server.Classes
         public ManualResetEvent mre = new ManualResetEvent(false);
         //gvarsId, ItemId, angle
         public Dictionary<string, Dictionary<int, double>> tempAngles = new();
-        //gvarsId, ItemId, (action, pressed/released)
+        //gvarsId, ItemId, (action, pressed/released)   
         public Dictionary<string, Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>> tempPlayerActions = new();
         //control
         public int controlCount;

@@ -9,18 +9,29 @@ namespace Fanior.Shared
 {
     public class ConstantMovement : IMovement
     {
+        private double baseSpeed = 0;
+        private int stopMovement = 0;
         public ConstantMovement(double movementSpeed, double angle) : base(movementSpeed, angle)
         {
+            baseSpeed = movementSpeed;
         }
 
         public override void Frame(double friction)
         {
-            
+            stopMovement++;
+            if (stopMovement > 1)
+            {
+                MovementSpeed = 0;
+            }
+            else
+            {
+                MovementSpeed = baseSpeed;
+            }
         }
 
         public override (double, double) Move()
         {
-            return ((double)(MovementSpeed * Math.Sin(Angle)), (double)(MovementSpeed * Math.Cos(Angle)));
+            return ToolsMath.PolarToCartesian(Angle, MovementSpeed); 
 
         }
 
@@ -32,7 +43,7 @@ namespace Fanior.Shared
 
         public override void UpdateMovement()
         {
-            
+            stopMovement = 0;
         }
     }
 }

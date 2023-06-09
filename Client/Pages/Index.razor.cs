@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using Fanior.Shared;
 
 using Microsoft.AspNetCore.Components;
@@ -42,7 +43,10 @@ namespace Fanior.Client.Pages
         private ManualResetEvent mre = new ManualResetEvent(false);
         private ManualResetEvent mre2 = new ManualResetEvent(false);
         private DotNetObjectReference<Index> selfReference;
-
+        //number of frames that passed during lag between server and client
+        private int delay;
+        //States of game for each frame 500 ms to the past for restoring actions - in JSON format.
+        private Queue<string> pastGvars = new Queue<string>();
         #endregion
 
 
@@ -92,7 +96,7 @@ namespace Fanior.Client.Pages
             keycode = keycode.ToLower();
             if (!pressedKeys.Contains(keycode))
             {
-                KeyController.GetRegisteredKey(keycode)?.KeyDown();
+                KeyController.GetRegisteredKey(keycode)?.KeyDown(now);
                 pressedKeys.Add(keycode);
             }
         }
@@ -102,11 +106,15 @@ namespace Fanior.Client.Pages
             keycode = keycode.ToLower();
             if (pressedKeys.Contains(keycode))
             {
-                KeyController.GetRegisteredKey(keycode)?.KeyUp();
+                KeyController.GetRegisteredKey(keycode)?.KeyUp(now);
                 pressedKeys.Remove(keycode);
             }
         }
-        public void Dispose() => selfReference?.Dispose();
+        public void Dispose()
+        {
+            selfReference?.Dispose();
+            timer?.Dispose();
+        }
         protected async Task MouseDown(MouseEventArgs e)
         {
 
@@ -114,37 +122,45 @@ namespace Fanior.Client.Pages
         }
         #endregion
         #region Frame
-
-        protected Task ExecuteAsync(CancellationToken stoppingToken)
+        /*protected Task ExecuteAsync(CancellationToken stoppingToken)
         {
             return Task.Run(async () =>
             {
                 while (stoppingToken.IsCancellationRequested == false)
                 {
-                    //sw.Start();
                     Frame();
                     await Task.Delay((1), stoppingToken);
-                    /*sw.Stop();
-                    Console.WriteLine(sw.ElapsedMilliseconds);
-                    sw.Reset();*/
                 }
             });
-        }
+        }*/
         int sendMessageId = 0;
         private async Task Frame()
         {
             try
             {
-                
-                //serialization of actions
                 //send serialized actions, game id, item id and angle of player that is sent every frame
-                
                 await Task.Run(() => hubConnection.SendAsync("ExecuteList", JsonConvert.SerializeObject(myActions, ToolsSystem.jsonSerializerSettings), gvars.GameId, this.id, player.Angle, sendMessageId));
                 sendMessageId++;
                 myActions.Clear();
                 lock (frameLock)
                 {
-                    ToolsGame.ProceedFrame(gvars, now);
+                    /*if (frameDelta >= Constants.FRAME_TIME)
+                    {
+                        
+                        Console.WriteLine("teď");
+                        frameDelta -= Constants.FRAME_TIME;
+                        ToolsGame.ProceedFrame(gvars, now, true);
+                    }
+                    else
+                    {
+                        ToolsGame.ProceedFrame(gvars, now, false);
+                    }*/
+                    ToolsGame.ProceedFrame(gvars, now, delay);
+                    /*sw2.Start();
+                    //pastGvars.Enqueue(JsonConvert.SerializeObject(gvars, ToolsSystem.jsonSerializerSettings));
+                    sw2.Stop();
+                    Console.WriteLine("Serialize: "+sw2.ElapsedMilliseconds);
+                    sw2.Reset();*/
                     gvars.PlayerActions.Clear();
                 }
                 StateHasChanged();
@@ -165,43 +181,43 @@ namespace Fanior.Client.Pages
             if (messageId != counter)
             {
                 counter2++;
-            }
-            counter += 1;*/
+            }*/
             if (player == null)
             {
                 return;
             }
-            try
-            {
-                this.now = now;
-                Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>> actionMethodNames = JsonConvert.DeserializeObject<Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
-                    
-                foreach (int itemId in actionMethodNames.Keys)
-                {
-                    if (actionMethodNames[itemId].Count > 0)
-                    {
-                        Console.WriteLine(actionMethodNames[itemId][0].Item1.ToString());
-                        //counter += 1;
-                    }
-                    if (gvars.PlayerActions.ContainsKey(itemId))
-                    {
-                        gvars.PlayerActions[itemId].AddRange(actionMethodNames[itemId]);
-                    }
-                    else
-                        gvars.PlayerActions.Add(itemId, actionMethodNames[itemId]);
-                }
-                foreach (var id in angles.Keys)
-                {
-                    if (id != this.id)
-                    {
-                        gvars.ItemsPlayers[id].Angle = angles[id];
-                    }
-                }
-                
-            }
-            catch (Exception ex)
-            {
+            delay = (int)(now - this.now);
+            Console.WriteLine(delay);
+            this.now = now;
+            Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>> actionMethodNames = JsonConvert.DeserializeObject<Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
 
+            foreach (int itemId in actionMethodNames.Keys)
+            {
+                if (gvars.PlayerActions.ContainsKey(itemId))
+                {
+                    gvars.PlayerActions[itemId].AddRange(actionMethodNames[itemId]);
+                }
+                else
+                    gvars.PlayerActions.Add(itemId, actionMethodNames[itemId]);
+                /*var tempList = new List<(PlayerAction.PlayerActionsEnum, bool)>(actionMethodNames[itemId]);
+                foreach (var action in tempList)
+                {
+                    if (true)
+                    {
+                        action
+                    }
+                }
+                for (int i = 0; i < delay; i++)
+                {
+                    gvars.PlayerActions.Add(itemId, new List<(PlayerAction.PlayerActionsEnum, bool)>)
+                }*/
+            }
+            foreach (var id in angles.Keys)
+            {
+                if (id != this.id)
+                {
+                    gvars.ItemsPlayers[id].Angle = angles[id];
+                }
             }
         }
 
@@ -229,11 +245,7 @@ namespace Fanior.Client.Pages
             {
                 try
                 {
-                    //sw2.Start();
                     ExecuteList(actionMethodNamesJson, messageId, angles, now);
-                    /*sw2.Stop();
-                    Console.WriteLine("ExecuteList: "+sw2.ElapsedMilliseconds);
-                    sw2.Reset();*/
                 }
                 catch (Exception e)
                 {
@@ -248,10 +260,12 @@ namespace Fanior.Client.Pages
                 if (this.id == 0)
                 {
                     currentMessageId = messageId;
+                    counter = (int)now;
                     this.now = now;
+                    sw.Start();
                     JoinGame(idReceived);
                     ReceiveGvars(gvarsJson);
-                    foreach (var item in gvars.Items.Values) 
+                    foreach (var item in gvars.Items.Values)
                     {
                         item.SetItemFromClient(gvars);
                     }
@@ -260,17 +274,11 @@ namespace Fanior.Client.Pages
             //new player joined game
             hubConnection.On<string, int>("PlayerJoinGame", async (playerJson, idConnectedPlayer) =>
             {
-                Console.Clear();
-                Console.WriteLine("New player");
-                sw2.Start();
                 if (id != idConnectedPlayer)
                 {
                     ToolsSystem.DeserializePlayer(playerJson, gvars);
                     await Task.Delay(1);
                 }
-                sw2.Stop();
-                Console.WriteLine("ExecuteList: " + sw2.ElapsedMilliseconds);
-                sw2.Reset();
             });
 
 
@@ -307,7 +315,15 @@ namespace Fanior.Client.Pages
                 {
                     Task.Run(async () =>
                     {
-                        ExecuteAsync(new CancellationToken(false));
+                        //ExecuteAsync(new CancellationToken(false));
+                        timer = new System.Threading.Timer(async _ =>  // async void
+                        {
+                            // we need StateHasChanged() because this is an async void handler
+                            // we need to Invoke it because we could be on the wrong Thread
+                            Frame();
+                            await InvokeAsync(StateHasChanged);
+
+                        }, null, 0, Constants.FRAME_TIME);
                     });
 
                     firstConnect = false;
@@ -378,6 +394,8 @@ namespace Fanior.Client.Pages
             {
             }
         }
+        System.Threading.Timer timer;
+
         protected async override Task OnAfterRenderAsync(bool firstRender)
         {
             try

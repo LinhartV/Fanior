@@ -16,28 +16,28 @@ namespace Fanior.Shared
         public enum ExecutionType { EveryTime, NotFirstTime, OnlyFirstTime, StopExecuting }
         //Action to be executed
         public string ActionName { get; private set; }
-        //whether the action will be repeated and if so, how often
+        //whether the action will be repeated and if so, how long it take between each repetition (number of frames)
         [JsonProperty]
-        private int repeat;
+        private double repeat;
         public ExecutionType executionType;
 
-        public ItemAction(string actionName, int repeat, ExecutionType executionType = ExecutionType.EveryTime)
+        public ItemAction(string actionName, double repeat, ExecutionType executionType = ExecutionType.EveryTime)
         {
             ActionName = actionName;
             Repeat = repeat;
             this.executionType = executionType;
         }
 
-        public int Repeat
+        public double Repeat
         {
             get { return repeat; }
             set
             {
                 if (value > 0)
                 {
-                    if (value <= Constants.FRAME_TIME)
+                    if (value <= 1)
                     {
-                        repeat = Constants.FRAME_TIME;
+                        repeat = 1;
                     }
                     else
                         repeat = value;

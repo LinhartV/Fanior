@@ -16,7 +16,7 @@ namespace Fanior.Shared
         
         public static Player CreateNewPlayer(Gvars gvars, string connectionId)
         {
-            return new Player(connectionId, gvars, (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", "red", "darkred", 1, 40, 40, Shape.GeometryEnum.circle), null, 4, 0.5, 0.1, 100, new BasicWeapon(true, 1000, 20, 3));
+            return new Player(connectionId, gvars, (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", "red", "darkred", 1, 40, 40, Shape.GeometryEnum.circle), null, 4, 0.5, 0.1, 100, new BasicWeapon(true, 30, 20, 10));
         }
         public class Coords
         {
@@ -29,12 +29,12 @@ namespace Fanior.Shared
                 this.y = y;
             }
         }
-        public static void ProceedFrame(Gvars gvars, long now)
+        public static void ProceedFrame(Gvars gvars, long now, int delay)
         {
             ProcedeGameAlgorithms(gvars);
             try
             {
-                ProcedePlayerActions(gvars);
+                ProcedePlayerActions(gvars, delay);
                 ProcedeItemActions(now, gvars);
             }
             catch (Exception e)
@@ -56,17 +56,13 @@ namespace Fanior.Shared
         /// <summary>
         /// Proceeds actions that players just did
         /// </summary>
-        private static void ProcedePlayerActions(Gvars gvars)
+        private static void ProcedePlayerActions(Gvars gvars, int delay)
         {
             foreach (int playerId in gvars.PlayerActions.Keys)
             {
                 foreach (var action in gvars.PlayerActions[playerId])
                 {
-                    if (playerId == 2)
-                    {
-
-                    }
-                    PlayerAction.InvokeAction(action.Item1, action.Item2, playerId, gvars);
+                    PlayerAction.InvokeAction(action.Item1, action.Item2, playerId, gvars, delay);
                 }
             }
         }
@@ -79,7 +75,7 @@ namespace Fanior.Shared
             var temp = new List<Item>(gvars.Items.Values);
             foreach (var item in temp)
             {
-                item.ExecuteActions(now, gvars, true);
+                item.ExecuteActions(now, gvars);
             }
         }
 

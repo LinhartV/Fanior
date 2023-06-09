@@ -18,13 +18,17 @@ namespace Fanior.Shared
         private static Dictionary<string, Action<Gvars, int>> lambdaActions = new();
         public static void setupLambdaActions()
         {
-            lambdaActions.Add("move", (gvars, id) => { (gvars.Items[id] as Movable).Move();});
-            lambdaActions.Add("fire", (gvars, id) => {
+            lambdaActions.Add("move", (gvars, id) =>
+            {
+                (gvars.Items[id] as Movable).Move();
+            });
+            lambdaActions.Add("fire", (gvars, id) =>
+            {
                 Console.WriteLine("just");
             });
             lambdaActions.Add("fire1", (gvars, id) =>
             {
-                Character character= gvars.Items[id] as Character;
+                Character character = gvars.Items[id] as Character;
                 if (!character.Weapon.reloaded)
                 {
                     character.DeleteAction("fire");

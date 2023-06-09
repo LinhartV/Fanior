@@ -10,14 +10,15 @@ namespace Fanior.Shared
     /// <summary>
     /// Class containing game variables of particular arena
     /// </summary>
+    [Serializable]
     public class Gvars
     {
         private class GvarsAction
         {
-            public int repeat;
-            public Action<Gvars, int> action;
+            public double repeat;
+            public Action<Gvars, double> action;
 
-            public GvarsAction(int repeat, Action<Gvars, int> action)
+            public GvarsAction(double repeat, Action<Gvars, double> action)
             {
                 this.repeat = repeat;
                 this.action = action;
@@ -49,6 +50,8 @@ namespace Fanior.Shared
         //Game id
         public string GameId { get; set; }
 
+        //
+        public List<string> serializedPlayers = new List<string> ();
         //Id for item creation
         public int Id { get; set; } = 1;
         public Gvars(string gameId, long now)
@@ -60,7 +63,7 @@ namespace Fanior.Shared
         }
         public Gvars()
         { }
-        public void AddGvarsAction(Action<Gvars, int> action, int repeat)
+        public void AddGvarsAction(Action<Gvars, double> action, double repeat)
         {
             gameActions.Add((0, new GvarsAction(repeat, action)));
         }
@@ -75,7 +78,7 @@ namespace Fanior.Shared
                     gameActions.Remove(action);
                     if (action.Item2.repeat > 0)
                     {
-                        gameActions.Add((now + action.Item2.repeat, action.Item2));
+                        gameActions.Add((now + (long)(action.Item2.repeat * Constants.FRAME_TIME), action.Item2));
                     }
                 }
             }

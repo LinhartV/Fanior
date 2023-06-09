@@ -30,8 +30,7 @@ namespace Fanior.Shared
 
         public override (double, double) Move()
         {
-            return ((double)(MovementSpeed * Math.Sin(Angle)), (double)(MovementSpeed * Math.Cos(Angle)));
-
+            return ToolsMath.PolarToCartesian(Angle, MovementSpeed);
         }
 
         public override void ResetMovement(double angle, double speed)

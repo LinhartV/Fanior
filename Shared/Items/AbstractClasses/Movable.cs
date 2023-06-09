@@ -114,7 +114,7 @@ namespace Fanior.Shared
             foreach (var movement in allMovements)
             {
                 movement.Frame(friction);
-                xy = ToolsMath.PolarToCartesian(movement.Angle, movement.MovementSpeed);
+                xy = movement.Move(); //ToolsMath.PolarToCartesian(movement.Angle, movement.MovementSpeed);
                 x += xy.Item1;
                 y -= xy.Item2;
             }

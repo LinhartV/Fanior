@@ -15,7 +15,7 @@ namespace Fanior.Shared
     {
         public double X { get; set; }
         public double Y { get; set; }
-        public int Id { get; set; }
+        public int Id { get; private set; }
         public bool Solid { get; set; }
         public bool IsVisible { get; set; }
         public Mask Mask { get; set; }
@@ -37,28 +37,21 @@ namespace Fanior.Shared
         /// <summary>
         /// Actions to be executed in the current frame. Is action is supposed to repeat, it will be added again to the list.
         /// </summary>
-        public void ExecuteActions(long now, Gvars gvars, bool procedeEveryFrameActions)
+        public void ExecuteActions(long now, Gvars gvars)
         {
             foreach (var action in actionsEveryFrame.Values)
             {
                 LambdaActions.executeAction(action.ActionName, gvars, this.Id);
             }
+
             Dictionary<string, (long, ItemAction)> tempActions = new Dictionary<string, (long, ItemAction)>(actions);
             foreach (var actionName in tempActions.Keys)
             {
                 if (tempActions[actionName].Item1 < now)
                 {
-                    if (actions[actionName].Item2.executionType == ItemAction.ExecutionType.EveryTime)
+                    if (actions[actionName].Item2.executionType == ItemAction.ExecutionType.EveryTime || (actions[actionName].Item2.Repeat == 0 && actions[actionName].Item2.executionType == ItemAction.ExecutionType.OnlyFirstTime))
                     {
-                        try
-                        {
-                            LambdaActions.executeAction(actions[actionName].Item2.ActionName, gvars, this.Id);
-                        }
-                        catch (Exception e)
-                        {
-
-                            throw;
-                        }
+                        LambdaActions.executeAction(actions[actionName].Item2.ActionName, gvars, this.Id);
                     }
                     else if (actions[actionName].Item2.executionType == ItemAction.ExecutionType.NotFirstTime)
                     {
@@ -67,23 +60,24 @@ namespace Fanior.Shared
                     actions.Remove(actionName);
                     if (tempActions[actionName].Item2.Repeat > 0 && tempActions[actionName].Item2.executionType != ItemAction.ExecutionType.StopExecuting)
                     {
-                        actions.Add(actionName, (now + tempActions[actionName].Item2.Repeat, tempActions[actionName].Item2));
+                        actions.Add(actionName, (now + (long)(tempActions[actionName].Item2.Repeat * Constants.FRAME_TIME), tempActions[actionName].Item2));
+                        if (tempActions[actionName].Item2.executionType == ItemAction.ExecutionType.OnlyFirstTime)
+                        {
+                            tempActions[actionName].Item2.Repeat = 0;
+                            actions[actionName].Item2.executionType = ItemAction.ExecutionType.EveryTime;
+                        }
                     }
-                    if (tempActions[actionName].Item2.executionType == ItemAction.ExecutionType.OnlyFirstTime)
-                    {
-                        tempActions[actionName].Item2.Repeat = 0;
-                        actions[actionName].Item2.executionType = ItemAction.ExecutionType.EveryTime;
-                    }
+                    
                 }
             }
         }
-        public bool ChangeRepeatTime(int repeat, string actionName)
+        public bool ChangeRepeatTime(double repeat, string actionName)
         {
             if (actions.ContainsKey(actionName))
             {
                 actions[actionName].Item2.Repeat = repeat;
 
-                if (repeat <= Constants.FRAME_TIME && repeat > 0)
+                if (repeat <= 1 && repeat > 0)
                 {
                     actionsEveryFrame.Add(actionName, actions[actionName].Item2);
                     actions.Remove(actionName);
@@ -92,7 +86,7 @@ namespace Fanior.Shared
             }
             else if (actionsEveryFrame.ContainsKey(actionName))
             {
-                if (repeat > Constants.FRAME_TIME)
+                if (repeat > 1)
                 {
                     actions.Add(actionName, (0, actionsEveryFrame[actionName]));
                     actionsEveryFrame.Remove(actionName);
@@ -111,14 +105,14 @@ namespace Fanior.Shared
             this.AddAction(action, action.ActionName, rewrite);
         }
         /// <summary>
-        /// 
+        /// Adds a new action to be executed
         /// </summary>
         /// <param name="action">ItemAction to add</param>
         /// <param name="storeName">The name the action will be stored in the dictionary under</param>
         /// <param name="rewrite">Whether to rewrite running action</param>
         public void AddAction(ItemAction action, string storeName, bool rewrite = true)
         {
-            if (action.Repeat > Constants.FRAME_TIME)
+            if (action.Repeat > 1 || action.Repeat == 0)
             {
                 if (!actions.ContainsKey(storeName))
                     actions.Add(storeName, (0, action));

@@ -16,24 +16,23 @@ namespace Fanior.Shared
     {
         private class KeyCommand
         {
-            public Action<int, Gvars> KeyDown { get; set; }
-            public Action<int, Gvars> KeyUp { get; set; }
-            //int = id, Gvars = gvars
-            public KeyCommand(Action<int, Gvars> keyDown, Action<int, Gvars> keyUp)
+            public Action<int, Gvars, int> KeyDown { get; set; }
+            public Action<int, Gvars, int> KeyUp { get; set; }
+            //int = id, Gvars = gvars, int = delay
+            public KeyCommand(Action<int, Gvars, int> keyDown, Action<int, Gvars, int> keyUp)
             {
-                this.KeyDown = new Action<int, Gvars>(async (int a, Gvars g) =>
+                this.KeyDown = new Action<int, Gvars, int>(async (int a, Gvars g, int delay) =>
                 {
                     if (keyDown != null)
                     {
-
-                        keyDown(a, g);
+                        keyDown(a, g, delay);
                     }
                 });
-                this.KeyUp = new Action<int, Gvars>(async (int a, Gvars g) =>
+                this.KeyUp = new Action<int, Gvars, int>(async (int a, Gvars g, int delay) =>
                 {
                     if (keyUp != null)
                     {
-                        keyUp(a, g);
+                        keyUp(a, g, delay);
                     }
                 });
             }
@@ -43,8 +42,15 @@ namespace Fanior.Shared
 
         static Dictionary<PlayerActionsEnum, KeyCommand> actions = new();
 
-
-        public static void InvokeAction(PlayerActionsEnum actionName, bool keyDown, int itemId, Gvars gvars)
+        /// <summary>
+        /// Invokes a predefined action from PlayerAction.actions list.
+        /// </summary>
+        /// <param name="actionName">Name of action to be invoked</param>
+        /// <param name="keyDown">Whether player pressed this particular key or released it</param>
+        /// <param name="itemId">Id of the player</param>
+        /// <param name="gvars">Gvars reference</param>
+        /// <param name="delay">Time delay caused by lag between server and client</param>
+        public static void InvokeAction(PlayerActionsEnum actionName, bool keyDown, int itemId, Gvars gvars, int delay)
         {
             try
             {
@@ -52,11 +58,11 @@ namespace Fanior.Shared
                 {
                     if (keyDown)
                     {
-                        actions[actionName]?.KeyDown(itemId, gvars);
+                        actions[actionName]?.KeyDown(itemId, gvars, delay);
                     }
                     else
                     {
-                        actions[actionName]?.KeyUp(itemId, gvars);
+                        actions[actionName]?.KeyUp(itemId, gvars, delay);
                     }
 
                 }
@@ -69,7 +75,7 @@ namespace Fanior.Shared
 
         public static void SetupActions()
         {
-            actions.Add(PlayerActionsEnum.fire, new KeyCommand((id, gvars) =>
+            actions.Add(PlayerActionsEnum.fire, new KeyCommand((id, gvars, delay) =>
               {
                 if (gvars.ItemsPlayers[id].Weapon.reloaded)
                 {
@@ -89,50 +95,50 @@ namespace Fanior.Shared
                     gvars.ItemsPlayers[id].Weapon.reloaded = true;
                 }
             },
-            (id, gvars) =>
+            (id, gvars, delay) =>
             {
                 gvars.ItemsPlayers[id].Weapon.reloaded = false;
             }));
             //Movements
-            actions.Add(PlayerActionsEnum.moveUp, new KeyCommand((id, gvars) =>
+            actions.Add(PlayerActionsEnum.moveUp, new KeyCommand((id, gvars, delay) =>
             {
                 gvars.ItemsPlayers[id].AddAction(new ItemAction("up", 1));
+                //AddDelayedAction(gvars, id, "up", delay);
             },
-            (id, gvars) =>
+            (id, gvars, delay) =>
             {
                 gvars.ItemsPlayers[id].DeleteAction("up");
             }));
 
-            actions.Add(PlayerActionsEnum.moveDown, new KeyCommand((id, gvars) =>
+            actions.Add(PlayerActionsEnum.moveDown, new KeyCommand((id, gvars, delay) =>
             {
                 gvars.ItemsPlayers[id].AddAction(new ItemAction("down", 1));
+                //AddDelayedAction(gvars, id, "down", delay);
             },
-            (id, gvars) =>
+            (id, gvars, delay) =>
             {
                 gvars.ItemsPlayers[id].DeleteAction("down");
             }));
 
-            actions.Add(PlayerActionsEnum.moveRight, new KeyCommand((id, gvars) =>
+            actions.Add(PlayerActionsEnum.moveRight, new KeyCommand((id, gvars, delay) =>
             {
                 gvars.ItemsPlayers[id].AddAction(new ItemAction("right", 1));
+                //AddDelayedAction(gvars, id, "right", delay);
             },
-            (id, gvars) =>
+            (id, gvars, delay) =>
             {
                 gvars.ItemsPlayers[id].DeleteAction("right");
             }));
 
-            actions.Add(PlayerActionsEnum.moveLeft, new KeyCommand((id, gvars) =>
+            actions.Add(PlayerActionsEnum.moveLeft, new KeyCommand((id, gvars, delay) =>
             {
                 gvars.ItemsPlayers[id].AddAction(new ItemAction("left", 1));
+                //AddDelayedAction(gvars, id, "left", delay);
             },
-            (id, gvars) =>
+            (id, gvars, delay) =>
             {
                 gvars.ItemsPlayers[id].DeleteAction("left");
             }));
-
-
         }
-
     }
-
 }

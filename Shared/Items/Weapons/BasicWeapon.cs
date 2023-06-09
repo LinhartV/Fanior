@@ -10,7 +10,7 @@ namespace Fanior.Shared
 {
     class BasicWeapon : Weapon
     {
-        public BasicWeapon(bool autoFire, int reloadTime, int shotSpeed, double damage) : base(autoFire, reloadTime, shotSpeed, damage)
+        public BasicWeapon(bool autoFire, double reloadTime, int shotSpeed, double damage) : base(autoFire, reloadTime, shotSpeed, damage)
         {
 
         }
@@ -19,7 +19,7 @@ namespace Fanior.Shared
         {
             try
             {
-                new BasicShot(gvars, gvars.Items[characterId].X, gvars.Items[characterId].Y, new Shape("lightblue", "darkblue", "lightred", "darkred", 2, 20, 20, Shape.GeometryEnum.circle), new Mask(20, 20, Shape.GeometryEnum.circle), this.shotSpeed, damage, characterId, (gvars.Items[characterId] as Character).Angle, 0, 0.2, 1000);
+                new BasicShot(gvars, gvars.Items[characterId].X, gvars.Items[characterId].Y, new Shape("lightblue", "darkblue", "lightred", "darkred", 2, 20, 20, Shape.GeometryEnum.circle), new Mask(20, 20, Shape.GeometryEnum.circle), this.shotSpeed, damage, characterId, (gvars.Items[characterId] as Character).Angle, 0, 0.2, 10);
 
             }
             catch (Exception e)
