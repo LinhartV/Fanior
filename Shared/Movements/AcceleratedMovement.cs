@@ -20,6 +20,23 @@ namespace Fanior.Shared
             this.maxSpeed = maxSpeed;
         }
 
+        public override void AntiFrame(double friction)
+        {
+            MovementSpeed += friction;
+        }
+
+        public override void AntiUpdateMovement()
+        {
+            if (MovementSpeed > 0)
+            {
+                MovementSpeed -= acceleration;
+            }
+            else
+            {
+                MovementSpeed = 0;
+            }
+        }
+
         public override void Frame(double friction)
         {
             if (this.MovementSpeed > 0.05)

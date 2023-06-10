@@ -15,7 +15,7 @@ namespace Fanior.Shared
     {
         public double X { get; set; }
         public double Y { get; set; }
-        public int Id { get; private set; }
+        public int Id { get; set; }
         public bool Solid { get; set; }
         public bool IsVisible { get; set; }
         public Mask Mask { get; set; }
@@ -37,10 +37,14 @@ namespace Fanior.Shared
         /// <summary>
         /// Actions to be executed in the current frame. Is action is supposed to repeat, it will be added again to the list.
         /// </summary>
-        public void ExecuteActions(long now, Gvars gvars)
+        public void ExecuteActions(long now, Gvars gvars, bool server)
         {
             foreach (var action in actionsEveryFrame.Values)
             {
+                if (!server && action.ActionName == "move" && this is Player)
+                {
+                    continue;
+                }
                 LambdaActions.executeAction(action.ActionName, gvars, this.Id);
             }
 
@@ -67,10 +71,38 @@ namespace Fanior.Shared
                             actions[actionName].Item2.executionType = ItemAction.ExecutionType.EveryTime;
                         }
                     }
-                    
+
                 }
             }
         }
+
+        //Idea that actions will be reversed, then I would add pending actions and then I would execute them several times to reach current state
+        //This way I would execute pending actions in the past, when the actually happened... didn't work...
+        /// <summary>
+        /// Invokes playerActions
+        /// </summary>
+        public void SetActions(long now, Gvars gvars, int delay, List<(PlayerAction.PlayerActionsEnum, bool)> actionMethodNames)
+        {
+            /*for (int i = 0; i < frames; i++)
+            {
+                foreach (var action in actionsEveryFrame.Values)
+                {
+                    LambdaActions.executeAntiAction(action.ActionName, gvars, this.Id);
+                }
+            }*/
+            foreach (var action in actionMethodNames)
+            {
+                PlayerAction.InvokeAction(action.Item1, action.Item2, Id, gvars, delay);
+            }
+            /*for (int i = 0; i < frames; i++)
+            {
+                foreach (var action in actionsEveryFrame.Values)
+                {
+                    LambdaActions.executeAction(action.ActionName, gvars, this.Id);
+                }
+            }*/
+        }
+
         public bool ChangeRepeatTime(double repeat, string actionName)
         {
             if (actions.ContainsKey(actionName))
@@ -100,9 +132,10 @@ namespace Fanior.Shared
         /// </summary>
         /// <param name="action">ItemAction to add</param>
         /// <param name="rewrite">Whether to rewrite running action</param>
-        public void AddAction(ItemAction action, bool rewrite = true)
+        /// <param name="delay">"When to execute the action. Gotta be (now + delay) "</param>
+        public void AddAction(ItemAction action, long delay = 0, bool rewrite = true)
         {
-            this.AddAction(action, action.ActionName, rewrite);
+            this.AddAction(action, action.ActionName, delay, rewrite);
         }
         /// <summary>
         /// Adds a new action to be executed
@@ -110,16 +143,16 @@ namespace Fanior.Shared
         /// <param name="action">ItemAction to add</param>
         /// <param name="storeName">The name the action will be stored in the dictionary under</param>
         /// <param name="rewrite">Whether to rewrite running action</param>
-        public void AddAction(ItemAction action, string storeName, bool rewrite = true)
+        public void AddAction(ItemAction action, string storeName, long delay = 0, bool rewrite = true)
         {
             if (action.Repeat > 1 || action.Repeat == 0)
             {
                 if (!actions.ContainsKey(storeName))
-                    actions.Add(storeName, (0, action));
+                    actions.Add(storeName, (delay, action));
                 else if (rewrite)
                 {
                     actions.Remove(storeName);
-                    actions.Add(storeName, (0, action));
+                    actions.Add(storeName, (delay, action));
                 }
             }
             else

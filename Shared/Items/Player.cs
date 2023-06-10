@@ -32,14 +32,14 @@ namespace Fanior.Shared
             this.ConnectionId = connectionId;
             Solid = true;
             gvars.ItemsPlayers.Add(this.Id, this);
-            this.AddControlledMovement(new ConstantMovement(BaseSpeed, Math.PI / 2), "up");
+            /*this.AddControlledMovement(new ConstantMovement(BaseSpeed, Math.PI / 2), "up");
             this.AddControlledMovement(new ConstantMovement(BaseSpeed, 0), "right");
             this.AddControlledMovement(new ConstantMovement(BaseSpeed, 3 * Math.PI / 2), "down");
-            this.AddControlledMovement(new ConstantMovement(BaseSpeed, Math.PI), "left");
-            /*this.AddControlledMovement(new AcceleratedMovement(0, Math.PI / 2, this.Acceleration, BaseSpeed), "up");
+            this.AddControlledMovement(new ConstantMovement(BaseSpeed, Math.PI), "left");*/
+            this.AddControlledMovement(new AcceleratedMovement(0, Math.PI / 2, this.Acceleration, BaseSpeed), "up");
             this.AddControlledMovement(new AcceleratedMovement(0, 0, this.Acceleration, BaseSpeed), "right");
             this.AddControlledMovement(new AcceleratedMovement(0, 3 * Math.PI / 2, this.Acceleration, BaseSpeed), "down");
-            this.AddControlledMovement(new AcceleratedMovement(0, Math.PI, this.Acceleration, BaseSpeed), "left");*/
+            this.AddControlledMovement(new AcceleratedMovement(0, Math.PI, this.Acceleration, BaseSpeed), "left");
         }
         public override void SetItemFromClient(Gvars gvars)
         {

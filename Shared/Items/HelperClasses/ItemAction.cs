@@ -20,7 +20,12 @@ namespace Fanior.Shared
         [JsonProperty]
         private double repeat;
         public ExecutionType executionType;
-
+        /// <summary>
+        /// Creates ItemAction - any possible action can be assigned to item
+        /// </summary>
+        /// <param name="actionName">Name of an action from LambdaActions</param>
+        /// <param name="repeat">how many frames to wait between executions</param>
+        /// <param name="executionType"></param>
         public ItemAction(string actionName, double repeat, ExecutionType executionType = ExecutionType.EveryTime)
         {
             ActionName = actionName;

@@ -66,11 +66,15 @@ namespace Fanior.Shared
             }
         }
         /// <summary>
-        /// Calls UpdageMovement of particular movement
+        /// Calls UpdateMovement of particular movement
         /// </summary>
         public void UpdateControlledMovement(string movementName)
         {
             MovementsControlled[movementName].UpdateMovement();
+        }
+        public void AntiUpdateControlledMovement(string movementName)
+        {
+            MovementsControlled[movementName].AntiUpdateMovement();
         }
         /// <summary>
         /// Rotates particular movement
@@ -102,6 +106,23 @@ namespace Fanior.Shared
                 movement.Angle = angle;
                 movement.MovementSpeed = movement.MovementSpeed * Math.Sin(Math.PI / 2 - angle - movement.Angle);
             }
+        }
+        public void AntiMove()
+        {
+            List<IMovement> allMovements = new List<IMovement>(MovementsAutomated);
+            allMovements.AddRange(MovementsControlled.Values);
+            (double, double) xy;
+            double x = 0;
+            double y = 0;
+            foreach (var movement in allMovements)
+            {
+                movement.AntiFrame(friction);
+                xy = movement.Move();
+                x -= xy.Item1;
+                y += xy.Item2;
+            }
+            this.X += x;
+            this.Y += y;
         }
 
         public void Move()

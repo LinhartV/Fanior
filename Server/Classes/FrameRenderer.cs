@@ -15,7 +15,7 @@ using Newtonsoft.Json;
 using System.Diagnostics;
 using Microsoft.Extensions.Options;
 using System.Reflection.Metadata;
-
+using Fanior.Server.Hubs;
 
 namespace Fanior.Server
 {
@@ -57,15 +57,15 @@ namespace Fanior.Server
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var provider = scope.ServiceProvider;
-                    var hub = provider.GetService<IHubContext<Fanior.Server.Hubs.MyHub>>();
+                    var hub = provider.GetService<IHubContext<MyHub>>();
                     var game = provider.GetService<GameControl>();
 
                     lock (game.tempListsLock)
                     {
-                        foreach (var angleDict in game.tempAngles)
+                        foreach (var infoDict in game.tempPlayerInfo)
                         {
-                            game.games[angleDict.Key].Angles = new Dictionary<int, double>(angleDict.Value);
-                            angleDict.Value.Clear();
+                            game.games[infoDict.Key].PlayerInfo = new Dictionary<int, (double, double, double)>(infoDict.Value);
+                            infoDict.Value.Clear();
                         }
                         foreach (var playerDict in game.tempPlayerActions)
                         {
@@ -91,7 +91,7 @@ namespace Fanior.Server
         /// <summary>
         /// Algorithms to be done each frame
         /// </summary>
-        private async Task Frame(GameControl game, IHubContext<Hubs.MyHub> hub)
+        private async Task Frame(GameControl game, IHubContext<MyHub> hub)
         {
             try
             {
@@ -99,9 +99,7 @@ namespace Fanior.Server
                 long now = game.sw.ElapsedMilliseconds;
                 foreach (Gvars gvars in game.games.Values)
                 {
-
-                    //ToolsGame.ProceedFrame(gvars, now);
-
+                    ToolsGame.ProceedFrame(gvars, now, Constants.DELAY, true);
                     gvars.messageId++;
                 }
                 await SendData(game, hub);
@@ -112,20 +110,18 @@ namespace Fanior.Server
         }
 
 
-
         /// <summary>
         /// Send all received actions to all clients for them to know, who did what.
         /// </summary>
-        private async Task SendData(GameControl game, IHubContext<Hubs.MyHub> hub)
+        private async Task SendData(GameControl game, IHubContext<MyHub> hub)
         {
             foreach (Gvars gvars in game.games.Values)
             {
                 try
                 {//Group(gvars.GameId)
-                    hub?.Clients.All.SendAsync("ExecuteList", game.sw.ElapsedMilliseconds, gvars.messageId, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings), gvars.Angles);
-                    
+                    hub?.Clients.All.SendAsync("ExecuteList", game.sw.ElapsedMilliseconds, gvars.messageId, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings), JsonConvert.SerializeObject(gvars.PlayerInfo, ToolsSystem.jsonSerializerSettings));
                     gvars.PlayerActions.Clear();
-                    gvars.Angles.Clear();
+                    gvars.PlayerInfo.Clear();
                 }
                 catch (Exception e)
                 {

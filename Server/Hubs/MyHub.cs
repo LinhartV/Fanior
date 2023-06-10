@@ -20,7 +20,7 @@ namespace Fanior.Server.Hubs
 
         public MyHub(GameControl game)
         {
-            this.gameControl = game;
+            gameControl = game;
         }
         /// <summary>
         /// Creation of new player, when he logs in.
@@ -60,33 +60,36 @@ namespace Fanior.Server.Hubs
         {
 
             gameControl.clientMessageId = messageId;
-            
-            Task.Run(async () => {AddActionsToList(gameId, itemId, angle, actionMethodNamesJson); });
+
+            Task.Run(async () => { AddActionsToList(gameId, itemId, angle, actionMethodNamesJson); });
         }
 
         private async Task AddActionsToList(string gameId, int itemId, double angle, string actionMethodNamesJson)
         {
             lock (gameControl.tempListsLock)
             {
-                if (gameControl.tempAngles[gameId].ContainsKey(itemId))
+                if (gameControl.tempPlayerInfo[gameId].ContainsKey(itemId))
                 {
-                    gameControl.tempAngles[gameId][itemId] = angle;
+                    gameControl.tempPlayerInfo[gameId][itemId] = (angle, gameControl.games[gameId].ItemsPlayers[itemId].X, gameControl.games[gameId].ItemsPlayers[itemId].Y);
                 }
                 else
                 {
-                    gameControl.tempAngles[gameId].Add(itemId, angle);
+                    gameControl.tempPlayerInfo[gameId].Add(itemId, (angle, gameControl.games[gameId].ItemsPlayers[itemId].X, gameControl.games[gameId].ItemsPlayers[itemId].Y));
                 }
                 gameControl.games[gameId].ItemsPlayers[itemId].Angle = angle;
                 List<(PlayerAction.PlayerActionsEnum, bool)> actionMethodNames = JsonConvert.DeserializeObject<List<(PlayerAction.PlayerActionsEnum, bool)>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
+                if (actionMethodNames.Count > 0)
+                {
+                    if (gameControl.tempPlayerActions[gameId].ContainsKey(itemId))
+                    {
+                        gameControl.tempPlayerActions[gameId][itemId].AddRange(actionMethodNames);
+                    }
+                    else
+                    {
+                        gameControl.tempPlayerActions[gameId].Add(itemId, actionMethodNames);
+                    }
+                }
                 
-                if (gameControl.tempPlayerActions[gameId].ContainsKey(itemId))
-                {
-                    gameControl.tempPlayerActions[gameId][itemId].AddRange(actionMethodNames);
-                }
-                else
-                {
-                    gameControl.tempPlayerActions[gameId].Add(itemId, actionMethodNames);
-                }
             }
         }
         /// <summary>

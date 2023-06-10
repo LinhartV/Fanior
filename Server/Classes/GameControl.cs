@@ -20,8 +20,8 @@ namespace Fanior.Server.Classes
         //all games by string (url)
         public Dictionary<string, Gvars> games = new Dictionary<string, Gvars>();
         public ManualResetEvent mre = new ManualResetEvent(false);
-        //gvarsId, ItemId, angle
-        public Dictionary<string, Dictionary<int, double>> tempAngles = new();
+        //gvarsId, ItemId, (angle, x, y)
+        public Dictionary<string, Dictionary<int, (double, double, double)>> tempPlayerInfo = new();
         //gvarsId, ItemId, (action, pressed/released)   
         public Dictionary<string, Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>> tempPlayerActions = new();
         //control
@@ -53,8 +53,9 @@ namespace Fanior.Server.Classes
                 if (gvars.ItemsPlayers.Count < Constants.PLAYERS_LIMIT)
                     return gvars;
             }
-            games["someId"] = new Gvars("someId", sw.ElapsedMilliseconds);
-            tempAngles.Add("someId", new Dictionary<int, double>());
+            games["someId"] = new Gvars("someId");
+            games["someId"].StartMeasuringTime(sw.ElapsedMilliseconds);
+            tempPlayerInfo.Add("someId", new Dictionary<int, (double, double, double)>());
             tempPlayerActions.Add("someId", new Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>());
             return games["someId"];
         }

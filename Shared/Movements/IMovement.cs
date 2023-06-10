@@ -29,10 +29,12 @@ namespace Fanior.Shared
         public abstract (double, double) Move();
         //what will happen every frame
         public abstract void Frame(double friction);
+        public abstract void AntiFrame(double friction);
         //change properties of this movement
         public abstract void ResetMovement(double angle, double speed);
         //proceed action of this movement on call (eg. player keeps on pressing arrow up)
         public abstract void UpdateMovement();
+        public abstract void AntiUpdateMovement();
         public virtual void SuddenStop()
         {
             this.MovementSpeed = 0;

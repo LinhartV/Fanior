@@ -16,10 +16,20 @@ namespace Fanior.Shared
             baseSpeed = movementSpeed;
         }
 
+        public override void AntiFrame(double friction)
+        {
+            
+        }
+
+        public override void AntiUpdateMovement()
+        {
+            stopMovement = 0;
+        }
+
         public override void Frame(double friction)
         {
             stopMovement++;
-            if (stopMovement > 1)
+            if (stopMovement > 2)
             {
                 MovementSpeed = 0;
             }

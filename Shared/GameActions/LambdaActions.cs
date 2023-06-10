@@ -13,20 +13,22 @@ namespace Fanior.Shared
     public class LambdaActions
     {
         /// <summary>
-        /// Dictionary of all actions. Key - name, Value - Action(gvars, id of item)
+        /// Dictionary of all actions. Key - name, Value - Action(gvars, id of item), AntiAction for reversing frames
         /// </summary>
-        private static Dictionary<string, Action<Gvars, int>> lambdaActions = new();
+        private static Dictionary<string, (Action<Gvars, int>, Action<Gvars, int>)> lambdaActions = new();
+
         public static void setupLambdaActions()
         {
-            lambdaActions.Add("move", (gvars, id) =>
+            lambdaActions.Add("move", ((gvars, id) =>
             {
                 (gvars.Items[id] as Movable).Move();
-            });
-            lambdaActions.Add("fire", (gvars, id) =>
+            }, (gvars, id) =>
             {
-                Console.WriteLine("just");
-            });
-            lambdaActions.Add("fire1", (gvars, id) =>
+                (gvars.Items[id] as Movable).AntiMove();
+            }
+            ));
+
+            lambdaActions.Add("fire1", ((gvars, id) =>
             {
                 Character character = gvars.Items[id] as Character;
                 if (!character.Weapon.reloaded)
@@ -39,35 +41,67 @@ namespace Fanior.Shared
                     character.Weapon.Fire(gvars);
                 }
 
-            });
-            lambdaActions.Add("fire2", (gvars, id) =>
+            }, (gvars, id) =>
+            {
+
+            }
+            ));
+            lambdaActions.Add("fire2", ((gvars, id) =>
             {
                 (gvars.Items[id] as Character).Weapon.reloaded = true;
-            });
-            lambdaActions.Add("up", (gvars, id) =>
+            }, (gvars, id) =>
+            {
+                (gvars.Items[id] as Character).Weapon.reloaded = false;
+            }
+            ));
+            lambdaActions.Add("up", ((gvars, id) =>
             {
                 (gvars.Items[id] as Player).UpdateControlledMovement("up");
-            });
-            lambdaActions.Add("down", (gvars, id) =>
+            }, (gvars, id) =>
+            {
+                (gvars.Items[id] as Player).AntiUpdateControlledMovement("up");
+            }
+            ));
+            lambdaActions.Add("down", ((gvars, id) =>
             {
                 (gvars.Items[id] as Player).UpdateControlledMovement("down");
-            });
-            lambdaActions.Add("right", (gvars, id) =>
+            }, (gvars, id) =>
+            {
+                (gvars.Items[id] as Player).AntiUpdateControlledMovement("down");
+            }
+            ));
+            lambdaActions.Add("right", ((gvars, id) =>
             {
                 (gvars.Items[id] as Player).UpdateControlledMovement("right");
-            });
-            lambdaActions.Add("left", (gvars, id) =>
+            }, (gvars, id) =>
+            {
+                (gvars.Items[id] as Player).AntiUpdateControlledMovement("right");
+            }
+            ));
+            lambdaActions.Add("left", ((gvars, id) =>
             {
                 (gvars.Items[id] as Player).UpdateControlledMovement("left");
-            });
-            lambdaActions.Add("dispose", (gvars, id) =>
+            }, (gvars, id) =>
+            {
+                (gvars.Items[id] as Player).AntiUpdateControlledMovement("left");
+            }
+            ));
+            lambdaActions.Add("dispose", ((gvars, id) =>
             {
                 gvars.Items[id].Dispose(gvars);
-            });
+            }, (gvars, id) =>
+            {
+                //Antidispose?
+            }
+            ));
         }
         public static void executeAction(string actionName, Gvars gvars, int id)
         {
-            lambdaActions[actionName](gvars, id);
+            lambdaActions[actionName].Item1(gvars, id);
+        }
+        public static void executeAntiAction(string actionName, Gvars gvars, int id)
+        {
+            lambdaActions[actionName].Item2(gvars, id);
         }
     }
 }
