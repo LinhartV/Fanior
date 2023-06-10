@@ -1,4 +1,5 @@
 # Fanior
+## Play here: https://fanior.herokuapp.com
 Welcome to my online game for bachelors project.
 Fanior is casual action multiplayer game.
 There are currently no running servers where you could play this game (hopefully this will change in the future).
