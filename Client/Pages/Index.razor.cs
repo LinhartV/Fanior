@@ -23,6 +23,8 @@ namespace Fanior.Client.Pages
         List<string> pressedKeys = new List<string>();
         //id of this connection
         int id = 0;
+        //name of the player
+        public string name;
         //just for testing
         public int counter = 0;
         public int counter2 = 0;
@@ -54,6 +56,7 @@ namespace Fanior.Client.Pages
         //measuring frame
         Stopwatch sw = new Stopwatch();
         Stopwatch sw2 = new Stopwatch();
+        System.Threading.Timer timer;
         #endregion
 
 
@@ -116,6 +119,13 @@ namespace Fanior.Client.Pages
                 pressedKeys.Remove(keycode);
             }
         }
+        [JSInvokable]
+        public void HandleWindowResize(int width, int height)
+        {
+            this.width = width;
+            this.height = height;
+        }
+        
         public void Dispose()
         {
             selfReference?.Dispose();
@@ -263,10 +273,21 @@ namespace Fanior.Client.Pages
             {
                 ReceiveGvars(gvarsJson);
             });
+            //on login and when connection was lost
+            hubConnection.On<string>("PlayerDisconnected", (connectionId) =>
+            {
+                foreach (Player p in gvars.ItemsPlayers.Values)
+                {
+                    if (p.ConnectionId == connectionId)
+                    {
+                        p.Dispose(gvars);
+                    }
+                }
+            });
             try
             {
                 await hubConnection.StartAsync();
-                await hubConnection.SendAsync("OnLogin", "@@@");
+                await hubConnection.SendAsync("OnLogin", "@@@", name == null ? "-_-" : name);
             }
             catch (Exception e)
             {
@@ -328,32 +349,6 @@ namespace Fanior.Client.Pages
         }
         #endregion
 
-        /*List<IWorker> workers = new List<IWorker>();
-        List<IWorkerBackgroundService<TaskService>> backgroundServices =
-                new List<IWorkerBackgroundService<TaskService>>();
-        public async Task Try()
-        {
-            try
-            {
-                var worker = await workerFactory.CreateAsync();
-                workers.Add(await workerFactory.CreateAsync());
-                var service = await worker.CreateBackgroundServiceAsync<TaskService>();
-                backgroundServices.Add(service);
-                await service.RegisterEventListenerAsync(nameof(TaskService.Num),
-                    (object s, Return eventInfo) =>
-                    {
-                        counter = eventInfo.Progress;
-                        StateHasChanged();
-                    });
-                Task.Run(()=>service.RunAsync(s => s.TryMethod(5)));
-            }
-            catch (Exception e)
-            {
-
-                throw;
-            }
-            
-        }*/
 
         #region Other
         async Task GetDimensions()
@@ -368,7 +363,6 @@ namespace Fanior.Client.Pages
             {
             }
         }
-        System.Threading.Timer timer;
 
         protected async override Task OnAfterRenderAsync(bool firstRender)
         {
@@ -384,8 +378,7 @@ namespace Fanior.Client.Pages
                         mySvg, selfReference);
                     await JS.InvokeVoidAsync("onKeyUp",
                         mySvg, selfReference);
-                    await Start();
-
+                    await JS.InvokeVoidAsync("onResize", selfReference);
                 }
 
             }

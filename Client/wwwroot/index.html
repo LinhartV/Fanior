@@ -10,7 +10,24 @@
 </head>
 
 <body>
-    <div id="app">Loading</div>
+    <div id="app">
+        <div id="fanior">FANIOR</div>
+        <p id="loading">Loading</p>
+        <script>
+            var loading = document.getElementById("loading");
+            loading.innerHTML = "Loading";
+            var length = 0;
+            setInterval(function () {
+                loading.innerHTML = " " + loading.innerHTML + "."
+
+                length++;
+                if (length > 3) {
+                    length = 0;
+                    loading.innerHTML = "Loading";
+                }
+            }, 100);
+        </script>
+    </div>
     <script src="_framework/blazor.webassembly.js"></script>
     <script>navigator.serviceWorker.register('service-worker.js');</script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.20/lodash.min.js"></script>
@@ -30,6 +47,13 @@
     <script type="text/javascript">
         window.Alert = function (message) {
             alert(message);
+        }
+    </script>
+    <script type="text/javascript">
+        function onResize(component) {
+            window.addEventListener('resize', e => {
+                component.invokeMethodAsync('HandleWindowResize', window.innerWidth, window.innerHeight);
+            });
         }
     </script>
     <script type="text/javascript">

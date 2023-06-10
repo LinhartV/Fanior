@@ -25,22 +25,22 @@ namespace Fanior.Server.Hubs
         /// <summary>
         /// Creation of new player, when he logs in.
         /// </summary>
-        public async Task OnLogin(string gameId)
+        public async Task OnLogin(string gameId, string name)
         {
             for (int i = 0; i < 1; i++)
             {
                 if (gameId == "@@@")
-                    await NewPlayer(gameControl.AddPlayer());
+                    await NewPlayer(gameControl.AddPlayer(), name);
                 else
-                    await NewPlayer(gameControl.AddPlayer(gameId));
+                    await NewPlayer(gameControl.AddPlayer(gameId), name);
             }
         }
 
-        public async Task NewPlayer(Gvars gvars)
+        public async Task NewPlayer(Gvars gvars, string name)
         {
             try
             {
-                Player player = ToolsGame.CreateNewPlayer(gvars, Context.ConnectionId);
+                Player player = ToolsGame.CreateNewPlayer(gvars, Context.ConnectionId, name);
                 string json = JsonConvert.SerializeObject(gvars, ToolsSystem.jsonSerializerSettings);
 
                 await Groups.AddToGroupAsync(Context.ConnectionId, gvars.GameId);
@@ -53,6 +53,7 @@ namespace Fanior.Server.Hubs
             }
 
         }
+
         /// <summary>
         /// Listens to incoming messages from clients, which are then proceeded in the Frame. It also joins actions of this player in the list of his actions, which are subsequently sent to every usery (done every frame).
         /// </summary>
@@ -99,6 +100,27 @@ namespace Fanior.Server.Hubs
         {
             string json = JsonConvert.SerializeObject(gameControl.games[gameId], ToolsSystem.jsonSerializerSettings);
             await Clients.Caller.SendAsync("ReceiveGvars", json);
+        }
+
+        public override Task OnDisconnectedAsync(Exception exception)
+        {
+            bool doublebreak = false;
+            foreach (var game in gameControl.games.Values)
+            {
+                foreach (var player in game.ItemsPlayers.Values)
+                {
+                    if (player.ConnectionId == Context.ConnectionId)
+                    {
+                        Clients.All.SendAsync("PlayerDisconnected", player.ConnectionId);
+                        player.Dispose(game);
+                        doublebreak = true;
+                        break;
+                    }
+                }
+                if (doublebreak)
+                    break;
+            }
+            return base.OnDisconnectedAsync(exception);
         }
     }
 }

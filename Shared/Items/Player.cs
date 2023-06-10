@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Fanior.Shared
@@ -13,17 +14,20 @@ namespace Fanior.Shared
     {
         public bool MovementEnabled { get; set; } = true;
         public string ConnectionId { get; set; }
+        public string Name { get; set; }
 
         public Player() { }
-        public Player(string connectionId, Gvars gvars, double x, double y, Shape shape, Mask mask, IMovement defaultMovement, double movementSpeed, double acceleration, double friction, double lives, Weapon weapon, bool isVisible = true)
+        public Player(string name, string connectionId, Gvars gvars, double x, double y, Shape shape, Mask mask, IMovement defaultMovement, double movementSpeed, double acceleration, double friction, double lives, Weapon weapon, bool isVisible = true)
             : base(gvars, x, y, shape, mask, movementSpeed, acceleration, friction, lives, weapon, defaultMovement, isVisible)
         {
+            this.Name = name;
             SetPlayer(gvars, connectionId);
         }
 
-        public Player(string connectionId, Gvars gvars, double x, double y, Shape shape, IMovement defaultMovement, double movementSpeed, double acceleration, double friction, double lives, Weapon weapon, bool isVisible = true)
+        public Player(string name, string connectionId, Gvars gvars, double x, double y, Shape shape, IMovement defaultMovement, double movementSpeed, double acceleration, double friction, double lives, Weapon weapon, bool isVisible = true)
             : base(gvars, x, y, shape, new Mask(shape.ImageWidth, shape.ImageHeight, shape.Geometry), movementSpeed, acceleration, friction, lives, weapon, defaultMovement, isVisible)
         {
+            this.Name = name;
             SetPlayer(gvars, connectionId);
         }
 

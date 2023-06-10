@@ -6,9 +6,12 @@
 @implements IDisposable
 @if ((id == -1 || player == null))
 {
-    <button @onclick=Start>"Start connection"</button>
+    <div id="introDiv">
+        <div id="fanior">FANIOR</div>
+        <InputText id="name" @bind-Value="@name" placeholder="Fighter's name" maxlength="10" />
+        <button @onclick=Start>START IT</button>
+    </div>
 }
-<h2>@counter</h2>
 <svg x=0 y=0 width="@width" height="@(height)" tabindex="-1" @ref="mySvg">
 
     @if (id != -1 && player != null)
@@ -63,7 +66,7 @@
 
                     var centerX = (item.X - Math.Round(player.X) + width / 2).ToString().Replace(',', '.');
                     var centerY = (item.Y - Math.Round(player.Y) + height / 2).ToString().Replace(',', '.');
-                    
+
 
 
                     if (item is Character c)
@@ -83,19 +86,31 @@
                     {
                         <circle cx=@(centerX) cy=@(centerY) r=@(item.Shape.ImageHeight / 2) stroke=@strokeColor stroke-width=@(item.Shape.StrokeWidth/2) fill=@fillColor />
                     }
-                    
+
 
                 }
                 else if (item.Shape.Geometry == Shape.GeometryEnum.rectange)
                 {
                     <rect x=@item.X y=@item.Y width=@item.Shape.ImageWidth height=@item.Shape.ImageHeight stroke=@strokeColor fill=@fillColor stroke-width=@item.Shape.StrokeWidth></rect>
                 }
-                if (item is ILived)
+                if (item is ILived l)
                 {
-                    var centerX = (item.X - Math.Round(player.X) - item.Shape.ImageWidth/2 + width / 2).ToString().Replace(',', '.');
+                    var centerX = (item.X - Math.Round(player.X) - item.Shape.ImageWidth / 2 + width / 2).ToString().Replace(',', '.');
                     var centerY = (item.Y - Math.Round(player.Y) + item.Shape.ImageHeight / 2 + height / 2 + item.Shape.ImageWidth / 10).ToString().Replace(',', '.');
-                    <rect x=@(centerX) y=@(centerY) width=@item.Shape.ImageWidth height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="lightgreen"></rect>
+                    <rect x=@(centerX) y=@(centerY) width=@item.Shape.ImageWidth height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="black"></rect>
+                    <rect x=@(centerX) y=@(centerY) width=@(item.Shape.ImageWidth * l.CurLives/l.MaxLives) height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="lightgreen"></rect>
+
+                    if (item is Player)
+                    {
+                        centerY = (item.Y - Math.Round(player.Y) - item.Shape.ImageHeight / 2 + height / 2 - item.Shape.ImageWidth / 4).ToString().Replace(',', '.');
+                        centerX = (item.X - Math.Round(player.X) + width / 2).ToString().Replace(',', '.');
+
+                        <g>
+                            <text x=@(centerX) y=@(centerY) style="font-size: 120%; font-family: Verdana, Geneva, Tahoma, sans-serif;" text-anchor="middle">@((item as Player).Name)</text>
+                        </g>
+                    }
                 }
+
             }
 
         }

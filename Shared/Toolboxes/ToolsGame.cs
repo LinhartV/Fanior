@@ -14,9 +14,9 @@ namespace Fanior.Shared
         public static int counter = 0;
         public static Random random = new();
 
-        public static Player CreateNewPlayer(Gvars gvars, string connectionId)
+        public static Player CreateNewPlayer(Gvars gvars, string connectionId, string name)
         {
-            return new Player(connectionId, gvars, (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", "red", "darkred", 1, 40, 40, Shape.GeometryEnum.circle), null, 4, 0.5, 0.1, 100, new BasicWeapon(true, 30, 20, 10));
+            return new Player(name, connectionId, gvars, (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", "red", "darkred", 1, 40, 40, Shape.GeometryEnum.circle), null, 4, 0.5, 0.1, 100, new BasicWeapon(true, 30, 20, 10));
         }
         public class Coords
         {
@@ -50,7 +50,14 @@ namespace Fanior.Shared
         /// </summary>
         private static void ProcedeGameAlgorithms(Gvars gvars)
         {
-
+            //Check if outside of arena
+            foreach (Player player in gvars.ItemsPlayers.Values)
+            {
+                if (player.X < 0 || player.X > gvars.ArenaWidth || player.Y > gvars.ArenaHeight || player.Y < 0)
+                {
+                    player.CurLives -= 1;
+                }
+            }
         }
 
         /// <summary>
