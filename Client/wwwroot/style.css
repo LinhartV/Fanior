@@ -30,7 +30,7 @@ button {
         border: 4px solid black;
     }
 
-#name{
+#name {
     border-width: 2px;
 }
 
@@ -64,6 +64,16 @@ button {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+
+#coverDiv {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background-image: linear-gradient(to bottom right, lightgreen, lightgrey);
+    opacity:0;
 }
 
 #app {

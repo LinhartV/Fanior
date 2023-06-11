@@ -21,10 +21,14 @@ namespace Fanior.Shared
             AddMovement(movementSpeed, angle, acceleration);
             this.AddAction(new ItemAction("dispose", lifeSpan, ItemAction.ExecutionType.OnlyFirstTime), "dispose");
         }
-        /*public override void Collide(Item collider, double angle, params Globals.ActionsAtCollision[] actionsNotToPerform)
+        public override void Collide(Item collider, double angle, Gvars gvars)
         {
-            base.Collide(collider, angle, actionsNotToPerform);
-        }*/
+            base.Collide(collider, angle, gvars);
+            if ((collider.Solid || collider is Character) && collider.Id != this.CharacterId)
+            {
+                this.Dispose(gvars);
+            }
+        }
         protected virtual void AddMovement(double movementSpeed, double angle, double acceleration)
         {
             this.AddAutomatedMovement(new AcceleratedMovement(movementSpeed, angle, acceleration, movementSpeed));

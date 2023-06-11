@@ -11,7 +11,7 @@ namespace Fanior.Shared
     {
         public double Width {get; }
         public double Height { get; }
-        Shape.GeometryEnum Geometry { get; }
+        public Shape.GeometryEnum Geometry { get; }
 
         public Mask(double width, double height, Shape.GeometryEnum geometry)
         {

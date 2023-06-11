@@ -16,7 +16,7 @@ namespace Fanior.Shared
 
         public static Player CreateNewPlayer(Gvars gvars, string connectionId, string name)
         {
-            return new Player(name, connectionId, gvars, (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", "red", "darkred", 1, 40, 40, Shape.GeometryEnum.circle), null, 4, 0.5, 0.1, 100, new BasicWeapon(true, 30, 20, 10));
+            return new Player(name, connectionId, gvars, (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", "red", "darkred", 1, 40, 40, Shape.GeometryEnum.circle), null, 4, 0.5, 0.1, 100, 0.02, new BasicWeapon(true, 30, 20, 10), 50);
         }
         public class Coords
         {
@@ -31,9 +31,9 @@ namespace Fanior.Shared
         }
         public static void ProceedFrame(Gvars gvars, long now, int delay, bool server)
         {
-            ProcedeGameAlgorithms(gvars);
             try
             {
+                ProcedeGameAlgorithms(gvars);
                 ProcedePlayerActions(gvars, delay, server);
                 ProcedeItemActions(now, gvars, server);
             }
@@ -50,12 +50,26 @@ namespace Fanior.Shared
         /// </summary>
         private static void ProcedeGameAlgorithms(Gvars gvars)
         {
-            //Check if outside of arena
+            //Check if player outside of arena
             foreach (Player player in gvars.ItemsPlayers.Values)
             {
                 if (player.X < 0 || player.X > gvars.ArenaWidth || player.Y > gvars.ArenaHeight || player.Y < 0)
                 {
-                    player.CurLives -= 1;
+                    player.ChangeCurLives(-1, null, gvars);
+                }
+            }
+            var tempList = new List<Item>(gvars.Items.Values);
+            //Everyone with everyone - later quadtree
+            //Supposing everything is sphere - later more geometries
+            for (int i = 0; i < tempList.Count; i++)
+            {
+                for (int j = i + 1; j < tempList.Count; j++)
+                {
+                    if (Math.Sqrt(Math.Pow(tempList[i].X - tempList[j].X, 2) + Math.Pow(tempList[i].Y - tempList[j].Y, 2)) < tempList[i].Mask.Height / 2 + tempList[j].Mask.Height / 2)
+                    {
+                        tempList[i].Collide(tempList[j], 0, gvars);
+                        tempList[j].Collide(tempList[i], 0, gvars);
+                    }
                 }
             }
         }
@@ -95,7 +109,6 @@ namespace Fanior.Shared
         static public void EndGame()
         {
             Console.WriteLine("GameEnded");
-            //player.Lives = 3;
         }
 
         /*static public bool ResetActionByName(Item item, string actionName, bool invokeStartAction)

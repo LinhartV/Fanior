@@ -27,15 +27,16 @@ namespace Fanior.Shared
         [JsonProperty]
         private Dictionary<string, ItemAction> actionsEveryFrame = new();
 
-        /*public virtual void Collide(Item collider, double angle, params Globals.ActionsAtCollision[] actionsNotToPerform)
+        public virtual void Collide(Item collider, double angle, Gvars gvars)
         {
-            if (actionsNotToPerform.Contains(Globals.ActionsAtCollision.All))
+            /*if (actionsNotToPerform.Contains(Globals.ActionsAtCollision.All))
                 return;
             if (!actionsNotToPerform.Contains(Globals.ActionsAtCollision.MoveToContact) && collider.solid)
-                ToolsItem.MoveToContact(this, collider, angle);
-        }*/
+                ToolsItem.MoveToContact(this, collider, angle);*/
+        }
         /// <summary>
         /// Actions to be executed in the current frame. Is action is supposed to repeat, it will be added again to the list.
+        /// Due to possible differences in duration of particular frames, actions will be executed be number of frames, not real time
         /// </summary>
         public void ExecuteActions(long now, Gvars gvars, bool server)
         {

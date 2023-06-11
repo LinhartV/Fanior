@@ -94,6 +94,19 @@ namespace Fanior.Shared
                 //Antidispose?
             }
             ));
+
+            lambdaActions.Add("regenerate", ((gvars, id) =>
+            {
+                ILived l = gvars.Items[id] as ILived;
+                if (l.GetCurLives() > 0)
+                {
+                    l.ChangeCurLives(l.Regeneration, null, gvars);
+                }
+            }, (gvars, id) =>
+            {
+            }
+            ));
+
         }
         public static void executeAction(string actionName, Gvars gvars, int id)
         {

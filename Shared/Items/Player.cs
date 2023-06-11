@@ -12,20 +12,20 @@ namespace Fanior.Shared
 {
     public class Player : Character
     {
+        public int Score { get; set; }
         public bool MovementEnabled { get; set; } = true;
         public string ConnectionId { get; set; }
         public string Name { get; set; }
-
         public Player() { }
-        public Player(string name, string connectionId, Gvars gvars, double x, double y, Shape shape, Mask mask, IMovement defaultMovement, double movementSpeed, double acceleration, double friction, double lives, Weapon weapon, bool isVisible = true)
-            : base(gvars, x, y, shape, mask, movementSpeed, acceleration, friction, lives, weapon, defaultMovement, isVisible)
+        public Player(string name, string connectionId, Gvars gvars, double x, double y, Shape shape, Mask mask, IMovement defaultMovement, double movementSpeed, double acceleration, double friction, double lives, double regeneration, Weapon weapon, double shield, bool isVisible = true)
+            : base(gvars, x, y, shape, mask, movementSpeed, acceleration, friction, lives, regeneration, weapon, shield, defaultMovement, isVisible)
         {
             this.Name = name;
             SetPlayer(gvars, connectionId);
         }
 
-        public Player(string name, string connectionId, Gvars gvars, double x, double y, Shape shape, IMovement defaultMovement, double movementSpeed, double acceleration, double friction, double lives, Weapon weapon, bool isVisible = true)
-            : base(gvars, x, y, shape, new Mask(shape.ImageWidth, shape.ImageHeight, shape.Geometry), movementSpeed, acceleration, friction, lives, weapon, defaultMovement, isVisible)
+        public Player(string name, string connectionId, Gvars gvars, double x, double y, Shape shape, IMovement defaultMovement, double movementSpeed, double acceleration, double friction, double lives, double regeneration, Weapon weapon, double shield, bool isVisible = true)
+            : base(gvars, x, y, shape, new Mask(shape.ImageWidth, shape.ImageHeight, shape.Geometry), movementSpeed, acceleration, friction, lives, regeneration, weapon, shield, defaultMovement, isVisible)
         {
             this.Name = name;
             SetPlayer(gvars, connectionId);
@@ -33,6 +33,7 @@ namespace Fanior.Shared
 
         private void SetPlayer(Gvars gvars, string connectionId)
         {
+            Score = 0;
             this.ConnectionId = connectionId;
             Solid = true;
             gvars.ItemsPlayers.Add(this.Id, this);
@@ -57,6 +58,16 @@ namespace Fanior.Shared
         public override void Death(Gvars gvars)
         {
             ToolsGame.EndGame();
+        }
+
+        public override int Bounty()
+        {
+            if (Score < 100)
+                return 100;
+            else if (Score < 1000)
+                return Score;
+            else
+                return 1000;
         }
 
         /*public override void Collide(Item collider, double angle, params Globals.ActionsAtCollision[] actionsNotToPerform)
