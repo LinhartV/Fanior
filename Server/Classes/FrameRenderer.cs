@@ -100,6 +100,7 @@ namespace Fanior.Server
                 foreach (Gvars gvars in game.games.Values)
                 {
                     ToolsGame.ProceedFrame(gvars, now, Constants.DELAY, true);
+                    ServerGameLogic.ExecuteActions(game.sw.ElapsedMilliseconds, game, gvars, hub);
                     gvars.messageId++;
                     foreach (var player in gvars.ItemsPlayers.Values)
                     {

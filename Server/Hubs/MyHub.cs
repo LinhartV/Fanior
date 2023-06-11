@@ -40,12 +40,17 @@ namespace Fanior.Server.Hubs
         {
             try
             {
-                Player player = ToolsGame.CreateNewPlayer(gvars, Context.ConnectionId, name);
-                string json = JsonConvert.SerializeObject(gvars, ToolsSystem.jsonSerializerSettings);
-
+                string json;
+                Player player;
+                lock (gameControl.creatingObjectsLock)
+                {
+                    player = ToolsGame.CreateNewPlayer(gvars, Context.ConnectionId, name);
+                    json = JsonConvert.SerializeObject(gvars, ToolsSystem.jsonSerializerSettings);
+                }
                 await Groups.AddToGroupAsync(Context.ConnectionId, gvars.GameId);
                 await Clients.Caller.SendAsync("JoinGame", player.Id, json, gameControl.sw.ElapsedMilliseconds, gvars.messageId);
                 await Clients.All.SendAsync("PlayerJoinGame", JsonConvert.SerializeObject(player, ToolsSystem.jsonSerializerSettings), player.Id);
+
             }
             catch (Exception e)
             {
@@ -59,7 +64,7 @@ namespace Fanior.Server.Hubs
         /// </summary>
         public void ExecuteList(string actionMethodNamesJson, string gameId, int itemId, double angle, int messageId)
         {
-
+            gameControl.games[gameId].ready = true;
             gameControl.clientMessageId = messageId;
 
             Task.Run(() => { AddActionsToList(gameId, itemId, angle, actionMethodNamesJson); });
@@ -93,7 +98,7 @@ namespace Fanior.Server.Hubs
                         gameControl.tempPlayerActions[gameId].Add(itemId, actionMethodNames);
                     }
                 }
-                
+
             }
         }
         /// <summary>

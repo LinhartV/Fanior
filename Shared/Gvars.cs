@@ -43,11 +43,13 @@ namespace Fanior.Shared
         public Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>> PlayerActions { get; set; } = new();
         //angles of all players (id, angle)
         public Dictionary<int, double> PlayerInfo { get; set; } = new();
-
+        //count of items in arena. First coins.
+        public int[] counts = new int[2];
         //size of arena
         public double ArenaWidth { get; set; }
         public double ArenaHeight { get; set; }
-
+        //indication whether arena is fully ready
+        public bool ready = false;
         //Game id of this arena
         public string GameId { get; set; }
 

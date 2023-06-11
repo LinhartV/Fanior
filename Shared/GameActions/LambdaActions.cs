@@ -106,6 +106,13 @@ namespace Fanior.Shared
             {
             }
             ));
+            lambdaActions.Add("enemyAI", ((gvars, id) =>
+            {
+                (gvars.ItemsStep[id] as Enemy).ai.Control(gvars, gvars.ItemsStep[id] as Enemy);
+            }, (gvars, id) =>
+            {
+            }
+            ));
 
         }
         public static void executeAction(string actionName, Gvars gvars, int id)

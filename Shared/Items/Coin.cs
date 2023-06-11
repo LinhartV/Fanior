@@ -9,8 +9,9 @@ namespace Fanior.Shared
     public class Coin : Item
     {
         public Coin() : base() { }
-        public Coin(int value, Gvars gvars, double x, double y, Shape shape, Mask mask) : base(gvars, x, y, shape, mask)
+        public Coin(int value, Gvars gvars, double x, double y, Shape shape, Mask mask = null) : base(gvars, x, y, shape, mask)
         {
+            gvars.counts[0]++;
             this.Value = value;
         }
 
@@ -22,6 +23,11 @@ namespace Fanior.Shared
             {
                 this.Dispose(gvars);
             }
+        }
+        public override void Dispose(Gvars gvars)
+        {
+            base.Dispose(gvars);
+            gvars.counts[0]--;
         }
     }
 }

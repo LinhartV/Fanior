@@ -72,21 +72,29 @@ namespace Fanior.Client.Pages
         /// </summary>
         public async Task Start()
         {
-            await Animate(false);
-            Task t1 = SetConnection();
-            Task t2 = GetDimensions();
-            await Task.WhenAll(t1, t2);
-            await hubConnection.StartAsync();
-            await hubConnection.SendAsync("OnLogin", "@@@", name == null ? "Figher" : name);
-
-            if (firstConnect == 2)
+            try
             {
-                DefaultAssingOfKeys();
-                PlayerActions.SetupActions();
-                LambdaActions.setupLambdaActions();
+                await Animate(false);
+                Task t1 = SetConnection();
+                Task t2 = GetDimensions();
+                await Task.WhenAll(t1, t2);
+                await hubConnection.StartAsync();
+                await hubConnection.SendAsync("OnLogin", "@@@", name == null ? "Figher" : name);
+
+                if (firstConnect == 2)
+                {
+                    DefaultAssingOfKeys();
+                    PlayerActions.SetupActions();
+                    LambdaActions.setupLambdaActions();
+                }
+                await InvokeAsync(() => this.StateHasChanged());
+                animEnd = false;
             }
-            await InvokeAsync(() => this.StateHasChanged());
-            animEnd = false;
+            catch (Exception e)
+            {
+                JS.InvokeVoidAsync("Alert", e.Message);
+                throw;
+            }
         }
         #region Input control
 
@@ -259,7 +267,7 @@ namespace Fanior.Client.Pages
                 lock (frameLock)
                 {
                     ToolsGame.ProceedFrame(gvars, gvars.GetNow(), delay, false);
-                    if (player.Score > nextLevel)
+                    if (player.Score >= nextLevel)
                     {
                         //Bonus
                         nextLevel = nextLevel * 5 / 2;
@@ -269,6 +277,7 @@ namespace Fanior.Client.Pages
             }
             catch (Exception e)
             {
+                JS.InvokeVoidAsync("Alert", e.Message);
                 throw;
             }
         }
@@ -337,8 +346,11 @@ namespace Fanior.Client.Pages
             });
             hubConnection.On<string>("CreateNewItem", (itemJson) =>
             {
-                Item item = JsonConvert.DeserializeObject<Item>(itemJson, ToolsSystem.jsonSerializerSettings);
-                item.SetItemFromClient(gvars);
+                if (id != 0)
+                {
+                    Item item = JsonConvert.DeserializeObject<Item>(itemJson, ToolsSystem.jsonSerializerSettings);
+                    item.SetItemFromClient(gvars);
+                }
             });
             //Actions to be proceeded that server sent to client 
             //Dictionary of list of actions assigned to object id along with information, if it's keydown or keyup (true = keydown).
@@ -386,9 +398,6 @@ namespace Fanior.Client.Pages
                     await Task.Delay(1);
                 }
             });
-
-
-
             //on login and when connection was lost
             hubConnection.On<string>("ReceiveGvars", (gvarsJson) =>
             {
@@ -405,7 +414,6 @@ namespace Fanior.Client.Pages
                     }
                 }
             });
-
         }
 
         private void ReceiveGvars(string gvarsJson)
@@ -413,15 +421,11 @@ namespace Fanior.Client.Pages
             try
             {
                 gvars = JsonConvert.DeserializeObject<Gvars>(gvarsJson, ToolsSystem.jsonSerializerSettings);
-
                 player = gvars.ItemsPlayers[id];
                 player.SetItemFromClient(gvars);
-
-                //new Enemy(gvars, 200, 400, new Shape("black", "grey", "grey", "grey", 5, 300, 300, Shape.GeometryEnum.circle), null, 0, 0, 0, 5, null);
                 if (firstConnect > 0)
                 {
                     //ExecuteAsync(new CancellationToken(false));
-
                     Task.Run(async () =>
                     {
                         timer = new System.Threading.Timer(async _ =>
@@ -431,7 +435,6 @@ namespace Fanior.Client.Pages
                             await InvokeAsync(StateHasChanged);
                         }, null, 0, Constants.FRAME_TIME);
                     });
-
                     firstConnect = 0;
                 }
             }

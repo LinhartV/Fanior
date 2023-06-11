@@ -16,7 +16,7 @@ namespace Fanior.Shared
 
         public static Player CreateNewPlayer(Gvars gvars, string connectionId, string name)
         {
-            return new Player(name, connectionId, gvars, (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", "red", "darkred", 1, 40, 40, Shape.GeometryEnum.circle), null, 8, 1, 0.2, 100, 0.02, new BasicWeapon(true, 30, 30, 10), 50);
+            return new Player(name, connectionId, gvars, (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", 1, 40, 40, Shape.GeometryEnum.circle, "red", "darkred"), null, 8, 1, 0.2, 100, 0.02, new BasicWeapon(true, 30, 30, 10), 50);
         }
         public class Coords
         {

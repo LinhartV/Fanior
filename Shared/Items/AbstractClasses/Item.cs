@@ -175,7 +175,7 @@ namespace Fanior.Shared
             if (actionsEveryFrame.ContainsKey(name))
                 actionsEveryFrame.Remove(name);
         }
-        public void Dispose(Gvars gvars)
+        public virtual void Dispose(Gvars gvars)
         {
             gvars.Items.Remove(this.Id);
             if (gvars.ItemsPlayers.ContainsKey(Id))
@@ -200,6 +200,10 @@ namespace Fanior.Shared
         {
             this.Shape = shape;
             this.Mask = mask;
+            if (mask == null)
+            {
+                Mask = new Mask(shape.ImageWidth, shape.ImageHeight, shape.Geometry);
+            }
             this.X = x;
             this.Y = y;
             VirtualX = x;

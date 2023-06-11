@@ -39,7 +39,7 @@ namespace Fanior.Shared
             this.FillColorEnemy = fillColorEnemy;
             this.StrokeColorEnemy = strokeColorEnemy;
         }*/
-        public Shape(string fillColor, string strokeColor, string fillColorEnemy, string strokeColorEnemy, int strokeWidth, int imageWidth, int imageHeight, GeometryEnum shape)
+        public Shape(string fillColor, string strokeColor, int strokeWidth, int imageWidth, int imageHeight, GeometryEnum shape, string fillColorEnemy = "", string strokeColorEnemy = "")
         {
             
             this.ImageWidth = imageWidth;
@@ -51,7 +51,16 @@ namespace Fanior.Shared
             this.StrokeWidth = strokeWidth;
             this.FillColorEnemy = fillColorEnemy;
             this.StrokeColorEnemy = strokeColorEnemy;
+            if (fillColorEnemy == "")
+            {
+                FillColorEnemy = fillColor;
+            }
+            if (StrokeColorEnemy == "")
+            {
+                StrokeColorEnemy = strokeColor;
+            }
         }
+
         
         /*public Shape(ShapeEnum shape, Bitmap bmp, int width, int height)
         {

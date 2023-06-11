@@ -17,6 +17,7 @@ namespace Fanior.Server.Classes
         public int clientMessageId = -1;
         public readonly object actionLock = new object();
         public readonly object tempListsLock = new object();
+        public readonly object creatingObjectsLock = new object();
         //number of milliseconds from the launch of server
         public Stopwatch sw = new Stopwatch();
         //all games by string (url)
@@ -26,8 +27,8 @@ namespace Fanior.Server.Classes
         public Dictionary<string, Dictionary<int, double>> tempPlayerInfo = new();
         //gvarsId, ItemId, (action, pressed/released)   
         public Dictionary<string, Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>>> tempPlayerActions = new();
-        //gvars id, action (when to execute, action itself)
-        public Dictionary<string, List<(double, Action<IHubContext<MyHub>>)>> gvarsAction = new();
+        //gvars id, action (when to execute by random (actual time, lower and upper bound), action itself)
+        public Dictionary<string, List<(long, int, int, Action<IHubContext<MyHub>>)>> gvarsActions = new();
         //control
         public int controlCount;
         public GameControl()
@@ -61,6 +62,8 @@ namespace Fanior.Server.Classes
             games["someId"].StartMeasuringTime(sw.ElapsedMilliseconds);
             tempPlayerInfo.Add("someId", new Dictionary<int, double>());
             tempPlayerActions.Add("someId", new Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>>());
+            gvarsActions.Add("someId", new List<(long, int, int, Action<IHubContext<MyHub>>)>());
+            ServerGameLogic.SetupGvarsActions(games["someId"], this);
             return games["someId"];
         }
     }

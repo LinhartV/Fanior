@@ -93,11 +93,18 @@ namespace Fanior.Shared
             MovementsControlled[movementName].AntiUpdateMovement();
         }
         /// <summary>
-        /// Rotates particular movement
+        /// Rotates particular movement or sets its angle
         /// </summary>
-        public void RotateControlledMovement(string movementName, double angleRotation)
+        public void RotateControlledMovement(string movementName, double angleRotation, bool rotate = true)
         {
-            MovementsControlled[movementName].Angle -= angleRotation;
+            if (MovementsControlled.ContainsKey(movementName))
+            {
+
+                if (rotate)
+                    MovementsControlled[movementName].Angle -= angleRotation;
+                else
+                    MovementsControlled[movementName].ResetMovementAngle(angleRotation);
+            }
         }
 
         /// <summary>
