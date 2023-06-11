@@ -1,4 +1,6 @@
-﻿using Fanior.Shared;
+﻿using Fanior.Server.Hubs;
+using Fanior.Shared;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -21,15 +23,17 @@ namespace Fanior.Server.Classes
         public Dictionary<string, Gvars> games = new Dictionary<string, Gvars>();
         public ManualResetEvent mre = new ManualResetEvent(false);
         //gvarsId, ItemId, (angle, x, y)
-        public Dictionary<string, Dictionary<int, (double, double, double)>> tempPlayerInfo = new();
+        public Dictionary<string, Dictionary<int, double>> tempPlayerInfo = new();
         //gvarsId, ItemId, (action, pressed/released)   
-        public Dictionary<string, Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>> tempPlayerActions = new();
+        public Dictionary<string, Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>>> tempPlayerActions = new();
+        //gvars id, action (when to execute, action itself)
+        public Dictionary<string, List<(double, Action<IHubContext<MyHub>>)>> gvarsAction = new();
         //control
         public int controlCount;
         public GameControl()
         {
             sw.Start();
-            PlayerAction.SetupActions();
+            PlayerActions.SetupActions();
             LambdaActions.setupLambdaActions();
         }
         //adds new player to concrete arena if possible
@@ -55,8 +59,8 @@ namespace Fanior.Server.Classes
             }
             games["someId"] = new Gvars("someId");
             games["someId"].StartMeasuringTime(sw.ElapsedMilliseconds);
-            tempPlayerInfo.Add("someId", new Dictionary<int, (double, double, double)>());
-            tempPlayerActions.Add("someId", new Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>());
+            tempPlayerInfo.Add("someId", new Dictionary<int, double>());
+            tempPlayerActions.Add("someId", new Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>>());
             return games["someId"];
         }
     }

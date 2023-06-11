@@ -9,7 +9,7 @@ namespace Fanior.Shared
     public class Constants
     {
         public const int PLAYERS_LIMIT = 50;
-        public const int FRAME_TIME = 16;
+        public const int FRAME_TIME = 32;
         public const int DELAY = 0;
     }
 }

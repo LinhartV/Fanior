@@ -23,7 +23,6 @@ namespace Fanior.Shared
         }
         public override void Collide(Item collider, double angle, Gvars gvars)
         {
-            base.Collide(collider, angle, gvars);
             if ((collider.Solid || collider is Character) && collider.Id != this.CharacterId)
             {
                 this.Dispose(gvars);

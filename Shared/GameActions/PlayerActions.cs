@@ -12,7 +12,7 @@ namespace Fanior.Shared
     /// <summary>
     /// Actions that player can invoke - shared on server and client and executed by name.
     /// </summary>
-    public static class PlayerAction
+    public static class PlayerActions
     {
         private class KeyCommand
         {

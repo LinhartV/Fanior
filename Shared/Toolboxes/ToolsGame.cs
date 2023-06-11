@@ -16,7 +16,7 @@ namespace Fanior.Shared
 
         public static Player CreateNewPlayer(Gvars gvars, string connectionId, string name)
         {
-            return new Player(name, connectionId, gvars, (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", "red", "darkred", 1, 40, 40, Shape.GeometryEnum.circle), null, 4, 0.5, 0.1, 100, 0.02, new BasicWeapon(true, 30, 20, 10), 50);
+            return new Player(name, connectionId, gvars, (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", "red", "darkred", 1, 40, 40, Shape.GeometryEnum.circle), null, 8, 1, 0.2, 100, 0.02, new BasicWeapon(true, 30, 30, 10), 50);
         }
         public class Coords
         {
@@ -33,7 +33,7 @@ namespace Fanior.Shared
         {
             try
             {
-                ProcedeGameAlgorithms(gvars);
+                ProcedeGameAlgorithms(gvars, now);
                 ProcedePlayerActions(gvars, delay, server);
                 ProcedeItemActions(now, gvars, server);
             }
@@ -48,8 +48,11 @@ namespace Fanior.Shared
         /// <summary>
         /// Proceeds algorithm of game logic (collision detection etc.)
         /// </summary>
-        private static void ProcedeGameAlgorithms(Gvars gvars)
+        private static void ProcedeGameAlgorithms(Gvars gvars, long now)
         {
+            //Gvars Actions
+            gvars.ExecuteActions(now);
+
             //Check if player outside of arena
             foreach (Player player in gvars.ItemsPlayers.Values)
             {
@@ -85,11 +88,11 @@ namespace Fanior.Shared
                 {
                     foreach (var action in gvars.PlayerActions[playerId])
                     {
-                        PlayerAction.InvokeAction(action.Item1, action.Item2, playerId, gvars, delay);
+                        PlayerActions.InvokeAction(action.Item1, action.Item2, playerId, gvars, delay);
                     }
                 }
             }
-            PlayerAction.CheckForActions(gvars);
+            PlayerActions.CheckForActions(gvars);
 
         }
 

@@ -7,12 +7,22 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json;
 
 namespace Fanior.Shared
 {
     public class Player : Character
     {
-        public int Score { get; set; }
+        [JsonProperty]
+        private int score;
+        public int Score
+        {
+            get => score; set
+            {
+                score = value;
+                this.BaseSpeed = BaseSpeed - (2 - (2000 / (score + 1000)));
+            }
+        }
         public bool MovementEnabled { get; set; } = true;
         public string ConnectionId { get; set; }
         public string Name { get; set; }
@@ -57,6 +67,7 @@ namespace Fanior.Shared
 
         public override void Death(Gvars gvars)
         {
+            //base.Death(gvars);
             ToolsGame.EndGame();
         }
 
@@ -68,6 +79,15 @@ namespace Fanior.Shared
                 return Score;
             else
                 return 1000;
+        }
+
+        public override void Collide(Item collider, double angle, Gvars gvars)
+        {
+            base.Collide(collider, angle, gvars);
+            if (collider is Coin c)
+            {
+                this.Score += c.Value;
+            }
         }
 
         /*public override void Collide(Item collider, double angle, params Globals.ActionsAtCollision[] actionsNotToPerform)

@@ -62,23 +62,26 @@ namespace Fanior.Server.Hubs
 
             gameControl.clientMessageId = messageId;
 
-            Task.Run(async () => { AddActionsToList(gameId, itemId, angle, actionMethodNamesJson); });
+            Task.Run(() => { AddActionsToList(gameId, itemId, angle, actionMethodNamesJson); });
         }
 
-        private async Task AddActionsToList(string gameId, int itemId, double angle, string actionMethodNamesJson)
+        private void AddActionsToList(string gameId, int itemId, double angle, string actionMethodNamesJson)
         {
             lock (gameControl.tempListsLock)
             {
                 if (gameControl.tempPlayerInfo[gameId].ContainsKey(itemId))
                 {
-                    gameControl.tempPlayerInfo[gameId][itemId] = (angle, gameControl.games[gameId].ItemsPlayers[itemId].X, gameControl.games[gameId].ItemsPlayers[itemId].Y);
+                    gameControl.tempPlayerInfo[gameId][itemId] = angle;
                 }
                 else
                 {
-                    gameControl.tempPlayerInfo[gameId].Add(itemId, (angle, gameControl.games[gameId].ItemsPlayers[itemId].X, gameControl.games[gameId].ItemsPlayers[itemId].Y));
+                    gameControl.tempPlayerInfo[gameId].Add(itemId, angle);
                 }
-                gameControl.games[gameId].ItemsPlayers[itemId].Angle = angle;
-                List<(PlayerAction.PlayerActionsEnum, bool)> actionMethodNames = JsonConvert.DeserializeObject<List<(PlayerAction.PlayerActionsEnum, bool)>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
+                if (gameControl.games[gameId].ItemsPlayers.ContainsKey(itemId))
+                {
+                    gameControl.games[gameId].ItemsPlayers[itemId].Angle = angle;
+                }
+                List<(PlayerActions.PlayerActionsEnum, bool)> actionMethodNames = JsonConvert.DeserializeObject<List<(PlayerActions.PlayerActionsEnum, bool)>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
                 if (actionMethodNames.Count > 0)
                 {
                     if (gameControl.tempPlayerActions[gameId].ContainsKey(itemId))

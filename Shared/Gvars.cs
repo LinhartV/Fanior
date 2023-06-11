@@ -16,9 +16,9 @@ namespace Fanior.Shared
         private class GvarsAction
         {
             public double repeat;
-            public Action<Gvars, double> action;
+            public Action<Gvars> action;
 
-            public GvarsAction(double repeat, Action<Gvars, double> action)
+            public GvarsAction(double repeat, Action<Gvars> action)
             {
                 this.repeat = repeat;
                 this.action = action;
@@ -40,9 +40,9 @@ namespace Fanior.Shared
         private List<(long, GvarsAction)> gameActions = new();
 
         //actions that players just did
-        public Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>> PlayerActions { get; set; } = new();
+        public Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>> PlayerActions { get; set; } = new();
         //angles of all players (id, angle)
-        public Dictionary<int, (double, double, double)> PlayerInfo { get; set; } = new();
+        public Dictionary<int, double> PlayerInfo { get; set; } = new();
 
         //size of arena
         public double ArenaWidth { get; set; }
@@ -70,7 +70,7 @@ namespace Fanior.Shared
         {
             return now + sw.ElapsedMilliseconds;
         }
-        public void AddGvarsAction(Action<Gvars, double> action, double repeat)
+        public void AddGvarsAction(Action<Gvars> action, double repeat)
         {
             gameActions.Add((0, new GvarsAction(repeat, action)));
         }
@@ -81,7 +81,7 @@ namespace Fanior.Shared
             {
                 if (action.Item1 < now)
                 {
-                    action.Item2.action(this, action.Item2.repeat);
+                    action.Item2.action(this);
                     gameActions.Remove(action);
                     if (action.Item2.repeat > 0)
                     {

@@ -14,10 +14,26 @@ namespace Fanior.Shared
     /// </summary>
     public abstract class Movable : Item
     {
+        [JsonProperty]
+        private double baseSpeed;
         /// <summary>
         /// Overall speed of the item
         /// </summary>
-        public double BaseSpeed { get; set; }
+        public double BaseSpeed
+        {
+            get => baseSpeed; set
+            {
+                baseSpeed = value;
+                foreach (var movement in MovementsAutomated)
+                {
+                    movement.ResetMovementSpeed(value);
+                }
+                foreach (var movement in MovementsControlled.Values)
+                {
+                    movement.ResetMovementSpeed(value);
+                }
+            }
+        }
         [JsonProperty]
         private double friction;
         public double Friction { get => friction; set => friction = Math.Abs(value); }
@@ -30,7 +46,7 @@ namespace Fanior.Shared
         private Dictionary<string, IMovement> MovementsControlled { get; set; } = new Dictionary<string, IMovement>();
         public bool ThroughSolid { get; set; } = false;
         public Movable() { }
-        public Movable(Gvars gvars, double x, double y, Shape shape, Mask mask, double baseSpeed, IMovement movement, double acceleration, double friction,bool isVisible = true) : base(gvars, x, y, shape, mask, isVisible)
+        public Movable(Gvars gvars, double x, double y, Shape shape, Mask mask, double baseSpeed, IMovement movement, double acceleration, double friction, bool isVisible = true) : base(gvars, x, y, shape, mask, isVisible)
         {
             this.Friction = friction;
             this.Acceleration = acceleration;

@@ -41,8 +41,8 @@ namespace Fanior.Server
             {
                 while (stoppingToken.IsCancellationRequested == false)
                 {
-                    DoWork();
-                    await Task.Delay(1000 / 60, stoppingToken);
+                    await DoWork();
+                    await Task.Delay(Constants.FRAME_TIME, stoppingToken);
                 }
             });
         }
@@ -64,12 +64,12 @@ namespace Fanior.Server
                     {
                         foreach (var infoDict in game.tempPlayerInfo)
                         {
-                            game.games[infoDict.Key].PlayerInfo = new Dictionary<int, (double, double, double)>(infoDict.Value);
+                            game.games[infoDict.Key].PlayerInfo = new Dictionary<int, double>(infoDict.Value);
                             infoDict.Value.Clear();
                         }
                         foreach (var playerDict in game.tempPlayerActions)
                         {
-                            game.games[playerDict.Key].PlayerActions = new Dictionary<int, List<(PlayerAction.PlayerActionsEnum, bool)>>(playerDict.Value);
+                            game.games[playerDict.Key].PlayerActions = new Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>>(playerDict.Value);
                             playerDict.Value.Clear();
                         }
                     }
@@ -101,6 +101,15 @@ namespace Fanior.Server
                 {
                     ToolsGame.ProceedFrame(gvars, now, Constants.DELAY, true);
                     gvars.messageId++;
+                    foreach (var player in gvars.ItemsPlayers.Values)
+                    {
+                        if (player.GetCurLives() <= 0)
+                        {
+                            hub?.Clients.All.SendAsync("PlayerDied", player.Id);
+                            player.Dispose(gvars);
+                            break;
+                        }
+                    }
                 }
                 await SendData(game, hub);
             }
@@ -119,7 +128,7 @@ namespace Fanior.Server
             {
                 try
                 {//Group(gvars.GameId)
-                    hub?.Clients.All.SendAsync("ExecuteList", game.sw.ElapsedMilliseconds, gvars.messageId, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings), JsonConvert.SerializeObject(gvars.PlayerInfo, ToolsSystem.jsonSerializerSettings));
+                    hub?.Clients.All.SendAsync("ExecuteList", game.sw.ElapsedMilliseconds, gvars.messageId, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings), gvars.PlayerInfo, JsonConvert.SerializeObject(GetItemCoordinates(gvars), ToolsSystem.jsonSerializerSettings));
                     gvars.PlayerActions.Clear();
                     gvars.PlayerInfo.Clear();
                 }
@@ -130,6 +139,15 @@ namespace Fanior.Server
             }
         }
 
+        private Dictionary<int, (double, double)> GetItemCoordinates (Gvars gvars)
+        {
+            var coordinates = new Dictionary<int, (double, double)> ();
+            foreach (var item in gvars.Items.Values)
+            {
+                coordinates.Add(item.Id, (item.X, item.Y));
+            }
+            return coordinates;
+        }
 
     }
 }

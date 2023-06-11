@@ -50,10 +50,13 @@ namespace Fanior.Shared
             return ToolsMath.PolarToCartesian(Angle, MovementSpeed);
         }
 
-        public override void ResetMovement(double angle, double speed)
+        public override void ResetMovementAngle(double angle)
         {
             this.Angle = angle;
-            MovementSpeed = speed;
+        }
+        public override void ResetMovementSpeed(double speed)
+        {
+            maxSpeed = speed;
         }
 
         public override void UpdateMovement()

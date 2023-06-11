@@ -15,6 +15,9 @@ namespace Fanior.Shared
     {
         public double X { get; set; }
         public double Y { get; set; }
+        //just for graphics
+        public double VirtualX { get; set; }
+        public double VirtualY { get; set; }
         public int Id { get; set; }
         public bool Solid { get; set; }
         public bool IsVisible { get; set; }
@@ -27,13 +30,7 @@ namespace Fanior.Shared
         [JsonProperty]
         private Dictionary<string, ItemAction> actionsEveryFrame = new();
 
-        public virtual void Collide(Item collider, double angle, Gvars gvars)
-        {
-            /*if (actionsNotToPerform.Contains(Globals.ActionsAtCollision.All))
-                return;
-            if (!actionsNotToPerform.Contains(Globals.ActionsAtCollision.MoveToContact) && collider.solid)
-                ToolsItem.MoveToContact(this, collider, angle);*/
-        }
+        public abstract void Collide(Item collider, double angle, Gvars gvars);
         /// <summary>
         /// Actions to be executed in the current frame. Is action is supposed to repeat, it will be added again to the list.
         /// Due to possible differences in duration of particular frames, actions will be executed be number of frames, not real time
@@ -42,7 +39,7 @@ namespace Fanior.Shared
         {
             foreach (var action in actionsEveryFrame.Values)
             {
-                if (!server && action.ActionName == "move" && this is Player)
+                if (!server && action.ActionName == "move")
                 {
                     continue;
                 }
@@ -82,7 +79,7 @@ namespace Fanior.Shared
         /// <summary>
         /// Invokes playerActions
         /// </summary>
-        public void SetActions(long now, Gvars gvars, int delay, List<(PlayerAction.PlayerActionsEnum, bool)> actionMethodNames)
+        public void SetActions(long now, Gvars gvars, int delay, List<(PlayerActions.PlayerActionsEnum, bool)> actionMethodNames)
         {
             /*for (int i = 0; i < frames; i++)
             {
@@ -93,7 +90,7 @@ namespace Fanior.Shared
             }*/
             foreach (var action in actionMethodNames)
             {
-                PlayerAction.InvokeAction(action.Item1, action.Item2, Id, gvars, delay);
+                PlayerActions.InvokeAction(action.Item1, action.Item2, Id, gvars, delay);
             }
             /*for (int i = 0; i < frames; i++)
             {
@@ -205,6 +202,8 @@ namespace Fanior.Shared
             this.Mask = mask;
             this.X = x;
             this.Y = y;
+            VirtualX = x;
+            VirtualY = y;
             this.IsVisible = isVisible;
             Solid = !justGraphics;
             this.Id = gvars.Id++;

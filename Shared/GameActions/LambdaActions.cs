@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Fanior.Shared.PlayerAction;
+using static Fanior.Shared.PlayerActions;
 
 namespace Fanior.Shared
 {

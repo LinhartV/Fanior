@@ -9,6 +9,7 @@ namespace Fanior.Shared
 {
     public class ConstantMovement : IMovement
     {
+        //speed the item can be moving by
         private double baseSpeed = 0;
         private int stopMovement = 0;
         public ConstantMovement(double movementSpeed, double angle) : base(movementSpeed, angle)
@@ -45,12 +46,14 @@ namespace Fanior.Shared
 
         }
 
-        public override void ResetMovement(double angle, double speed)
+        public override void ResetMovementAngle(double angle)
         {
             this.Angle = angle;
-            MovementSpeed = speed;
         }
-
+        public override void ResetMovementSpeed(double speed)
+        {
+            this.baseSpeed = speed;
+        }
         public override void UpdateMovement()
         {
             stopMovement = 0;

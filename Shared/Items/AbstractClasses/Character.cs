@@ -89,7 +89,6 @@ namespace Fanior.Shared
 
         public override void Collide(Item collider, double angle, Gvars gvars)
         {
-            base.Collide(collider, angle, gvars);
             if (collider is Shot s && s.CharacterId != this.Id)
             {
                 this.ReceiveDamage(s.Damage, gvars.ItemsPlayers.ContainsKey(s.CharacterId) ? gvars.ItemsPlayers[s.CharacterId] : null, gvars);
