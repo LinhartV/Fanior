@@ -40,6 +40,7 @@ namespace Fanior.Client
                     if (action != PlayerActions.PlayerActionsEnum.none)
                     {
                         myActions.Add((action, true));
+                        
                         //PlayerAction.InvokeAction(keyDown, true, a, g);
                     }
                 }

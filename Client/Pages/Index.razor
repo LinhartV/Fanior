@@ -23,7 +23,7 @@
         <rect x=0 y=0 width="@width" height="@(height)" fill="#CDCDCD"></rect>
         <rect x=@(-Math.Round(player.X) + width/2-player.Shape.ImageWidth/2) y=@(-Math.Round(player.Y) + height/2-player.Shape.ImageHeight/2) width=@(gvars.ArenaWidth) height=@(gvars.ArenaHeight) fill="#D8EAED"></rect>
         const int LINESPACE = 125;
-        const string LINECOLOR = "lightgrey";
+        const string LINECOLOR = "red";
         //horizontal
         for (int i = 0; i < (gvars.ArenaHeight) / LINESPACE; i++)
         {
@@ -76,14 +76,14 @@
 
                     if (item is Character c)
                     {
-                        var leftEyeX = (item.X - Math.Round(player.X) + width / 2 + item.Shape.ImageHeight / 2.5 * Math.Cos(c.Angle - Math.PI / 6));
-                        var rightEyeX = (item.X - Math.Round(player.X) + width / 2 + item.Shape.ImageHeight / 2.5 * Math.Cos(c.Angle + Math.PI / 6));
-                        var leftEyeY = (item.Y - Math.Round(player.Y) + height / 2 - item.Shape.ImageHeight / 2.5 * Math.Sin(c.Angle - Math.PI / 6));
-                        var rightEyeY = (item.Y - Math.Round(player.Y) + height / 2 - item.Shape.ImageHeight / 2.5 * Math.Sin(c.Angle + Math.PI / 6));
+                        var leftEyeX = (centerX + item.Shape.ImageHeight / 2.5 * Math.Cos(c.Angle - Math.PI / 6)).ToString().Replace(',', '.');
+                        var rightEyeX = (centerX + item.Shape.ImageHeight / 2.5 * Math.Cos(c.Angle + Math.PI / 6)).ToString().Replace(',', '.');
+                        var leftEyeY = (centerY - item.Shape.ImageHeight / 2.5 * Math.Sin(c.Angle - Math.PI / 6)).ToString().Replace(',', '.');
+                        var rightEyeY = (centerY - item.Shape.ImageHeight / 2.5 * Math.Sin(c.Angle + Math.PI / 6)).ToString().Replace(',', '.');
 
 
 
-                        <circle cx=@(centerX) cy=@(centerY) r=@(item.Shape.ImageHeight / 2) stroke=@strokeColor stroke-width=@(item.Shape.StrokeWidth/2) fill=@fillColor />
+                        <circle cx=@(centerX.ToString().Replace(',','.')) cy=@(centerY.ToString().Replace(',','.')) r=@(item.Shape.ImageHeight / 2) stroke=@strokeColor stroke-width=@(item.Shape.StrokeWidth/2) fill=@fillColor />
                         <circle cx=@(leftEyeX) cy=@(leftEyeY) r=@(item.Shape.ImageHeight / 9) stroke="white" stroke-width=1 fill=@fillColor />
                         <circle cx=@(rightEyeX) cy=@(rightEyeY) r=@(item.Shape.ImageHeight / 9) stroke="white" stroke-width=1 fill=@fillColor />
                         <circle cx=@(leftEyeX) cy=@(leftEyeY) r=@(item.Shape.ImageHeight / 15) stroke="blue" stroke-width=1 fill="blue" />
@@ -91,13 +91,13 @@
                         if (c.Shield > 0)
                         {
                             centerY += item.Shape.ImageHeight * 7 / 10 + 5;
-                            <rect x=@(centerX - item.Shape.ImageWidth / 2) y=@(centerY) width=@item.Shape.ImageWidth height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="black"></rect>
-                            <rect x=@(centerX - item.Shape.ImageWidth / 2) y=@(centerY) width=@(item.Shape.ImageWidth * c.Shield/c.MaxShield) height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="gray"></rect>
+                            <rect x=@((centerX - item.Shape.ImageWidth / 2).ToString().Replace(',','.')) y=@(centerY.ToString().Replace(',','.')) width=@item.Shape.ImageWidth height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="black"></rect>
+                            <rect x=@((centerX - item.Shape.ImageWidth / 2).ToString().Replace(',','.')) y=@(centerY.ToString().Replace(',','.')) width=@(item.Shape.ImageWidth * c.Shield/c.MaxShield) height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="gray"></rect>
                         }
                     }
                     else
                     {
-                        <circle cx=@(centerX) cy=@(centerY) r=@(item.Shape.ImageHeight / 2) stroke=@strokeColor stroke-width=@(item.Shape.StrokeWidth/2) fill=@fillColor />
+                        <circle cx=@(centerX.ToString().Replace(',','.')) cy=@(centerY.ToString().Replace(',','.')) r=@(item.Shape.ImageHeight / 2) stroke=@strokeColor stroke-width=@(item.Shape.StrokeWidth/2) fill=@fillColor />
                     }
 
 
@@ -110,8 +110,8 @@
                 {
                     var centerX = (item.X - Math.Round(player.X) - item.Shape.ImageWidth / 2 + width / 2);
                     var centerY = (item.Y - Math.Round(player.Y) + item.Shape.ImageHeight / 2 + height / 2 + item.Shape.ImageWidth / 10);
-                    <rect x=@(centerX) y=@(centerY) width=@item.Shape.ImageWidth height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="black"></rect>
-                    <rect x=@(centerX) y=@(centerY) width=@(item.Shape.ImageWidth * l.GetCurLives()/l.MaxLives) height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="lightgreen"></rect>
+                    <rect x=@(centerX.ToString().Replace(',','.')) y=@(centerY.ToString().Replace(',','.')) width=@item.Shape.ImageWidth height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="black"></rect>
+                    <rect x=@(centerX.ToString().Replace(',','.')) y=@(centerY.ToString().Replace(',','.')) width=@(item.Shape.ImageWidth * l.GetCurLives()/l.MaxLives) height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="lightgreen"></rect>
 
                     if (item is Player)
                     {
@@ -119,7 +119,7 @@
                         centerX = (item.X - Math.Round(player.X) + width / 2);
 
                         <g>
-                            <text x=@(centerX) y=@(centerY) style="font-size: 120%; font-family: Verdana, Geneva, Tahoma, sans-serif;" text-anchor="middle">@((item as Player).Name)</text>
+                            <text x=@(centerX.ToString().Replace(',','.')) y=@(centerY.ToString().Replace(',','.')) style="font-size: 120%; font-family: Verdana, Geneva, Tahoma, sans-serif;" text-anchor="middle">@((item as Player).Name)</text>
                         </g>
                     }
                 }

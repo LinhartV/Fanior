@@ -29,8 +29,21 @@ namespace Fanior.Shared
         //actions of this item to be executed everyFrame
         [JsonProperty]
         private Dictionary<string, ItemAction> actionsEveryFrame = new();
+        /// <summary>
+        /// Collision event executed both on server side and client side
+        /// </summary>
+        /// <param name="collider">Item that collided</param>
+        /// <param name="angle">Angle of collision</param>
+        /// <param name="gvars">Reference to gvars</param>
+        public virtual void CollideClient(Item collider, double angle, Gvars gvars) { }
+        /// <summary>
+        /// Collision event executed only on server side
+        /// </summary>
+        /// <param name="collider">Item that collided</param>
+        /// <param name="angle">Angle of collision</param>
+        /// <param name="gvars">Reference to gvars</param>
+        public virtual void CollideServer(Item collider, double angle, Gvars gvars) { }
 
-        public abstract void Collide(Item collider, double angle, Gvars gvars);
         /// <summary>
         /// Actions to be executed in the current frame. Is action is supposed to repeat, it will be added again to the list.
         /// Due to possible differences in duration of particular frames, actions will be executed be number of frames, not real time
@@ -39,10 +52,6 @@ namespace Fanior.Shared
         {
             foreach (var action in actionsEveryFrame.Values)
             {
-                if (!server && action.ActionName == "move")
-                {
-                    continue;
-                }
                 LambdaActions.executeAction(action.ActionName, gvars, this.Id);
             }
 
@@ -62,7 +71,7 @@ namespace Fanior.Shared
                     actions.Remove(actionName);
                     if (tempActions[actionName].Item2.Repeat > 0 && tempActions[actionName].Item2.executionType != ItemAction.ExecutionType.StopExecuting)
                     {
-                        actions.Add(actionName, (now + (long)(tempActions[actionName].Item2.Repeat * Constants.FRAME_TIME), tempActions[actionName].Item2));
+                        actions.Add(actionName, (now + (long)(tempActions[actionName].Item2.Repeat * Constants.CONTROL_FRAME_TIME), tempActions[actionName].Item2));
                         if (tempActions[actionName].Item2.executionType == ItemAction.ExecutionType.OnlyFirstTime)
                         {
                             tempActions[actionName].Item2.Repeat = 0;
@@ -73,7 +82,10 @@ namespace Fanior.Shared
                 }
             }
         }
+        public virtual void ReceiveRandomNumbers(List<double> numbers)
+        {
 
+        }
         //Idea that actions will be reversed, then I would add pending actions and then I would execute them several times to reach current state
         //This way I would execute pending actions in the past, when the actually happened... didn't work...
         /// <summary>
@@ -131,9 +143,9 @@ namespace Fanior.Shared
         /// <param name="action">ItemAction to add</param>
         /// <param name="rewrite">Whether to rewrite running action</param>
         /// <param name="delay">"When to execute the action. Gotta be (now + delay) "</param>
-        public void AddAction(ItemAction action, long delay = 0, bool rewrite = true)
+        public void AddAction(Gvars gvars, ItemAction action, long delay = 0, bool rewrite = true)
         {
-            this.AddAction(action, action.ActionName, delay, rewrite);
+            this.AddAction(gvars, action, action.ActionName, delay, rewrite);
         }
         /// <summary>
         /// Adds a new action to be executed
@@ -141,26 +153,29 @@ namespace Fanior.Shared
         /// <param name="action">ItemAction to add</param>
         /// <param name="storeName">The name the action will be stored in the dictionary under</param>
         /// <param name="rewrite">Whether to rewrite running action</param>
-        public void AddAction(ItemAction action, string storeName, long delay = 0, bool rewrite = true)
+        public void AddAction(Gvars gvars, ItemAction action, string storeName, long delay = 0, bool rewrite = true)
         {
-            if (action.Repeat > 1 || action.Repeat == 0)
+            if (gvars.server || action.ClientAction == true)
             {
-                if (!actions.ContainsKey(storeName))
-                    actions.Add(storeName, (delay, action));
-                else if (rewrite)
+                if (action.Repeat > 1 || action.Repeat == 0)
                 {
-                    actions.Remove(storeName);
-                    actions.Add(storeName, (delay, action));
+                    if (!actions.ContainsKey(storeName))
+                        actions.Add(storeName, (delay, action));
+                    else if (rewrite)
+                    {
+                        actions.Remove(storeName);
+                        actions.Add(storeName, (delay, action));
+                    }
                 }
-            }
-            else
-            {
-                if (!actionsEveryFrame.ContainsKey(storeName))
-                    actionsEveryFrame.Add(storeName, action);
-                else if (rewrite)
+                else
                 {
-                    actionsEveryFrame.Remove(storeName);
-                    actionsEveryFrame.Add(storeName, action);
+                    if (!actionsEveryFrame.ContainsKey(storeName))
+                        actionsEveryFrame.Add(storeName, action);
+                    else if (rewrite)
+                    {
+                        actionsEveryFrame.Remove(storeName);
+                        actionsEveryFrame.Add(storeName, action);
+                    }
                 }
             }
         }
@@ -186,6 +201,7 @@ namespace Fanior.Shared
             {
                 gvars.ItemsStep.Remove(this.Id);
             }
+            gvars.Msg.itemsToDestroy.Add(this.Id);
         }
         public virtual void SetItemFromClient(Gvars gvars)
         {
@@ -193,6 +209,24 @@ namespace Fanior.Shared
             {
                 gvars.Items.Add(Id, this);
                 gvars.Id++;
+            }
+            var tempList = new Dictionary<string, ItemAction>(actionsEveryFrame);
+
+            foreach (var action in tempList.Keys)
+            {
+                if (!actionsEveryFrame[action].ClientAction)
+                {
+                    DeleteAction(actionsEveryFrame[action].ActionName);
+                }
+            }
+
+            Dictionary<string, (long, ItemAction)> tempActions = new Dictionary<string, (long, ItemAction)>(actions);
+            foreach (var actionName in tempActions.Keys)
+            {
+                if (!actions[actionName].Item2.ClientAction)
+                {
+                    DeleteAction(actions[actionName].Item2.ActionName);
+                }
             }
         }
         public Item() { }
@@ -212,6 +246,8 @@ namespace Fanior.Shared
             Solid = !justGraphics;
             this.Id = gvars.Id++;
             gvars.Items.Add(Id, this);
+            
+            gvars.Msg.itemsToCreate.Add(this);
         }
     }
 }

@@ -26,15 +26,17 @@ namespace Fanior.Shared
                 angle = value % (Math.PI * 2);
             }
         }
-        public abstract (double, double) Move();
+        public abstract (double, double) Move(double percentage);
         //what will happen every frame
         public abstract void Frame(double friction);
         public abstract void AntiFrame(double friction);
         //change properties of this movement
         public abstract void ResetMovementAngle(double angle);
         public abstract void ResetMovementSpeed(double speed);
-        //proceed action of this movement on call (eg. player keeps on pressing arrow up)
-        public abstract void UpdateMovement();
+        /// <summary>
+        /// proceed action of this movement on call (eg. player keeps on pressing arrow up)
+        /// </summary>
+        public abstract void UpdateMovement(double percentage);
         public abstract void AntiUpdateMovement();
         public virtual void SuddenStop()
         {

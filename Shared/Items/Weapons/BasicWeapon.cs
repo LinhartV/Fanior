@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Fanior.Shared
 {
-    class BasicWeapon : Weapon
+    public class BasicWeapon : Weapon
     {
         public BasicWeapon(bool autoFire, double reloadTime, int shotSpeed, double damage) : base(autoFire, reloadTime, shotSpeed, damage)
         {

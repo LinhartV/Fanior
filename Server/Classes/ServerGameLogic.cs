@@ -10,13 +10,14 @@ namespace Fanior.Server.Classes
 {
     public static class ServerGameLogic
     {
+        
         public static void SetupGvarsActions(Gvars gvars, GameControl gameControl)
         {
 
             //Create coin
-            gameControl.gvarsActions[gvars.GameId].Add((0, 5000, 10000, (hub) =>
+           /* gameControl.gvarsActions[gvars.GameId].Add((gameControl.sw.ElapsedMilliseconds+1000, 5000, 10000, (hub) =>
             {
-                if (gvars.counts[0] < 8)
+                if (gvars.counts[0] < 12)
                 {
                     Coin c;
                     if (ToolsGame.random.NextDouble() < 0.5)
@@ -24,21 +25,21 @@ namespace Fanior.Server.Classes
                     else
                         c = new Coin(20, gvars, (double)(ToolsGame.random.NextDouble() * gvars.ArenaWidth), (double)(ToolsGame.random.NextDouble() * gvars.ArenaHeight), new Shape("orange", "black", 2, 17, 17, Shape.GeometryEnum.circle));
 
-                    hub?.Clients.All.SendAsync("CreateNewItem", JsonConvert.SerializeObject(c, ToolsSystem.jsonSerializerSettings));
+                    //hub?.Clients.All.SendAsync("CreateNewItem", JsonConvert.SerializeObject(c, ToolsSystem.jsonSerializerSettings));
                 }
             }
-            ));
+            ));*/
             //Create boss
-            gameControl.gvarsActions[gvars.GameId].Add((0, 2000, 5000, (hub) =>
+            gameControl.gvarsActions[gvars.GameId].Add((gameControl.sw.ElapsedMilliseconds + 1000, 2000, 5000, (hub) =>
             {
-                /*lock (gameControl.creatingObjectsLock)
+                lock (gameControl.creatingObjectsLock)
                 {
-                    if (gvars.counts[1] < 1)
+                    if (gvars.CountOfItems[ToolsGame.Counts.enemies] < 1)
                     {
-                        Enemy e = new Enemy(gvars, gvars.ArenaWidth / 2, gvars.ArenaHeight / 2, new Shape("black", "grey", 5, 300, 300, Shape.GeometryEnum.circle), new AcceleratedMovement(2, 0, 0.05, 5), 5, 0.05, 0, 200, 1, null, 2000, new RandomGoingAI(), 100);
-                        hub?.Clients.All.SendAsync("CreateNewItem", JsonConvert.SerializeObject(e, ToolsSystem.jsonSerializerSettings));
+                        Enemy e = new Enemy(gvars, (double)gvars.ArenaWidth / 2, (double)gvars.ArenaHeight / 2, new Shape("black", "black", 5, 300, 300, Shape.GeometryEnum.circle), new AcceleratedMovement(2, 0, 0.05, 5), 5, 0.05, 0, 200, 1, null, 2000, new RandomGoingAI(), 100);
+
                     }
-                }*/
+                }
             }
             ));
         }

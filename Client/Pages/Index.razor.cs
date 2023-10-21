@@ -85,7 +85,7 @@ namespace Fanior.Client.Pages
                 {
                     DefaultAssingOfKeys();
                     PlayerActions.SetupActions();
-                    LambdaActions.setupLambdaActions();
+                    LambdaActions.SetupLambdaActions();
                 }
                 await InvokeAsync(() => this.StateHasChanged());
                 animEnd = false;
@@ -189,91 +189,52 @@ namespace Fanior.Client.Pages
                 }
             });
         }*/
-        private async Task Animate(bool down)
-        {
-            zindex = 100;
-            while (true)
-            {
-                if (down)
-                    opacity -= 0.05;
-                else
-                    opacity += 0.05;
-                await Task.Delay(10);
-                if (opacity < 0)
-                {
-                    zindex = -100;
-                    opacity = 0;
-                    break;
-                }
-                if (opacity > 1)
-                {
-                    opacity = 1;
-                    break;
-                }
-                StateHasChanged();
-            }
-            StateHasChanged();
 
-        }
-       /* int movementCounter = 0;
-        private void Movement()
-        {
-            lock (actionLock)
-            {
-                foreach (var item in coordinates)
-                {
-                    if (movementCounter < 5)
-                    {
-                        gvars.Items[item.Key].VirtualX += (item.Value.Item1 - gvars.Items[item.Key].X) / 4;
-                        gvars.Items[item.Key].VirtualY += (item.Value.Item2 - gvars.Items[item.Key].Y) / 4;
-                    }
-                }
-                movementCounter++;
-            }
-        }*/
-
-        private async void EndGame()
-        {
-            try
-            {
-                animEnd = true;
-                timer.Change(Timeout.Infinite, Timeout.Infinite);
-                firstConnect = 1;
-                await Animate(false);
-                await hubConnection.DisposeAsync();
-                player = null;
-                gvars = null;
-                pressedKeys.Clear();
-                hubConnection = null;
-                myActions.Clear();
-                this.id = 0;
-                await Animate(true);
-            }
-            catch (Exception e)
-            {
-
-                throw;
-            }
-
-        }
+        /* int movementCounter = 0;
+         private void Movement()
+         {
+             lock (actionLock)
+             {
+                 foreach (var item in coordinates)
+                 {
+                     if (movementCounter < 5)
+                     {
+                         gvars.Items[item.Key].VirtualX += (item.Value.Item1 - gvars.Items[item.Key].X) / 4;
+                         gvars.Items[item.Key].VirtualY += (item.Value.Item2 - gvars.Items[item.Key].Y) / 4;
+                     }
+                 }
+                 movementCounter++;
+             }
+         }*/
+        long avg;
+        long frameDuration = 0;
         private async Task Frame()
         {
             try
             {
                 //send serialized actions, game id, item id and angle of player that is sent every frame
-                await Task.Run(() => hubConnection.SendAsync("ExecuteList", JsonConvert.SerializeObject(myActions, ToolsSystem.jsonSerializerSettings), gvars.GameId, this.id, player.Angle, sendMessageId));
+                sw2.Start();
+                await hubConnection.SendAsync("ExecuteList", JsonConvert.SerializeObject(myActions, ToolsSystem.jsonSerializerSettings), gvars.GameId, this.id, player.Angle, sendMessageId);
+
                 sendMessageId++;
+                gvars.PlayerActions[id] = new List<(PlayerActions.PlayerActionsEnum, bool)>(myActions);
                 myActions.Clear();
                 lock (frameLock)
                 {
+                    double percantage = (sw.ElapsedMilliseconds - frameDuration) / Constants.GAMEPLAY_FRAME_TIME;
+                    frameDuration = sw.ElapsedMilliseconds;
                     ToolsGame.ProceedFrame(gvars, gvars.GetNow(), delay, false);
                     if (player.Score >= nextLevel)
                     {
                         //Bonus
                         nextLevel = nextLevel * 5 / 2;
                     }
+                    gvars.PlayerActions[id].Clear();
                 }
-                StateHasChanged();
+                sw2.Stop();
+                avg += sw2.ElapsedMilliseconds;
+                Console.WriteLine(sw2.ElapsedMilliseconds);
+                sw2.Reset();
             }
             catch (Exception e)
             {
@@ -281,7 +242,7 @@ namespace Fanior.Client.Pages
                 throw;
             }
         }
-        private void ExecuteList(string actionMethodNamesJson, long messageId, Dictionary<int, double> playerInfo, long now, Dictionary<int, (double, double)> coordinates)
+        private void ExecuteList(long now, long messageId, string actionMethodNamesJson, Dictionary<int, double> playerInfo, string itemsToCreateJson, List<int> itemsToDestroy)
         {
             /*if (counter == 0)
             {
@@ -295,35 +256,56 @@ namespace Fanior.Client.Pages
             {
                 return;
             }
-            delay = (int)(now - gvars.GetNow());
+            //delay = (int)(now - gvars.GetNow());
             //int frames = (int)Math.Floor((double)delay / Constants.FRAME_TIME);
             //Console.WriteLine(delay);
-            Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>> actionMethodNames = JsonConvert.DeserializeObject<Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
+            try
+            {
+                Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>> actionMethodNames = JsonConvert.DeserializeObject<Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
+                List<Item> itemsToCreate = JsonConvert.DeserializeObject<List<Item>>(itemsToCreateJson, ToolsSystem.jsonSerializerSettings);
 
-            foreach (int itemId in actionMethodNames.Keys)
-            {
-                gvars.ItemsPlayers[itemId].SetActions(now, gvars, Constants.DELAY - delay, actionMethodNames[itemId]);
-            }
-            foreach (var id in playerInfo.Keys)
-            {
-                if (id != this.id)
+
+                foreach (var itemId in itemsToDestroy)
                 {
-                    gvars.ItemsPlayers[id].Angle = playerInfo[id];
+                    gvars.Items[itemId].Dispose(gvars);
                 }
-            }
-            lock (actionLock)
-            {
-                foreach (var item in coordinates)
+                foreach (var item in itemsToCreate)
                 {
-                    gvars.Items[item.Key].X = item.Value.Item1;
-                    gvars.Items[item.Key].Y = item.Value.Item2;
+                    if (id != 0)
+                    {
+                        item.SetItemFromClient(gvars);
+                    }
                 }
-                /*this.coordinates = coordinates;
-                movementCounter = 0;*/
+                foreach (int itemId in actionMethodNames.Keys)
+                {
+                    gvars.ItemsPlayers[itemId].SetActions(now, gvars, Constants.DELAY, actionMethodNames[itemId]);
+                }
+                foreach (var id in playerInfo.Keys)
+                {
+                    if (id != this.id)
+                    {
+                        gvars.ItemsPlayers[id].Angle = playerInfo[id];
+                    }
+                }
+                /*lock (actionLock)
+                {
+                    foreach (var item in coordinates)
+                    {
+                        gvars.Items[item.Key].X = item.Value.Item1;
+                        gvars.Items[item.Key].Y = item.Value.Item2;
+                    }
+                    //this.coordinates = coordinates;
+                    //movementCounter = 0;
+                }*/
+            }
+            catch (Exception e)
+            {
+
             }
         }
 
         #endregion
+
         #region Set connection
         public async Task SetConnection()
         {
@@ -336,6 +318,18 @@ namespace Fanior.Client.Pages
                 counter++;
                 StateHasChanged();
             });
+            hubConnection.On<string>("ReceiveRandomNumbers", (listJson) =>
+            {
+                List<Gvars.Message.RandomNumbers> list = JsonConvert.DeserializeObject<List<Gvars.Message.RandomNumbers>>(listJson, ToolsSystem.jsonSerializerSettings);
+                foreach (var item in list)
+                {
+                    if (item.purpose == "randomAI")
+                    {
+                        ((gvars.ItemsStep[item.id] as Enemy).ai as RandomGoingAI).ReceiveRandomNumbers(item.numbers);
+                    }
+
+                }
+            });
             hubConnection.On<int>("PlayerDied", (id) =>
             {
                 gvars.ItemsPlayers[id].Dispose(gvars);
@@ -344,22 +338,24 @@ namespace Fanior.Client.Pages
                     EndGame();
                 }
             });
-            hubConnection.On<string>("CreateNewItem", (itemJson) =>
+            /*hubConnection.On<string>("CreateNewItem", (itemJson) =>
             {
                 if (id != 0)
                 {
                     Item item = JsonConvert.DeserializeObject<Item>(itemJson, ToolsSystem.jsonSerializerSettings);
                     item.SetItemFromClient(gvars);
                 }
-            });
+            });*/
+
             //Actions to be proceeded that server sent to client 
             //Dictionary of list of actions assigned to object id along with information, if it's keydown or keyup (true = keydown).
             //+messageId to check if connection was lost.
-            hubConnection.On<long, long, string, Dictionary<int, double>, string>("ExecuteList", (now, messageId, actionMethodNamesJson, playerInfo, coordinates) =>
+            //time, messageId, PlayerActions, angles, itemsToCreate, itemsToDestroy (id)
+            hubConnection.On<long, long, string, Dictionary<int, double>, string, List<int>>("ExecuteList", (now, messageId, actionMethodNamesJson, playerInfo, itemsToCreate, itemsToDestroy) =>
             {
                 try
                 {
-                    ExecuteList(actionMethodNamesJson, messageId, playerInfo, now, JsonConvert.DeserializeObject<Dictionary<int, (double, double)>>(coordinates, ToolsSystem.jsonSerializerSettings));
+                    ExecuteList(now, messageId, actionMethodNamesJson, playerInfo, itemsToCreate, itemsToDestroy);
                 }
                 catch (Exception e)
                 {
@@ -378,7 +374,9 @@ namespace Fanior.Client.Pages
                     JoinGame(idReceived);
                     ReceiveGvars(gvarsJson);
                     gvars.StartMeasuringTime(now);
+                    gvars.PlayerActions.Add(id, null);
                     startTime = now;
+                    frameDuration = now;
                     sw.Start();
                     foreach (var item in gvars.Items.Values)
                     {
@@ -421,6 +419,7 @@ namespace Fanior.Client.Pages
             try
             {
                 gvars = JsonConvert.DeserializeObject<Gvars>(gvarsJson, ToolsSystem.jsonSerializerSettings);
+                gvars.server = false;
                 player = gvars.ItemsPlayers[id];
                 player.SetItemFromClient(gvars);
                 if (firstConnect > 0)
@@ -433,7 +432,7 @@ namespace Fanior.Client.Pages
                             if (firstConnect == 0)
                                 Frame();
                             await InvokeAsync(StateHasChanged);
-                        }, null, 0, Constants.FRAME_TIME);
+                        }, null, 0, Constants.CONTROL_FRAME_TIME);
                     });
                     firstConnect = 0;
                 }
@@ -487,8 +486,8 @@ namespace Fanior.Client.Pages
                     selfReference = DotNetObjectReference.Create(this);
 
                     var minInterval = 20;
-                    await JS.InvokeVoidAsync("onThrottledMouseMove",
-                        mySvg, selfReference, minInterval);
+                    /*await JS.InvokeVoidAsync("onThrottledMouseMove",
+                         mySvg, selfReference, minInterval);*/
                     await JS.InvokeVoidAsync("onKeyDown",
                         mySvg, selfReference);
                     await JS.InvokeVoidAsync("onKeyUp",
@@ -502,6 +501,56 @@ namespace Fanior.Client.Pages
 
                 throw;
             }
+        }
+        private async Task Animate(bool down)
+        {
+            zindex = 100;
+            while (true)
+            {
+                if (down)
+                    opacity -= 0.05;
+                else
+                    opacity += 0.05;
+                await Task.Delay(10);
+                if (opacity < 0)
+                {
+                    zindex = -100;
+                    opacity = 0;
+                    break;
+                }
+                if (opacity > 1)
+                {
+                    opacity = 1;
+                    break;
+                }
+                StateHasChanged();
+            }
+            StateHasChanged();
+
+        }
+        private async void EndGame()
+        {
+            try
+            {
+                animEnd = true;
+                timer.Change(Timeout.Infinite, Timeout.Infinite);
+                firstConnect = 1;
+                await Animate(false);
+                await hubConnection.DisposeAsync();
+                player = null;
+                gvars = null;
+                pressedKeys.Clear();
+                hubConnection = null;
+                myActions.Clear();
+                this.id = 0;
+                await Animate(true);
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+
         }
         #endregion
 

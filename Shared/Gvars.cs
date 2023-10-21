@@ -24,12 +24,54 @@ namespace Fanior.Shared
                 this.action = action;
             }
         }
+        public Message Msg { get;} = new Message();
+        /// <summary>
+        /// class for collection messages sent to client
+        /// </summary>
+        public class Message
+        {
+            public Message()
+            {
+            }
+
+            public List<Item> itemsToCreate = new List<Item>();
+            /// <summary>
+            /// list of items to destroy by their id
+            /// </summary>
+            public List<int> itemsToDestroy = new List<int>();
+            public List<RandomNumbers> randomNumbersList = new();
+
+            public class RandomNumbers
+            {
+                public List<double> numbers;
+                public string purpose;
+                public int id;
+
+                public RandomNumbers()
+                {
+                }
+
+                public RandomNumbers(List<double> numbers, string purpose, int id)
+                {
+                    this.numbers = numbers;
+                    this.purpose = purpose;
+                    this.id = id;
+                }
+            }
+            public void ClearThis()
+            {
+                itemsToCreate.Clear();
+                itemsToDestroy.Clear();
+                randomNumbersList.Clear();
+            }
+        }
         //id of sent messages
         public long messageId = 0;
         //milliseconds elapsed from the launch of server
         private long now;
         private Stopwatch sw = new Stopwatch();
-
+        //if this particular Gvars are on server or client
+        public bool server;
         //all items
         public Dictionary<int, Item> Items { get; set; } = new Dictionary<int, Item>();
         //derived dictionaries
@@ -43,8 +85,9 @@ namespace Fanior.Shared
         public Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>> PlayerActions { get; set; } = new();
         //angles of all players (id, angle)
         public Dictionary<int, double> PlayerInfo { get; set; } = new();
-        //count of items in arena. First coins.
-        public int[] counts = new int[2];
+        
+        //count of items in arena.
+        public Dictionary<ToolsGame.Counts, int> CountOfItems { get; set; } = new() { { ToolsGame.Counts.coins, 0 }, { ToolsGame.Counts.enemies, 0} };
         //size of arena
         public double ArenaWidth { get; set; }
         public double ArenaHeight { get; set; }
@@ -52,6 +95,8 @@ namespace Fanior.Shared
         public bool ready = false;
         //Game id of this arena
         public string GameId { get; set; }
+
+        public double PercentageOfFrame { get; set; }
 
         //Id for item creation
         public int Id { get; set; } = 1;
@@ -87,7 +132,7 @@ namespace Fanior.Shared
                     gameActions.Remove(action);
                     if (action.Item2.repeat > 0)
                     {
-                        gameActions.Add((now + (long)(action.Item2.repeat * Constants.FRAME_TIME), action.Item2));
+                        gameActions.Add((now + (long)(action.Item2.repeat * Constants.CONTROL_FRAME_TIME), action.Item2));
                     }
                 }
             }

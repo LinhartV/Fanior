@@ -35,7 +35,7 @@ namespace Fanior.Server.Classes
         {
             sw.Start();
             PlayerActions.SetupActions();
-            LambdaActions.setupLambdaActions();
+            LambdaActions.SetupLambdaActions();
         }
         //adds new player to concrete arena if possible
         public Gvars AddPlayer(string gameId)
@@ -60,6 +60,7 @@ namespace Fanior.Server.Classes
             }
             games["someId"] = new Gvars("someId");
             games["someId"].StartMeasuringTime(sw.ElapsedMilliseconds);
+            games["someId"].server = true;
             tempPlayerInfo.Add("someId", new Dictionary<int, double>());
             tempPlayerActions.Add("someId", new Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>>());
             gvarsActions.Add("someId", new List<(long, int, int, Action<IHubContext<MyHub>>)>());

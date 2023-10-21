@@ -19,9 +19,9 @@ namespace Fanior.Shared
             this.CharacterId = characterId;
             Solid = false;
             AddMovement(movementSpeed, angle, acceleration);
-            this.AddAction(new ItemAction("dispose", lifeSpan, ItemAction.ExecutionType.OnlyFirstTime), "dispose");
+            this.AddAction(gvars, new ItemAction("dispose", lifeSpan, ItemAction.ExecutionType.OnlyFirstTime), "dispose");
         }
-        public override void Collide(Item collider, double angle, Gvars gvars)
+        public override void CollideServer(Item collider, double angle, Gvars gvars)
         {
             if ((collider.Solid || collider is Character) && collider.Id != this.CharacterId)
             {

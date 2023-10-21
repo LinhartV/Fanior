@@ -40,9 +40,9 @@ namespace Fanior.Shared
             }
         }
 
-        public override (double, double) Move()
+        public override (double, double) Move(double percentage)
         {
-            return ToolsMath.PolarToCartesian(Angle, MovementSpeed); 
+            return ToolsMath.PolarToCartesian(Angle, MovementSpeed * percentage); 
 
         }
 
@@ -54,7 +54,7 @@ namespace Fanior.Shared
         {
             this.baseSpeed = speed;
         }
-        public override void UpdateMovement()
+        public override void UpdateMovement(double percentage)
         {
             stopMovement = 0;
         }

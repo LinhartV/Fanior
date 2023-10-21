@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using static Fanior.Shared.PlayerActions;
@@ -13,22 +14,15 @@ namespace Fanior.Shared
     public class LambdaActions
     {
         /// <summary>
-        /// Dictionary of all actions. Key - name, Value - Action(gvars, id of item), AntiAction for reversing frames
+        /// Dictionary of actions. Key - name, Value - Action(gvars, id of item)
         /// </summary>
-        private static Dictionary<string, (Action<Gvars, int>, Action<Gvars, int>)> lambdaActions = new();
+        private static Dictionary<string, Action<Gvars, int>> lambdaActions = new();
+        
 
-        public static void setupLambdaActions()
+        public static void SetupLambdaActions()
         {
-            lambdaActions.Add("move", ((gvars, id) =>
-            {
-                (gvars.Items[id] as Movable).Move();
-            }, (gvars, id) =>
-            {
-                (gvars.Items[id] as Movable).AntiMove();
-            }
-            ));
 
-            lambdaActions.Add("fire1", ((gvars, id) =>
+            lambdaActions.Add("fire1", (gvars, id) =>
             {
                 Character character = gvars.Items[id] as Character;
                 if (!character.Weapon.reloaded)
@@ -41,87 +35,37 @@ namespace Fanior.Shared
                     character.Weapon.Fire(gvars);
                 }
 
-            }, (gvars, id) =>
-            {
+            }
+            );
+            lambdaActions.Add("fire2", ((gvars, id) => { (gvars.Items[id] as Character).Weapon.reloaded = true; }));
+            lambdaActions.Add("dispose", ((gvars, id) => { gvars.Items[id].Dispose(gvars); }));
 
+            lambdaActions.Add("move", (gvars, id) =>
+            {
+                (gvars.Items[id] as Movable).Move(gvars.PercentageOfFrame);
             }
-            ));
-            lambdaActions.Add("fire2", ((gvars, id) =>
-            {
-                (gvars.Items[id] as Character).Weapon.reloaded = true;
-            }, (gvars, id) =>
-            {
-                (gvars.Items[id] as Character).Weapon.reloaded = false;
-            }
-            ));
-            lambdaActions.Add("up", ((gvars, id) =>
-            {
-                (gvars.Items[id] as Player).UpdateControlledMovement("up");
-            }, (gvars, id) =>
-            {
-                (gvars.Items[id] as Player).AntiUpdateControlledMovement("up");
-            }
-            ));
-            lambdaActions.Add("down", ((gvars, id) =>
-            {
-                (gvars.Items[id] as Player).UpdateControlledMovement("down");
-            }, (gvars, id) =>
-            {
-                (gvars.Items[id] as Player).AntiUpdateControlledMovement("down");
-            }
-            ));
-            lambdaActions.Add("right", ((gvars, id) =>
-            {
-                (gvars.Items[id] as Player).UpdateControlledMovement("right");
-            }, (gvars, id) =>
-            {
-                (gvars.Items[id] as Player).AntiUpdateControlledMovement("right");
-            }
-            ));
-            lambdaActions.Add("left", ((gvars, id) =>
-            {
-                (gvars.Items[id] as Player).UpdateControlledMovement("left");
-            }, (gvars, id) =>
-            {
-                (gvars.Items[id] as Player).AntiUpdateControlledMovement("left");
-            }
-            ));
-            lambdaActions.Add("dispose", ((gvars, id) =>
-            {
-                gvars.Items[id].Dispose(gvars);
-            }, (gvars, id) =>
-            {
-                //Antidispose?
-            }
-            ));
+            );
+            lambdaActions.Add("up", ((gvars, id) => { (gvars.Items[id] as Player).UpdateControlledMovement("up", gvars.PercentageOfFrame); }));
+            lambdaActions.Add("down", ((gvars, id) => { (gvars.Items[id] as Player).UpdateControlledMovement("down", gvars.PercentageOfFrame); }));
+            lambdaActions.Add("right", ((gvars, id) => { (gvars.Items[id] as Player).UpdateControlledMovement("right", gvars.PercentageOfFrame); }));
+            lambdaActions.Add("left", ((gvars, id) => { (gvars.Items[id] as Player).UpdateControlledMovement("left", gvars.PercentageOfFrame); }));
 
-            lambdaActions.Add("regenerate", ((gvars, id) =>
+            lambdaActions.Add("regenerate", ((gvars, id) => { ILived l = gvars.Items[id] as ILived; if (l.GetCurLives() > 0) { l.ChangeCurLives(l.Regeneration*gvars.PercentageOfFrame, null, gvars); } }));
+            lambdaActions.Add("outsideArena", ((gvars, id) =>
             {
-                ILived l = gvars.Items[id] as ILived;
-                if (l.GetCurLives() > 0)
+                Player player = gvars.Items[id] as Player;
+                if (player.X < 0 || player.X > gvars.ArenaWidth || player.Y > gvars.ArenaHeight || player.Y < 0)
                 {
-                    l.ChangeCurLives(l.Regeneration, null, gvars);
+                    player.ChangeCurLives(-1*gvars.PercentageOfFrame, null, gvars);
                 }
-            }, (gvars, id) =>
-            {
-            }
-            ));
-            lambdaActions.Add("enemyAI", ((gvars, id) =>
-            {
-                (gvars.ItemsStep[id] as Enemy).ai.Control(gvars, gvars.ItemsStep[id] as Enemy);
-            }, (gvars, id) =>
-            {
-            }
-            ));
+            }));
+
+            lambdaActions.Add("enemyAI", ((gvars, id) => { (gvars.ItemsStep[id] as Enemy).ai.Control(gvars, gvars.ItemsStep[id] as Enemy); }));
 
         }
         public static void executeAction(string actionName, Gvars gvars, int id)
         {
-            lambdaActions[actionName].Item1(gvars, id);
-        }
-        public static void executeAntiAction(string actionName, Gvars gvars, int id)
-        {
-            lambdaActions[actionName].Item2(gvars, id);
+            lambdaActions[actionName](gvars, id);
         }
     }
 }

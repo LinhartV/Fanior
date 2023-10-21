@@ -45,9 +45,9 @@ namespace Fanior.Shared
                 MovementSpeed = 0;
         }
 
-        public override (double, double) Move()
+        public override (double, double) Move(double percentage)
         {
-            return ToolsMath.PolarToCartesian(Angle, MovementSpeed);
+            return ToolsMath.PolarToCartesian(Angle, MovementSpeed * percentage);
         }
 
         public override void ResetMovementAngle(double angle)
@@ -59,11 +59,11 @@ namespace Fanior.Shared
             maxSpeed = speed;
         }
 
-        public override void UpdateMovement()
+        public override void UpdateMovement(double percentage)
         {
             if (MovementSpeed < maxSpeed)
             {
-                MovementSpeed += acceleration;
+                MovementSpeed += acceleration * percentage;
             }
             else
             {

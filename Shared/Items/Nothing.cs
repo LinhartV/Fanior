@@ -12,7 +12,12 @@ namespace Fanior.Shared
         public Nothing(Gvars gvars, double x, double y, Shape shape, Mask mask)
             : base(gvars, x, y, shape, mask) { }
 
-        public override void Collide(Item collider, double angle, Gvars gvars)
+        public override void CollideClient(Item collider, double angle, Gvars gvars)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void CollideServer(Item collider, double angle, Gvars gvars)
         {
             throw new NotImplementedException();
         }

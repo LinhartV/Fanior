@@ -19,15 +19,19 @@ namespace Fanior.Shared
         //whether the action will be repeated and if so, how long it take between each repetition (number of frames)
         [JsonProperty]
         private double repeat;
+        [JsonProperty]
+        public bool ClientAction { get; set; }
         public ExecutionType executionType;
         /// <summary>
         /// Creates ItemAction - any possible action can be assigned to item
         /// </summary>
         /// <param name="actionName">Name of an action from LambdaActions</param>
-        /// <param name="repeat">how many frames to wait between executions</param>
+        /// <param name="repeat">How many frames to wait between executions (0 = only first time, 1 = each frame)</param>
+        /// <param name="clientAction">Whether this action should be executed on client side</param>
         /// <param name="executionType"></param>
-        public ItemAction(string actionName, double repeat, ExecutionType executionType = ExecutionType.EveryTime)
+        public ItemAction(string actionName, double repeat, ExecutionType executionType = ExecutionType.EveryTime, bool clientAction = false)
         {
+            this.ClientAction = clientAction;
             ActionName = actionName;
             Repeat = repeat;
             this.executionType = executionType;
