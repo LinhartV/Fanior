@@ -16,7 +16,7 @@ namespace Fanior.Shared
         /// <summary>
         /// Duration of actions that happens continuously (movement, healing etc.)
         /// </summary>
-        public const int GAMEPLAY_FRAME_TIME = 20;
+        public const int GAMEPLAY_FRAME_TIME = 30;
         public const int DELAY = 0;
     }
 }

@@ -41,7 +41,7 @@ namespace Fanior.Server
             {
                 while (stoppingToken.IsCancellationRequested == false)
                 {
-                    await DoWork();
+                    DoWork();
                     await Task.Delay(Constants.CONTROL_FRAME_TIME, stoppingToken);
                 }
             });
@@ -87,7 +87,7 @@ namespace Fanior.Server
             }
         }
 
-        long now = 0;
+        double now = 0;
         /// <summary>
         /// Algorithms to be done each frame
         /// </summary>
@@ -95,13 +95,14 @@ namespace Fanior.Server
         {
             try
             {
-                double percantage = (game.sw.ElapsedMilliseconds - now) / (double)Constants.GAMEPLAY_FRAME_TIME;
-                now = game.sw.ElapsedMilliseconds;
                 foreach (Gvars gvars in game.games.Values)
                 {
+                    double percantage = ToolsSystem.GetPercentageOfFrame(now, game.sw.Elapsed.TotalMilliseconds);
+                    now = game.sw.Elapsed.TotalMilliseconds;
+                    Console.WriteLine(now);
                     gvars.PercentageOfFrame = percantage;
                     ToolsGame.ProceedFrame(gvars, now, Constants.DELAY, true);
-                    ServerGameLogic.ExecuteActions(game.sw.ElapsedMilliseconds, game, gvars, hub);
+                    ServerGameLogic.ExecuteActions(game.sw.Elapsed.TotalMilliseconds, game, gvars, hub);
                     gvars.messageId++;
                     foreach (var player in gvars.ItemsPlayers.Values)
                     {
@@ -113,7 +114,7 @@ namespace Fanior.Server
                         }
                     }
                 }
-                await SendData(game, hub);
+                //await SendData(game, hub);
             }
             catch (Exception e)
             {
@@ -132,7 +133,7 @@ namespace Fanior.Server
                 {//Group(gvars.GameId)
                  //actual time for delay, message id for check if messages are in order, playerActions, angle of every player, itemsToCreate, itemsToDestroy
 
-                    hub?.Clients.All.SendAsync("ExecuteList", game.sw.ElapsedMilliseconds, gvars.messageId, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings), gvars.PlayerInfo,
+                    hub?.Clients.All.SendAsync("ExecuteList", game.sw.Elapsed.TotalMilliseconds, gvars.messageId/*, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings)*/, gvars.PlayerInfo,
                         JsonConvert.SerializeObject(gvars.Msg.itemsToCreate, ToolsSystem.jsonSerializerSettings), gvars.Msg.itemsToDestroy
                         /*, JsonConvert.SerializeObject(GetItemCoordinates(gvars), ToolsSystem.jsonSerializerSettings)*/);
                     if (gvars.Msg.randomNumbersList.Count > 0)

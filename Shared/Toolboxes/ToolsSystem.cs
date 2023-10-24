@@ -28,7 +28,10 @@ namespace Fanior.Shared
             item.SetItemFromClient(gvars);
             return item;
         }
-
+        public static double GetPercentageOfFrame(double previousTick, double now)
+        {
+            return (now - previousTick) / (double)Constants.GAMEPLAY_FRAME_TIME;
+        }
         /*public static void Execute(string actionMethodName, Gvars gvars, int playerId)
         {
             Type thisType = typeof(PlayerAction);

@@ -25,7 +25,7 @@ namespace Fanior.Shared
         public Shape Shape { get; set; }
         //actions of this item with information when to be execuded, accessed by name.
         [JsonProperty]
-        private Dictionary<string, (long, ItemAction)> actions = new();
+        private Dictionary<string, (double, ItemAction)> actions = new();
         //actions of this item to be executed everyFrame
         [JsonProperty]
         private Dictionary<string, ItemAction> actionsEveryFrame = new();
@@ -48,14 +48,14 @@ namespace Fanior.Shared
         /// Actions to be executed in the current frame. Is action is supposed to repeat, it will be added again to the list.
         /// Due to possible differences in duration of particular frames, actions will be executed be number of frames, not real time
         /// </summary>
-        public void ExecuteActions(long now, Gvars gvars, bool server)
+        public void ExecuteActions(double now, Gvars gvars, bool server)
         {
             foreach (var action in actionsEveryFrame.Values)
             {
                 LambdaActions.executeAction(action.ActionName, gvars, this.Id);
             }
 
-            Dictionary<string, (long, ItemAction)> tempActions = new Dictionary<string, (long, ItemAction)>(actions);
+            Dictionary<string, (double, ItemAction)> tempActions = new Dictionary<string, (double, ItemAction)>(actions);
             foreach (var actionName in tempActions.Keys)
             {
                 if (tempActions[actionName].Item1 < now)
@@ -71,7 +71,7 @@ namespace Fanior.Shared
                     actions.Remove(actionName);
                     if (tempActions[actionName].Item2.Repeat > 0 && tempActions[actionName].Item2.executionType != ItemAction.ExecutionType.StopExecuting)
                     {
-                        actions.Add(actionName, (now + (long)(tempActions[actionName].Item2.Repeat * Constants.CONTROL_FRAME_TIME), tempActions[actionName].Item2));
+                        actions.Add(actionName, (now + (double)(tempActions[actionName].Item2.Repeat * Constants.GAMEPLAY_FRAME_TIME), tempActions[actionName].Item2));
                         if (tempActions[actionName].Item2.executionType == ItemAction.ExecutionType.OnlyFirstTime)
                         {
                             tempActions[actionName].Item2.Repeat = 0;
@@ -91,7 +91,7 @@ namespace Fanior.Shared
         /// <summary>
         /// Invokes playerActions
         /// </summary>
-        public void SetActions(long now, Gvars gvars, int delay, List<(PlayerActions.PlayerActionsEnum, bool)> actionMethodNames)
+        public void SetActions(double now, Gvars gvars, int delay, List<(PlayerActions.PlayerActionsEnum, bool)> actionMethodNames)
         {
             /*for (int i = 0; i < frames; i++)
             {
@@ -220,7 +220,7 @@ namespace Fanior.Shared
                 }
             }
 
-            Dictionary<string, (long, ItemAction)> tempActions = new Dictionary<string, (long, ItemAction)>(actions);
+            Dictionary<string, (double, ItemAction)> tempActions = new Dictionary<string, (double, ItemAction)>(actions);
             foreach (var actionName in tempActions.Keys)
             {
                 if (!actions[actionName].Item2.ClientAction)
@@ -246,8 +246,11 @@ namespace Fanior.Shared
             Solid = !justGraphics;
             this.Id = gvars.Id++;
             gvars.Items.Add(Id, this);
-            
-            gvars.Msg.itemsToCreate.Add(this);
+
+            if (this is not Player)
+            { 
+                gvars.Msg.itemsToCreate.Add(this); 
+            }
         }
     }
 }

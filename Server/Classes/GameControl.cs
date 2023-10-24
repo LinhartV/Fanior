@@ -28,7 +28,7 @@ namespace Fanior.Server.Classes
         //gvarsId, ItemId, (action, pressed/released)   
         public Dictionary<string, Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>>> tempPlayerActions = new();
         //gvars id, action (when to execute by random (actual time, lower and upper bound), action itself)
-        public Dictionary<string, List<(long, int, int, Action<IHubContext<MyHub>>)>> gvarsActions = new();
+        public Dictionary<string, List<(double, int, int, Action<IHubContext<MyHub>>)>> gvarsActions = new();
         //control
         public int controlCount;
         public GameControl()
@@ -59,11 +59,11 @@ namespace Fanior.Server.Classes
                     return gvars;
             }
             games["someId"] = new Gvars("someId");
-            games["someId"].StartMeasuringTime(sw.ElapsedMilliseconds);
+            games["someId"].StartMeasuringTime(sw.Elapsed.TotalMilliseconds);
             games["someId"].server = true;
             tempPlayerInfo.Add("someId", new Dictionary<int, double>());
             tempPlayerActions.Add("someId", new Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>>());
-            gvarsActions.Add("someId", new List<(long, int, int, Action<IHubContext<MyHub>>)>());
+            gvarsActions.Add("someId", new List<(double, int, int, Action<IHubContext<MyHub>>)>());
             ServerGameLogic.SetupGvarsActions(games["someId"], this);
             return games["someId"];
         }

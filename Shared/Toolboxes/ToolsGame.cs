@@ -30,7 +30,7 @@ namespace Fanior.Shared
                 this.y = y;
             }
         }
-        public static void ProceedFrame(Gvars gvars, long now, int delay, bool server)
+        public static void ProceedFrame(Gvars gvars, double now, int delay, bool server)
         {
             try
             {
@@ -49,7 +49,7 @@ namespace Fanior.Shared
         /// <summary>
         /// Proceeds algorithm of game logic (collision detection etc.)
         /// </summary>
-        private static void ProcedeGameAlgorithms(Gvars gvars, long now, bool server)
+        private static void ProcedeGameAlgorithms(Gvars gvars, double now, bool server)
         {
             //Gvars Actions
             gvars.ExecuteActions(now);
@@ -81,6 +81,9 @@ namespace Fanior.Shared
         /// </summary>
         private static void ProcedePlayerActions(Gvars gvars, int delay, bool server)
         {
+            try
+            {
+
             foreach (int playerId in gvars.PlayerActions.Keys)
             {
                 var list = gvars.PlayerActions[playerId];
@@ -92,12 +95,17 @@ namespace Fanior.Shared
 
             PlayerActions.CheckForActions(gvars);
 
+            }
+            catch (Exception e)
+            {
+
+            }
         }
 
         /// <summary>
         /// Handles all actions of every item (excluding player actions)
         /// </summary>
-        private static void ProcedeItemActions(long now, Gvars gvars, bool server)
+        private static void ProcedeItemActions(double now, Gvars gvars, bool server)
         {
             var temp = new List<Item>(gvars.Items.Values);
             foreach (var item in temp)

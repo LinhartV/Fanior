@@ -17,13 +17,13 @@ namespace Fanior.Client
         public bool Pressed { get; set; } = false;
         //whether the functionality of this key is active of not
         public bool Active { get; set; } = true;
-        //actions assigned to each event - long is time, when the action happened
-        public Action<long> KeyDown { get; set; }
-        public Action<long> KeyUp { get; set; }
+        //actions assigned to each event - double is time, when the action happened
+        public Func<PlayerActions.PlayerActionsEnum> KeyDown { get; set; }
+        public Func<PlayerActions.PlayerActionsEnum> KeyUp { get; set; }
         public Action KeyPressed { get; set; }
 
         //Constroctur for actions proceeded on client side (settings etc.)
-        public RegisteredKey(Action<long> keyDown, Action<long> keyUp, Action keyPressed)
+        public RegisteredKey(Func<PlayerActions.PlayerActionsEnum> keyDown, Func<PlayerActions.PlayerActionsEnum> keyUp, Action keyPressed)
         {
             this.KeyDown = keyDown;
             this.KeyUp = keyUp;
@@ -33,28 +33,33 @@ namespace Fanior.Client
         //Constroctur for actions proceeded on both server and client side. So far only name of action enum sent to server. Better idea (PlayerAction.PlayerActionsEnum, bool, long) providing time when it happed
         public RegisteredKey(PlayerActions.PlayerActionsEnum action, List<(PlayerActions.PlayerActionsEnum, bool)> myActions)
         {
-            this.KeyDown = new Action<long>(async(long now) =>
+            this.KeyDown = () =>
             {
                 if (Pressed == false)
                 {
+                    Pressed = true;
                     if (action != PlayerActions.PlayerActionsEnum.none)
                     {
                         myActions.Add((action, true));
-                        
+                        return action;
                         //PlayerAction.InvokeAction(keyDown, true, a, g);
                     }
                 }
-                Pressed = true;
-            });
-            this.KeyUp = new Action<long>(async (long now) =>
+
+                return PlayerActions.PlayerActionsEnum.none;
+            };
+            this.KeyUp = () =>
             {
+                Pressed = false;
                 if (action != PlayerActions.PlayerActionsEnum.none)
                 {
                     myActions.Add((action, false));
+                    return action;
                     //PlayerAction.InvokeAction(keyUp, false, a, g);
                 }
-                Pressed = false;
-            });
+
+                return PlayerActions.PlayerActionsEnum.none;
+            };
         }
 
     }

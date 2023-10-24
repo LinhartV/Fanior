@@ -42,7 +42,7 @@ namespace Fanior.Shared
 
         static Dictionary<PlayerActionsEnum, KeyCommand> actions = new();
         //when; what; keydown?; id
-        static List<(long, PlayerActionsEnum, bool, int)> pendingActions = new();
+        static List<(double, PlayerActionsEnum, bool, int)> pendingActions = new();
 
 
 
@@ -70,7 +70,7 @@ namespace Fanior.Shared
         }
         public static void CheckForActions(Gvars gvars)
         {
-            var tempList = new List<(long, PlayerActionsEnum, bool, int)>(pendingActions);
+            var tempList = new List<(double, PlayerActionsEnum, bool, int)>(pendingActions);
             foreach (var item in tempList)
             {
                 if (item.Item1 < gvars.GetNow())

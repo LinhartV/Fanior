@@ -48,7 +48,7 @@ namespace Fanior.Server.Hubs
                     json = JsonConvert.SerializeObject(gvars, ToolsSystem.jsonSerializerSettings);
                 }
                 await Groups.AddToGroupAsync(Context.ConnectionId, gvars.GameId);
-                await Clients.Caller.SendAsync("JoinGame", player.Id, json, gameControl.sw.ElapsedMilliseconds, gvars.messageId);
+                await Clients.Caller.SendAsync("JoinGame", player.Id, json, gameControl.sw.Elapsed.TotalMilliseconds, gvars.messageId);
                 await Clients.All.SendAsync("PlayerJoinGame", JsonConvert.SerializeObject(player, ToolsSystem.jsonSerializerSettings), player.Id);
 
             }
@@ -58,19 +58,28 @@ namespace Fanior.Server.Hubs
             }
 
         }
-
         /// <summary>
-        /// Listens to incoming messages from clients, which are then proceeded in the Frame. It also joins actions of this player in the list of his actions, which are subsequently sent to every usery (done every frame).
+        /// Executes player action on server and sends it to all other clients
         /// </summary>
-        public void ExecuteList(string actionMethodNamesJson, string gameId, int itemId, double angle, int messageId)
+        public void ExecuteAction(PlayerActions.PlayerActionsEnum action, bool down, string gameId, int itemId, double angle)
+        {
+            AddActionsToList(gameId, itemId, angle, action, down);
+        }
+        /// <summary>
+        /// Listens to incoming messages from clients.
+        /// </summary>
+        public void ExecuteList(string gameId, int itemId, double angle, int messageId)
         {
             gameControl.games[gameId].ready = true;
             gameControl.clientMessageId = messageId;
 
-            Task.Run(() => { AddActionsToList(gameId, itemId, angle, actionMethodNamesJson); });
+            Task.Run(() => { AddActionsToList(gameId, itemId, angle); });
         }
 
-        private void AddActionsToList(string gameId, int itemId, double angle, string actionMethodNamesJson)
+        /// <summary>
+        /// Listens to incoming messages from clients, which are then proceeded in the Frame. It also joins actions of this player in the list of his actions, which are subsequently sent to every usery (done every frame).
+        /// </summary>
+        private void AddActionsToList(string gameId, int itemId, double angle)
         {
             lock (gameControl.tempListsLock)
             {
@@ -86,7 +95,7 @@ namespace Fanior.Server.Hubs
                 {
                     gameControl.games[gameId].ItemsPlayers[itemId].Angle = angle;
                 }
-                List<(PlayerActions.PlayerActionsEnum, bool)> actionMethodNames = JsonConvert.DeserializeObject<List<(PlayerActions.PlayerActionsEnum, bool)>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
+                /*List<(PlayerActions.PlayerActionsEnum, bool)> actionMethodNames = JsonConvert.DeserializeObject<List<(PlayerActions.PlayerActionsEnum, bool)>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
                 if (actionMethodNames.Count > 0)
                 {
                     if (gameControl.tempPlayerActions[gameId].ContainsKey(itemId))
@@ -97,9 +106,38 @@ namespace Fanior.Server.Hubs
                     {
                         gameControl.tempPlayerActions[gameId].Add(itemId, actionMethodNames);
                     }
-                }
+                }*/
 
             }
+        }
+        private async void AddActionsToList(string gameId, int itemId, double angle, PlayerActions.PlayerActionsEnum action, bool down)
+        {
+            lock (gameControl.tempListsLock)
+            {
+                if (gameControl.tempPlayerInfo[gameId].ContainsKey(itemId))
+                {
+                    gameControl.tempPlayerInfo[gameId][itemId] = angle;
+                }
+                else
+                {
+                    gameControl.tempPlayerInfo[gameId].Add(itemId, angle);
+                }
+                if (gameControl.games[gameId].ItemsPlayers.ContainsKey(itemId))
+                {
+                    gameControl.games[gameId].ItemsPlayers[itemId].Angle = angle;
+                }
+                if (gameControl.tempPlayerActions[gameId].ContainsKey(itemId))
+                {
+                    gameControl.tempPlayerActions[gameId][itemId].Add((action, down));
+                }
+                else
+                {
+                    gameControl.tempPlayerActions[gameId].Add(itemId, new List<(PlayerActions.PlayerActionsEnum, bool)>() { (action, down) });
+
+                }
+            }
+            await Clients.All.SendAsync("ExecuteAction", action, down, itemId, angle, gameControl.games[gameId].Items[itemId].X, gameControl.games[gameId].Items[itemId].Y);
+
         }
         /// <summary>
         /// Sends all GVars to caller.
@@ -130,5 +168,11 @@ namespace Fanior.Server.Hubs
             }
             return base.OnDisconnectedAsync(exception);
         }
+
+        /*public async Task Ping(double time)
+        {
+            // await Clients.All.SendAsync("Ping", time+gameControl.sw.Elapsed.TotalMilliseconds);
+            gameControl.ping = true;
+        }*/
     }
 }

@@ -68,7 +68,7 @@ namespace Fanior.Shared
         //id of sent messages
         public long messageId = 0;
         //milliseconds elapsed from the launch of server
-        private long now;
+        private double now;
         private Stopwatch sw = new Stopwatch();
         //if this particular Gvars are on server or client
         public bool server;
@@ -79,7 +79,7 @@ namespace Fanior.Shared
         public Dictionary<int, Player> ItemsPlayers { get; set; } = new Dictionary<int, Player>();
 
         //actions controlled by game (reference to gvars and repeat delay) with information when to be executed (such as playing music...)
-        private List<(long, GvarsAction)> gameActions = new();
+        private List<(double, GvarsAction)> gameActions = new();
 
         //actions that players just did
         public Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>> PlayerActions { get; set; } = new();
@@ -108,22 +108,22 @@ namespace Fanior.Shared
         }
         public Gvars()
         { }
-        public void StartMeasuringTime(long now)
+        public void StartMeasuringTime(double now)
         {
             this.now = now;
             sw.Start();
         }
-        public long GetNow()
+        public double GetNow()
         {
-            return now + sw.ElapsedMilliseconds;
+            return now + sw.Elapsed.TotalMilliseconds;
         }
         public void AddGvarsAction(Action<Gvars> action, double repeat)
         {
             gameActions.Add((0, new GvarsAction(repeat, action)));
         }
-        public void ExecuteActions(long now)
+        public void ExecuteActions(double now)
         {
-            List<(long, GvarsAction)> tempActions = new List<(long, GvarsAction)>(gameActions);
+            List<(double, GvarsAction)> tempActions = new List<(double, GvarsAction)>(gameActions);
             foreach (var action in tempActions)
             {
                 if (action.Item1 < now)
@@ -132,7 +132,7 @@ namespace Fanior.Shared
                     gameActions.Remove(action);
                     if (action.Item2.repeat > 0)
                     {
-                        gameActions.Add((now + (long)(action.Item2.repeat * Constants.CONTROL_FRAME_TIME), action.Item2));
+                        gameActions.Add((now + (double)(action.Item2.repeat * Constants.GAMEPLAY_FRAME_TIME), action.Item2));
                     }
                 }
             }
