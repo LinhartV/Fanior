@@ -55,7 +55,7 @@ namespace Fanior.Shared
             {
                 AddControlledMovement(movement, "default");
             }
-            this.AddAction(new ItemAction("move", 1));
+            this.AddAction(gvars, new ItemAction("move", 1, ItemAction.ExecutionType.EveryTime, true));
             gvars.ItemsStep.Add(Id, this);
         }
         public override void SetItemFromClient(Gvars gvars)
@@ -65,7 +65,7 @@ namespace Fanior.Shared
                 gvars.ItemsStep.Add(Id, this);
             }
             base.SetItemFromClient(gvars);
-            this.AddAction(new ItemAction("move", 1));
+            this.AddAction(gvars, new ItemAction("move", 1, ItemAction.ExecutionType.EveryTime, true));
         }
         /// <summary>
         /// Creates new movement
@@ -84,9 +84,9 @@ namespace Fanior.Shared
         /// <summary>
         /// Calls UpdateMovement of particular movement
         /// </summary>
-        public void UpdateControlledMovement(string movementName)
+        public void UpdateControlledMovement(string movementName, double percentage)
         {
-            MovementsControlled[movementName].UpdateMovement();
+            MovementsControlled[movementName].UpdateMovement(percentage);
         }
         public void AntiUpdateControlledMovement(string movementName)
         {
@@ -95,6 +95,9 @@ namespace Fanior.Shared
         /// <summary>
         /// Rotates particular movement or sets its angle
         /// </summary>
+        /// <param name="movementName">Name of the movement to rotate</param>
+        /// <param name="angleRotation">Angle to set or rotate by</param>
+        /// <param name="rotate">Set true for relative rotation, set false to set the angle</param>
         public void RotateControlledMovement(string movementName, double angleRotation, bool rotate = true)
         {
             if (MovementsControlled.ContainsKey(movementName))
@@ -130,7 +133,7 @@ namespace Fanior.Shared
                 movement.MovementSpeed = movement.MovementSpeed * Math.Sin(Math.PI / 2 - angle - movement.Angle);
             }
         }
-        public void AntiMove()
+        /*public void AntiMove()
         {
             List<IMovement> allMovements = new List<IMovement>(MovementsAutomated);
             allMovements.AddRange(MovementsControlled.Values);
@@ -140,15 +143,15 @@ namespace Fanior.Shared
             foreach (var movement in allMovements)
             {
                 movement.AntiFrame(friction);
-                xy = movement.Move();
+                xy = movement.Move(percentage);
                 x -= xy.Item1;
                 y += xy.Item2;
             }
             this.X += x;
             this.Y += y;
-        }
+        }*/
 
-        public void Move()
+        public void Move(double percentage)
         {
             List<IMovement> allMovements = new List<IMovement>(MovementsAutomated);
             allMovements.AddRange(MovementsControlled.Values);
@@ -157,8 +160,8 @@ namespace Fanior.Shared
             double y = 0;
             foreach (var movement in allMovements)
             {
-                movement.Frame(friction);
-                xy = movement.Move(); //ToolsMath.PolarToCartesian(movement.Angle, movement.MovementSpeed);
+                movement.Frame(friction, percentage);
+                xy = movement.Move(percentage); //ToolsMath.PolarToCartesian(movement.Angle, movement.MovementSpeed);
                 x += xy.Item1;
                 y -= xy.Item2;
             }

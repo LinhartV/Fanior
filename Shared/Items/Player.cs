@@ -20,7 +20,7 @@ namespace Fanior.Shared
             get => score; set
             {
                 score = value;
-                this.BaseSpeed = BaseSpeed - (2 - (2000 / (score + 1000)));
+                //this.BaseSpeed = BaseSpeed - (2 - (2000 / (score + 1000)));
             }
         }
         public bool MovementEnabled { get; set; } = true;
@@ -55,6 +55,8 @@ namespace Fanior.Shared
             this.AddControlledMovement(new AcceleratedMovement(0, 0, this.Acceleration, BaseSpeed), "right");
             this.AddControlledMovement(new AcceleratedMovement(0, 3 * Math.PI / 2, this.Acceleration, BaseSpeed), "down");
             this.AddControlledMovement(new AcceleratedMovement(0, Math.PI, this.Acceleration, BaseSpeed), "left");
+            this.AddAction(gvars, new ItemAction("outsideArena", 1, ItemAction.ExecutionType.EveryTime), "outsideArena");
+
         }
         public override void SetItemFromClient(Gvars gvars)
         {
@@ -81,15 +83,14 @@ namespace Fanior.Shared
                 return 1000;
         }
 
-        public override void Collide(Item collider, double angle, Gvars gvars)
+        public override void CollideServer(Item collider, double angle, Gvars gvars)
         {
-            base.Collide(collider, angle, gvars);
+            base.CollideServer(collider, angle, gvars);
             if (collider is Coin c)
             {
                 this.Score += c.Value;
             }
         }
-
         /*public override void Collide(Item collider, double angle, params Globals.ActionsAtCollision[] actionsNotToPerform)
         {
             base.Collide(collider, angle, actionsNotToPerform);

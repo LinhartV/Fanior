@@ -41,8 +41,9 @@ namespace Fanior.Shared
         public enum PlayerActionsEnum { none = 0, moveUp = 1, moveDown = 2, moveLeft = 3, moveRight = 4, fire = 5, ability1 = 6, ability2 = 7, other = 8 }
 
         static Dictionary<PlayerActionsEnum, KeyCommand> actions = new();
-        static List<(long, PlayerActionsEnum, bool, int)> pendingActions = new();
-        
+        //when; what; keydown?; id
+        static List<(double, PlayerActionsEnum, bool, int)> pendingActions = new();
+
 
 
         /// <summary>
@@ -59,7 +60,7 @@ namespace Fanior.Shared
             {
                 if (actions.ContainsKey(actionName))
                 {
-                    pendingActions.Add((gvars.GetNow() + delay, actionName, keyDown, itemId));
+                    pendingActions.Add((gvars.GetNow(), actionName, keyDown, itemId));
                 }
             }
             catch (Exception e)
@@ -69,7 +70,7 @@ namespace Fanior.Shared
         }
         public static void CheckForActions(Gvars gvars)
         {
-            var tempList = new List < (long, PlayerActionsEnum, bool, int) >(pendingActions);
+            var tempList = new List<(double, PlayerActionsEnum, bool, int)>(pendingActions);
             foreach (var item in tempList)
             {
                 if (item.Item1 < gvars.GetNow())
@@ -95,13 +96,13 @@ namespace Fanior.Shared
                   {
                       if (gvars.ItemsPlayers[id].Weapon.autoFire)
                       {
-                          gvars.ItemsPlayers[id].AddAction(new ItemAction("fire1", gvars.ItemsPlayers[id].Weapon.reloadTime, ItemAction.ExecutionType.EveryTime), "fire");
+                          gvars.ItemsPlayers[id].AddAction(gvars, new ItemAction("fire1", gvars.ItemsPlayers[id].Weapon.reloadTime, ItemAction.ExecutionType.EveryTime), "fire");
                       }
                       else
                       {
                           gvars.ItemsPlayers[id].Weapon.Fire(gvars);
                           gvars.ItemsPlayers[id].Weapon.reloaded = false;
-                          gvars.ItemsPlayers[id].AddAction(new ItemAction("fire2", gvars.ItemsPlayers[id].Weapon.reloadTime, ItemAction.ExecutionType.OnlyFirstTime), "fire");
+                          gvars.ItemsPlayers[id].AddAction(gvars, new ItemAction("fire2", gvars.ItemsPlayers[id].Weapon.reloadTime, ItemAction.ExecutionType.OnlyFirstTime), "fire");
                       }
                   }
                   else
@@ -116,7 +117,7 @@ namespace Fanior.Shared
             //Movements
             actions.Add(PlayerActionsEnum.moveUp, new KeyCommand((id, gvars) =>
             {
-                gvars.ItemsPlayers[id].AddAction(new ItemAction("up", 1));
+                gvars.ItemsPlayers[id].AddAction(gvars, new ItemAction("up", 1, ItemAction.ExecutionType.EveryTime, true));
                 //AddDelayedAction(gvars, id, "up", delay);
             },
             (id, gvars) =>
@@ -126,7 +127,7 @@ namespace Fanior.Shared
 
             actions.Add(PlayerActionsEnum.moveDown, new KeyCommand((id, gvars) =>
             {
-                gvars.ItemsPlayers[id].AddAction(new ItemAction("down", 1));
+                gvars.ItemsPlayers[id].AddAction(gvars, new ItemAction("down", 1, ItemAction.ExecutionType.EveryTime, true));
                 //AddDelayedAction(gvars, id, "down", delay);
             },
             (id, gvars) =>
@@ -136,7 +137,7 @@ namespace Fanior.Shared
 
             actions.Add(PlayerActionsEnum.moveRight, new KeyCommand((id, gvars) =>
             {
-                gvars.ItemsPlayers[id].AddAction(new ItemAction("right", 1));
+                gvars.ItemsPlayers[id].AddAction(gvars, new ItemAction("right", 1, ItemAction.ExecutionType.EveryTime, true));
                 //AddDelayedAction(gvars, id, "right", delay);
             },
             (id, gvars) =>
@@ -146,7 +147,7 @@ namespace Fanior.Shared
 
             actions.Add(PlayerActionsEnum.moveLeft, new KeyCommand((id, gvars) =>
             {
-                gvars.ItemsPlayers[id].AddAction(new ItemAction("left", 1));
+                gvars.ItemsPlayers[id].AddAction(gvars, new ItemAction("left", 1, ItemAction.ExecutionType.EveryTime, true));
                 //AddDelayedAction(gvars, id, "left", delay);
             },
             (id, gvars) =>

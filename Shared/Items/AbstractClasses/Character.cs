@@ -55,7 +55,7 @@ namespace Fanior.Shared
             {
                 weapon.characterId = this.Id;
             }
-            this.AddAction(new ItemAction("regenerate", 1));
+            this.AddAction(gvars, new ItemAction("regenerate", 1));
         }
         public virtual void Death(Gvars gvars)
         {
@@ -87,7 +87,7 @@ namespace Fanior.Shared
             return curLives;
         }
 
-        public override void Collide(Item collider, double angle, Gvars gvars)
+        public override void CollideServer(Item collider, double angle, Gvars gvars)
         {
             if (collider is Shot s && s.CharacterId != this.Id)
             {

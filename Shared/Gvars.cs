@@ -11,40 +11,72 @@ namespace Fanior.Shared
     /// <summary>
     /// Class containing game variables of particular arena
     /// </summary>
-    public class Gvars
+    public class Gvars : ActionHandler
     {
-        private class GvarsAction
+        public Message Msg { get;} = new Message();
+        /// <summary>
+        /// class for collection messages sent to client
+        /// </summary>
+        public class Message
         {
-            public double repeat;
-            public Action<Gvars> action;
-
-            public GvarsAction(double repeat, Action<Gvars> action)
+            public Message()
             {
-                this.repeat = repeat;
-                this.action = action;
+            }
+
+            public List<Item> itemsToCreate = new List<Item>();
+            /// <summary>
+            /// list of items to destroy by their id
+            /// </summary>
+            public List<int> itemsToDestroy = new List<int>();
+            public List<RandomNumbers> randomNumbersList = new();
+
+            public class RandomNumbers
+            {
+                public List<double> numbers;
+                public string purpose;
+                public int id;
+
+                public RandomNumbers()
+                {
+                }
+
+                public RandomNumbers(List<double> numbers, string purpose, int id)
+                {
+                    this.numbers = numbers;
+                    this.purpose = purpose;
+                    this.id = id;
+                }
+            }
+            public void ClearThis()
+            {
+                itemsToCreate.Clear();
+                itemsToDestroy.Clear();
+                randomNumbersList.Clear();
             }
         }
         //id of sent messages
         public long messageId = 0;
         //milliseconds elapsed from the launch of server
-        private long now;
+        private double now;
         private Stopwatch sw = new Stopwatch();
-
+        //if this particular Gvars are on server or client
+        public bool server;
         //all items
         public Dictionary<int, Item> Items { get; set; } = new Dictionary<int, Item>();
         //derived dictionaries
         public Dictionary<int, Item> ItemsStep { get; set; } = new Dictionary<int, Item>();
         public Dictionary<int, Player> ItemsPlayers { get; set; } = new Dictionary<int, Player>();
 
-        //actions controlled by game (reference to gvars and repeat delay) with information when to be executed (such as playing music...)
-        private List<(long, GvarsAction)> gameActions = new();
 
         //actions that players just did
         public Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>> PlayerActions { get; set; } = new();
         //angles of all players (id, angle)
-        public Dictionary<int, double> PlayerInfo { get; set; } = new();
-        //count of items in arena. First coins.
-        public int[] counts = new int[2];
+        public Dictionary<int, double> PlayersAngle { get; set; } = new();
+        //properties of items that changed from previous frame
+        public Dictionary<int, string> ItemInfo { get; set; } = new();
+        
+        //count of items in arena.
+        public Dictionary<ToolsGame.Counts, int> CountOfItems { get; set; } = new() { { ToolsGame.Counts.coins, 0 }, { ToolsGame.Counts.enemies, 0} };
         //size of arena
         public double ArenaWidth { get; set; }
         public double ArenaHeight { get; set; }
@@ -52,6 +84,8 @@ namespace Fanior.Shared
         public bool ready = false;
         //Game id of this arena
         public string GameId { get; set; }
+
+        public double PercentageOfFrame { get; set; }
 
         //Id for item creation
         public int Id { get; set; } = 1;
@@ -63,34 +97,15 @@ namespace Fanior.Shared
         }
         public Gvars()
         { }
-        public void StartMeasuringTime(long now)
+        public void StartMeasuringTime(double now)
         {
             this.now = now;
             sw.Start();
         }
-        public long GetNow()
+        public double GetNow()
         {
-            return now + sw.ElapsedMilliseconds;
+            return now + sw.Elapsed.TotalMilliseconds;
         }
-        public void AddGvarsAction(Action<Gvars> action, double repeat)
-        {
-            gameActions.Add((0, new GvarsAction(repeat, action)));
-        }
-        public void ExecuteActions(long now)
-        {
-            List<(long, GvarsAction)> tempActions = new List<(long, GvarsAction)>(gameActions);
-            foreach (var action in tempActions)
-            {
-                if (action.Item1 < now)
-                {
-                    action.Item2.action(this);
-                    gameActions.Remove(action);
-                    if (action.Item2.repeat > 0)
-                    {
-                        gameActions.Add((now + (long)(action.Item2.repeat * Constants.FRAME_TIME), action.Item2));
-                    }
-                }
-            }
-        }
+        
     }
 }

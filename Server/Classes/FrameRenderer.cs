@@ -41,8 +41,8 @@ namespace Fanior.Server
             {
                 while (stoppingToken.IsCancellationRequested == false)
                 {
-                    await DoWork();
-                    await Task.Delay(Constants.FRAME_TIME, stoppingToken);
+                    DoWork();
+                    await Task.Delay(Constants.CONTROL_FRAME_TIME, stoppingToken);
                 }
             });
         }
@@ -64,7 +64,7 @@ namespace Fanior.Server
                     {
                         foreach (var infoDict in game.tempPlayerInfo)
                         {
-                            game.games[infoDict.Key].PlayerInfo = new Dictionary<int, double>(infoDict.Value);
+                            game.games[infoDict.Key].PlayersAngle = new Dictionary<int, double>(infoDict.Value);
                             infoDict.Value.Clear();
                         }
                         foreach (var playerDict in game.tempPlayerActions)
@@ -87,7 +87,7 @@ namespace Fanior.Server
             }
         }
 
-
+        double now = 0;
         /// <summary>
         /// Algorithms to be done each frame
         /// </summary>
@@ -95,12 +95,13 @@ namespace Fanior.Server
         {
             try
             {
-
-                long now = game.sw.ElapsedMilliseconds;
+                game.swTest.Start();
                 foreach (Gvars gvars in game.games.Values)
                 {
+                    double percantage = ToolsSystem.GetPercentageOfFrame(now, game.sw.Elapsed.TotalMilliseconds);
+                    now = game.sw.Elapsed.TotalMilliseconds;
+                    gvars.PercentageOfFrame = percantage;
                     ToolsGame.ProceedFrame(gvars, now, Constants.DELAY, true);
-                    ServerGameLogic.ExecuteActions(game.sw.ElapsedMilliseconds, game, gvars, hub);
                     gvars.messageId++;
                     foreach (var player in gvars.ItemsPlayers.Values)
                     {
@@ -113,6 +114,9 @@ namespace Fanior.Server
                     }
                 }
                 await SendData(game, hub);
+                game.swTest.Stop();
+                Console.WriteLine(game.swTest.Elapsed.TotalMilliseconds);
+                game.swTest.Reset();
             }
             catch (Exception e)
             {
@@ -128,10 +132,22 @@ namespace Fanior.Server
             foreach (Gvars gvars in game.games.Values)
             {
                 try
-                {//Group(gvars.GameId)
-                    hub?.Clients.All.SendAsync("ExecuteList", game.sw.ElapsedMilliseconds, gvars.messageId, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings), gvars.PlayerInfo, JsonConvert.SerializeObject(GetItemCoordinates(gvars), ToolsSystem.jsonSerializerSettings));
+                {
+                    //Group(gvars.GameId)
+                    //actual time for delay, message id for check if messages are in order, playerActions, angle of every player, itemsToCreate, itemsToDestroy
+
+                    hub?.Clients.All.SendAsync("ExecuteList", game.sw.Elapsed.TotalMilliseconds, gvars.messageId/*, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings)*/, gvars.PlayersAngle,
+                       JsonConvert.SerializeObject(gvars.Msg.itemsToCreate, ToolsSystem.jsonSerializerSettings), gvars.Msg.itemsToDestroy
+                        , JsonConvert.SerializeObject(GetItemCoordinates(gvars), ToolsSystem.jsonSerializerSettings));
+                    /*if (gvars.Msg.randomNumbersList.Count > 0)
+                    {
+                        hub?.Clients.All.SendAsync("ReceiveRandomNumbers", JsonConvert.SerializeObject(gvars.Msg.randomNumbersList, ToolsSystem.jsonSerializerSettings));
+                    }*/
+                    
+
                     gvars.PlayerActions.Clear();
-                    gvars.PlayerInfo.Clear();
+                    gvars.PlayersAngle.Clear();
+                    gvars.Msg.ClearThis();
                 }
                 catch (Exception e)
                 {
@@ -140,9 +156,9 @@ namespace Fanior.Server
             }
         }
 
-        private Dictionary<int, (double, double)> GetItemCoordinates (Gvars gvars)
+        private Dictionary<int, (double, double)> GetItemCoordinates(Gvars gvars)
         {
-            var coordinates = new Dictionary<int, (double, double)> ();
+            var coordinates = new Dictionary<int, (double, double)>();
             foreach (var item in gvars.Items.Values)
             {
                 coordinates.Add(item.Id, (item.X, item.Y));
