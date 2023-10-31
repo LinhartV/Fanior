@@ -30,7 +30,12 @@ namespace Fanior.Shared
         }
         public static double GetPercentageOfFrame(double previousTick, double now)
         {
-            return (now - previousTick) / (double)Constants.GAMEPLAY_FRAME_TIME;
+            double percentage = (now - previousTick) / (double)Constants.GAMEPLAY_FRAME_TIME;
+            /*if (percentage > 5)
+            {
+                return -1;
+            }*/
+            return percentage;
         }
         /*public static void Execute(string actionMethodName, Gvars gvars, int playerId)
         {

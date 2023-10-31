@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -13,6 +14,8 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
 using Newtonsoft.Json;
+using static System.Collections.Specialized.BitVector32;
+using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 namespace Fanior.Client.Pages
 {
@@ -45,6 +48,7 @@ namespace Fanior.Client.Pages
         public ElementReference mySvg;
         public HubConnection hubConnection;
         long currentMessageId = 0;
+        //action, down, now
         public List<(PlayerActions.PlayerActionsEnum, bool)> myActions = new();
         private DotNetObjectReference<Index> selfReference;
         //number of frames that passed during lag between server and client
@@ -63,128 +67,14 @@ namespace Fanior.Client.Pages
         System.Threading.Timer timer;
         //animated movement
         bool animEnd = false;
-        Dictionary<int, (double, double)> coordinates = new Dictionary<int, (double, double)>();
+        //dicionary of actions (pressed or released) waiting for server to confirm with time of execution
+        Dictionary<int, (PlayerActions.PlayerActionsEnum, bool, double)> actions = new();
+        int actionId = 0;
         #endregion
 
 
 
-        /// <summary>
-        /// Method containing all stuff that are to be proceeded at the start of the load up.
-        /// </summary>
-        public async Task Start()
-        {
-            try
-            {
-                await Animate(false);
-                Task t1 = SetConnection();
-                Task t2 = GetDimensions();
-                await Task.WhenAll(t1, t2);
-                await hubConnection.StartAsync();
-                await hubConnection.SendAsync("OnLogin", "@@@", name == null ? "Figher" : name);
-
-                if (firstConnect == 2)
-                {
-                    DefaultAssingOfKeys();
-                    PlayerActions.SetupActions();
-                    LambdaActions.SetupLambdaActions();
-                }
-                await InvokeAsync(() => this.StateHasChanged());
-                animEnd = false;
-            }
-            catch (Exception e)
-            {
-                JS.InvokeVoidAsync("Alert", e.Message);
-                throw;
-            }
-        }
-        #region Input control
-
-        public void DefaultAssingOfKeys()
-        {
-            //set keys here
-            KeyController.AddKey("w", new RegisteredKey(PlayerActions.PlayerActionsEnum.moveUp, myActions));
-            KeyController.AddKey("s", new RegisteredKey(PlayerActions.PlayerActionsEnum.moveDown, myActions));
-            KeyController.AddKey("d", new RegisteredKey(PlayerActions.PlayerActionsEnum.moveRight, myActions));
-            KeyController.AddKey("a", new RegisteredKey(PlayerActions.PlayerActionsEnum.moveLeft, myActions));
-            KeyController.AddKey(" ", new RegisteredKey(PlayerActions.PlayerActionsEnum.fire, myActions));
-        }
-
-
-
-
-
-        [JSInvokable]
-        public void HandleMouseMove(int x, int y)
-        {
-            if (player != null)
-            {
-                this.player.Angle = ToolsMath.GetAngleFromLengts(x - width / 2, height / 2 - y);
-            }
-            //counter = (int)(player.Angle * 180 / Math.PI);
-        }
-        [JSInvokable]
-        public void HandleKeyDown(string keycode)
-        {
-            keycode = keycode.ToLower();
-            if (player == null)
-            {
-                if (keycode == "enter")
-                {
-                    Start();
-                }
-            }
-            else
-            {
-                if (!pressedKeys.Contains(keycode))
-                {
-
-                    pressedKeys.Add(keycode);
-                    //send serialized action, game id, item id and angle of player that is sent every frame
-                    hubConnection.SendAsync("ExecuteAction", KeyController.GetRegisteredKey(keycode)?.KeyDown(), true, gvars.GameId, this.id, player.Angle);
-
-                }
-            }
-            if (keycode == "p")
-            {
-                //Ping();
-                ping = true;
-            }
-
-        }
-        bool ping = false;
-        [JSInvokable]
-        public void HandleKeyUp(string keycode)
-        {
-            if (player != null)
-            {
-                keycode = keycode.ToLower();
-                if (pressedKeys.Contains(keycode))
-                {
-                    hubConnection.SendAsync("ExecuteAction", KeyController.GetRegisteredKey(keycode)?.KeyUp(), false, gvars.GameId, this.id, player.Angle);
-
-                    pressedKeys.Remove(keycode);
-                }
-            }
-
-        }
-        [JSInvokable]
-        public void HandleWindowResize(int width, int height)
-        {
-            this.width = width;
-            this.height = height;
-        }
-
-        public void Dispose()
-        {
-            selfReference?.Dispose();
-            timer?.Dispose();
-        }
-        protected async Task MouseDown(MouseEventArgs e)
-        {
-
-
-        }
-        #endregion
+        
         #region Frame
         /*protected Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -239,16 +129,19 @@ namespace Fanior.Client.Pages
                     pingWatch.Reset();
                 }*/
 
-                //sw2.Start();
                 await hubConnection.SendAsync("ExecuteList", gvars.GameId, this.id, player.Angle, sendMessageId);
 
-                sendMessageId++;
+               /* sendMessageId++;
                 gvars.PlayerActions[id] = new List<(PlayerActions.PlayerActionsEnum, bool)>(myActions);
                 myActions.Clear();
                 lock (frameLock)
                 {
                     gvars.PercentageOfFrame = ToolsSystem.GetPercentageOfFrame(frameDuration, sw.Elapsed.TotalMilliseconds);
-                    Console.WriteLine("now "+(frameDuration - sw.Elapsed.TotalMilliseconds));
+                    if (gvars.PercentageOfFrame == -1)
+                    {
+                        //hubConnection.SendAsync("SendGvars", gvars.GameId);
+                    }
+                   
                     frameDuration = sw.Elapsed.TotalMilliseconds;
                     ToolsGame.ProceedFrame(gvars, gvars.GetNow(), delay, false);
                     if (player.Score >= nextLevel)
@@ -257,19 +150,22 @@ namespace Fanior.Client.Pages
                         nextLevel = nextLevel * 5 / 2;
                     }
                     gvars.PlayerActions[id].Clear();
-                }
-               /* sw2.Stop();
-                //avg += sw2.Elapsed.TotalMilliseconds;
-                Console.WriteLine(sw2.Elapsed.TotalMilliseconds);
-                sw2.Reset();*/
+                }*/
+
+                
             }
             catch (Exception e)
             {
-                JS.InvokeVoidAsync("Alert", e.Message);
+                //JS.InvokeVoidAsync("Alert", e.Message);
                 throw;
             }
         }
-        private void ExecuteList(double now, long messageId,/* string actionMethodNamesJson,*/ Dictionary<int, double> playerInfo, string itemsToCreateJson, List<int> itemsToDestroy)
+        private void GetAllItems(string itemsJson)
+        {
+            gvars.Items = JsonConvert.DeserializeObject<Dictionary<int, Item>>(itemsJson, ToolsSystem.jsonSerializerSettings);
+            player = gvars.Items[this.id] as Player;
+        }
+        private void ExecuteList(double now, long messageId,/* string actionMethodNamesJson,*/ Dictionary<int, double> playerInfo, string itemsToCreateJson, List<int> itemsToDestroy, string coordsJson)
         {
             /*if (counter == 0)
             {
@@ -291,6 +187,7 @@ namespace Fanior.Client.Pages
                 //Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>> actionMethodNames = JsonConvert.DeserializeObject<Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
                 List<Item> itemsToCreate = JsonConvert.DeserializeObject<List<Item>>(itemsToCreateJson, ToolsSystem.jsonSerializerSettings);
 
+                Dictionary<int, (double, double)> coordinates = JsonConvert.DeserializeObject<Dictionary<int, (double, double)>>(coordsJson, ToolsSystem.jsonSerializerSettings);
 
                 foreach (var itemId in itemsToDestroy)
                 {
@@ -314,7 +211,7 @@ namespace Fanior.Client.Pages
                         gvars.ItemsPlayers[id].Angle = playerInfo[id];
                     }
                 }
-                /*lock (actionLock)
+                lock (actionLock)
                 {
                     foreach (var item in coordinates)
                     {
@@ -323,285 +220,28 @@ namespace Fanior.Client.Pages
                     }
                     //this.coordinates = coordinates;
                     //movementCounter = 0;
-                }*/
+                }
             }
             catch (Exception e)
             {
 
             }
         }
-
-        #endregion
-
-        #region Set connection
-        public async Task SetConnection()
+        void ExecuteAction(PlayerActions.PlayerActionsEnum action, bool down, int itemId, double angle, double x, double y, int actionIdReceived)
         {
-            hubConnection = new HubConnectionBuilder()
-           .WithUrl(NavigationManager.ToAbsoluteUri("/myhub"))
-           .Build();
-            hubConnection.On<string>("ReceiveMessage", (str) =>
-            {
-                // info = str.ToString();
-                counter++;
-                StateHasChanged();
-            });
-            hubConnection.On<double>("Ping", (time) =>
-            {
-                /*Console.WriteLine("server time: " + (time - sw.Elapsed.TotalMilliseconds));
-                pingWatch.Stop();
-                Console.WriteLine("total ping: "+pingWatch.Elapsed.TotalMilliseconds);
-                pingWatch.Reset();*/
-                serverTime = time;
-                reping = true;
-            });
-            hubConnection.On<string>("ReceiveRandomNumbers", (listJson) =>
-            {
-                List<Gvars.Message.RandomNumbers> list = JsonConvert.DeserializeObject<List<Gvars.Message.RandomNumbers>>(listJson, ToolsSystem.jsonSerializerSettings);
-                foreach (var item in list)
-                {
-                    if (item.purpose == "randomAI")
-                    {
-                        ((gvars.ItemsStep[item.id] as Enemy).ai as RandomGoingAI).ReceiveRandomNumbers(item.numbers);
-                    }
-
-                }
-            });
-            hubConnection.On<int>("PlayerDied", (id) =>
-            {
-                gvars.ItemsPlayers[id].Dispose(gvars);
-                if (id == this.id)
-                {
-                    EndGame();
-                }
-            });
-            /*hubConnection.On<string>("CreateNewItem", (itemJson) =>
-            {
-                if (id != 0)
-                {
-                    Item item = JsonConvert.DeserializeObject<Item>(itemJson, ToolsSystem.jsonSerializerSettings);
-                    item.SetItemFromClient(gvars);
-                }
-            });*/
-
-            hubConnection.On<PlayerActions.PlayerActionsEnum, bool, int, double, double, double>("ExecuteAction", (action, down, itemId, angle, x, y) =>
+            lock (frameLock)
             {
                 gvars.Items[itemId].X = x;
                 gvars.Items[itemId].Y = y;
-                gvars.Items[itemId].SetActions(gvars.GetNow(), gvars, Constants.DELAY, new List<(PlayerActions.PlayerActionsEnum, bool)> { (action, down) });
-
-            });
-            //Actions to be proceeded that server sent to client 
-            //Dictionary of list of actions assigned to object id along with information, if it's keydown or keyup (true = keydown).
-            //+messageId to check if connection was lost.
-            //time, messageId, PlayerActions, angles, itemsToCreate, itemsToDestroy (id)
-            hubConnection.On<double, long/*, string*/, Dictionary<int, double>, string, List<int>>("ExecuteList", (now, messageId/*, actionMethodNamesJson*/, playerInfo, itemsToCreate, itemsToDestroy) =>
-            {
-                try
+                if (actions.ContainsKey(actionIdReceived))
                 {
-                    ExecuteList(now, messageId/*, actionMethodNamesJson*/, playerInfo, itemsToCreate, itemsToDestroy);
+                    // (gvars.Items[itemId] as Movable).Move(ToolsSystem.GetPercentageOfFrame(actions[actionId].Item3, gvars.GetNow()));
                 }
-                catch (Exception e)
-                {
-
-                    throw;
-                }
-
-            });
-            //this player joined game
-            hubConnection.On<int, string, double, long>("JoinGame", async (idReceived, gvarsJson, now, messageId) =>
-            {
-                if (this.id == 0)
-                {
-                    counter = 0;
-                    currentMessageId = messageId;
-                    JoinGame(idReceived);
-                    ReceiveGvars(gvarsJson);
-                    gvars.StartMeasuringTime(now);
-                    gvars.PlayerActions.Add(id, null);
-                    startTime = now;
-                    frameDuration = now;
-                    sw.Start();
-                    foreach (var item in gvars.Items.Values)
-                    {
-                        item.SetItemFromClient(gvars);
-                    }
-                    if (firstConnect > 0)
-                    {
-                        //ExecuteAsync(new CancellationToken(false));
-                        Task.Run(async () =>
-                        {
-                            timer = new System.Threading.Timer(async _ =>
-                            {
-                                if (firstConnect == 0)
-                                    Frame();
-                                await InvokeAsync(StateHasChanged);
-                            }, null, 0, Constants.CONTROL_FRAME_TIME);
-                        });
-                        firstConnect = 0;
-                    }
-                    await Animate(true);
-                    await JS.InvokeVoidAsync("SetFocus", mySvg);
-                }
-            });
-            //new player joined game
-            hubConnection.On<string, int>("PlayerJoinGame", async (playerJson, idConnectedPlayer) =>
-            {
-                counter = 0;
-                if (id != idConnectedPlayer)
-                {
-                    ToolsSystem.DeserializePlayer(playerJson, gvars);
-                    await Task.Delay(1);
-                }
-            });
-            //on login and when connection was lost
-            hubConnection.On<string>("ReceiveGvars", (gvarsJson) =>
-            {
-                ReceiveGvars(gvarsJson);
-            });
-            //on login and when connection was lost
-            hubConnection.On<string>("PlayerDisconnected", (connectionId) =>
-            {
-                foreach (Player p in gvars.ItemsPlayers.Values)
-                {
-                    if (p.ConnectionId == connectionId)
-                    {
-                        p.Dispose(gvars);
-                    }
-                }
-            });
-        }
-
-        private void ReceiveGvars(string gvarsJson)
-        {
-            try
-            {
-                gvars = JsonConvert.DeserializeObject<Gvars>(gvarsJson, ToolsSystem.jsonSerializerSettings);
-                gvars.server = false;
-                player = gvars.ItemsPlayers[id];
-                player.SetItemFromClient(gvars);
-
-            }
-            catch (Exception e)
-            {
-                throw;
-            }
-            StateHasChanged();
-        }
-        private void JoinGame(int id)
-        {
-            this.id = id;
-            info = id.ToString();
-            this.StateHasChanged();
-        }
-
-        public bool IsConnected =>
-            hubConnection.State == HubConnectionState.Connected;
-
-        public async ValueTask DisposeAsync()
-        {
-            if (hubConnection is not null)
-            {
-                await hubConnection.DisposeAsync();
+                //gvars.Items[itemId].SetActions(gvars.GetNow(), gvars, Constants.DELAY, new List<(PlayerActions.PlayerActionsEnum, bool)> { (action, down) });
             }
         }
         #endregion
 
-
-        #region Other
-        async Task GetDimensions()
-        {
-            try
-            {
-                var dimension = await new DimensionReader.BrowserService(JS).GetDimensions();
-                height = dimension.Height;
-                width = dimension.Width;
-            }
-            catch (Exception)
-            {
-            }
-        }
-
-        protected async override Task OnAfterRenderAsync(bool firstRender)
-        {
-            try
-            {
-                if (firstRender)
-                {
-                    selfReference = DotNetObjectReference.Create(this);
-
-                    var minInterval = 20;
-                    /*await JS.InvokeVoidAsync("onThrottledMouseMove",
-                         mySvg, selfReference, minInterval);*/
-                    await JS.InvokeVoidAsync("onKeyDown",
-                        mySvg, selfReference);
-                    await JS.InvokeVoidAsync("onKeyUp",
-                        mySvg, selfReference);
-                    await JS.InvokeVoidAsync("onResize", selfReference);
-                }
-
-            }
-            catch (Exception e)
-            {
-
-                throw;
-            }
-        }
-        private async Task Animate(bool down)
-        {
-            zindex = 100;
-            while (true)
-            {
-                if (down)
-                    opacity -= 0.05;
-                else
-                    opacity += 0.05;
-                await Task.Delay(10);
-                if (opacity < 0)
-                {
-                    zindex = -100;
-                    opacity = 0;
-                    break;
-                }
-                if (opacity > 1)
-                {
-                    opacity = 1;
-                    break;
-                }
-                StateHasChanged();
-            }
-            StateHasChanged();
-
-        }
-        private async void EndGame()
-        {
-            try
-            {
-                animEnd = true;
-                timer.Change(Timeout.Infinite, Timeout.Infinite);
-                firstConnect = 1;
-                await Animate(false);
-                await hubConnection.DisposeAsync();
-                player = null;
-                gvars = null;
-                pressedKeys.Clear();
-                hubConnection = null;
-                myActions.Clear();
-                this.id = 0;
-                await Animate(true);
-            }
-            catch (Exception e)
-            {
-
-                throw;
-            }
-
-        }
-        public async void Ping()
-        {
-            await hubConnection.SendAsync("Ping", sw2.Elapsed.TotalMilliseconds);
-            pingWatch.Start();
-        }
-        #endregion
 
 
 

@@ -42,7 +42,7 @@ namespace Fanior.Server.Hubs
             {
                 string json;
                 Player player;
-                lock (gameControl.creatingObjectsLock)
+                lock (gameControl.actionLock)
                 {
                     player = ToolsGame.CreateNewPlayer(gvars, Context.ConnectionId, name);
                     json = JsonConvert.SerializeObject(gvars, ToolsSystem.jsonSerializerSettings);
@@ -58,12 +58,13 @@ namespace Fanior.Server.Hubs
             }
 
         }
+
         /// <summary>
         /// Executes player action on server and sends it to all other clients
         /// </summary>
-        public void ExecuteAction(PlayerActions.PlayerActionsEnum action, bool down, string gameId, int itemId, double angle)
+        public void ExecuteAction(PlayerActions.PlayerActionsEnum action, bool down, string gameId, int itemId, double angle, int actionId)
         {
-            AddActionsToList(gameId, itemId, angle, action, down);
+            AddActionsToList(gameId, itemId, angle, action, down, actionId);
         }
         /// <summary>
         /// Listens to incoming messages from clients.
@@ -110,34 +111,35 @@ namespace Fanior.Server.Hubs
 
             }
         }
-        private async void AddActionsToList(string gameId, int itemId, double angle, PlayerActions.PlayerActionsEnum action, bool down)
+        private async void AddActionsToList(string gameId, int itemId, double angle, PlayerActions.PlayerActionsEnum action, bool down, int actionId)
         {
-            lock (gameControl.tempListsLock)
-            {
-                if (gameControl.tempPlayerInfo[gameId].ContainsKey(itemId))
+            
+                lock (gameControl.tempListsLock)
                 {
-                    gameControl.tempPlayerInfo[gameId][itemId] = angle;
-                }
-                else
-                {
-                    gameControl.tempPlayerInfo[gameId].Add(itemId, angle);
-                }
-                if (gameControl.games[gameId].ItemsPlayers.ContainsKey(itemId))
-                {
-                    gameControl.games[gameId].ItemsPlayers[itemId].Angle = angle;
-                }
-                if (gameControl.tempPlayerActions[gameId].ContainsKey(itemId))
-                {
-                    gameControl.tempPlayerActions[gameId][itemId].Add((action, down));
-                }
-                else
-                {
-                    gameControl.tempPlayerActions[gameId].Add(itemId, new List<(PlayerActions.PlayerActionsEnum, bool)>() { (action, down) });
+                    if (gameControl.tempPlayerInfo[gameId].ContainsKey(itemId))
+                    {
+                        gameControl.tempPlayerInfo[gameId][itemId] = angle;
+                    }
+                    else
+                    {
+                        gameControl.tempPlayerInfo[gameId].Add(itemId, angle);
+                    }
+                    if (gameControl.games[gameId].ItemsPlayers.ContainsKey(itemId))
+                    {
+                        gameControl.games[gameId].ItemsPlayers[itemId].Angle = angle;
+                    }
+                    if (gameControl.tempPlayerActions[gameId].ContainsKey(itemId))
+                    {
+                        gameControl.tempPlayerActions[gameId][itemId].Add((action, down));
+                    }
+                    else
+                    {
+                        gameControl.tempPlayerActions[gameId].Add(itemId, new List<(PlayerActions.PlayerActionsEnum, bool)>() { (action, down) });
 
+                    }
                 }
-            }
-            await Clients.All.SendAsync("ExecuteAction", action, down, itemId, angle, gameControl.games[gameId].Items[itemId].X, gameControl.games[gameId].Items[itemId].Y);
-
+                //Clients.All.SendAsync("ExecuteAction", action, down, itemId, angle, gameControl.games[gameId].Items[itemId].X, gameControl.games[gameId].Items[itemId].Y, actionId);
+            
         }
         /// <summary>
         /// Sends all GVars to caller.

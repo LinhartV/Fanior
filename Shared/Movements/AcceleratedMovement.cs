@@ -37,10 +37,10 @@ namespace Fanior.Shared
             }
         }
 
-        public override void Frame(double friction)
+        public override void Frame(double friction, double percentage)
         {
             if (this.MovementSpeed > 0.05)
-                MovementSpeed -= friction;
+                MovementSpeed -= friction * percentage;
             else
                 MovementSpeed = 0;
         }

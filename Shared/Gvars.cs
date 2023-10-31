@@ -11,19 +11,8 @@ namespace Fanior.Shared
     /// <summary>
     /// Class containing game variables of particular arena
     /// </summary>
-    public class Gvars
+    public class Gvars : ActionHandler
     {
-        private class GvarsAction
-        {
-            public double repeat;
-            public Action<Gvars> action;
-
-            public GvarsAction(double repeat, Action<Gvars> action)
-            {
-                this.repeat = repeat;
-                this.action = action;
-            }
-        }
         public Message Msg { get;} = new Message();
         /// <summary>
         /// class for collection messages sent to client
@@ -78,13 +67,13 @@ namespace Fanior.Shared
         public Dictionary<int, Item> ItemsStep { get; set; } = new Dictionary<int, Item>();
         public Dictionary<int, Player> ItemsPlayers { get; set; } = new Dictionary<int, Player>();
 
-        //actions controlled by game (reference to gvars and repeat delay) with information when to be executed (such as playing music...)
-        private List<(double, GvarsAction)> gameActions = new();
 
         //actions that players just did
         public Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>> PlayerActions { get; set; } = new();
         //angles of all players (id, angle)
-        public Dictionary<int, double> PlayerInfo { get; set; } = new();
+        public Dictionary<int, double> PlayersAngle { get; set; } = new();
+        //properties of items that changed from previous frame
+        public Dictionary<int, string> ItemInfo { get; set; } = new();
         
         //count of items in arena.
         public Dictionary<ToolsGame.Counts, int> CountOfItems { get; set; } = new() { { ToolsGame.Counts.coins, 0 }, { ToolsGame.Counts.enemies, 0} };
@@ -117,25 +106,6 @@ namespace Fanior.Shared
         {
             return now + sw.Elapsed.TotalMilliseconds;
         }
-        public void AddGvarsAction(Action<Gvars> action, double repeat)
-        {
-            gameActions.Add((0, new GvarsAction(repeat, action)));
-        }
-        public void ExecuteActions(double now)
-        {
-            List<(double, GvarsAction)> tempActions = new List<(double, GvarsAction)>(gameActions);
-            foreach (var action in tempActions)
-            {
-                if (action.Item1 < now)
-                {
-                    action.Item2.action(this);
-                    gameActions.Remove(action);
-                    if (action.Item2.repeat > 0)
-                    {
-                        gameActions.Add((now + (double)(action.Item2.repeat * Constants.GAMEPLAY_FRAME_TIME), action.Item2));
-                    }
-                }
-            }
-        }
+        
     }
 }

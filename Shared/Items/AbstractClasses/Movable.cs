@@ -160,7 +160,7 @@ namespace Fanior.Shared
             double y = 0;
             foreach (var movement in allMovements)
             {
-                movement.Frame(friction);
+                movement.Frame(friction, percentage);
                 xy = movement.Move(percentage); //ToolsMath.PolarToCartesian(movement.Angle, movement.MovementSpeed);
                 x += xy.Item1;
                 y -= xy.Item2;

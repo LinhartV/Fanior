@@ -28,7 +28,7 @@ namespace Fanior.Shared
         }
         public abstract (double, double) Move(double percentage);
         //what will happen every frame
-        public abstract void Frame(double friction);
+        public abstract void Frame(double friction, double percentage);
         public abstract void AntiFrame(double friction);
         //change properties of this movement
         public abstract void ResetMovementAngle(double angle);

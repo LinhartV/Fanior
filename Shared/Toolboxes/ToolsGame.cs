@@ -43,7 +43,7 @@ namespace Fanior.Shared
 
 
             }
-            gvars.ExecuteActions(now);
+            gvars.ExecuteActions(now, gvars, server, -1);
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Fanior.Shared
         private static void ProcedeGameAlgorithms(Gvars gvars, double now, bool server)
         {
             //Gvars Actions
-            gvars.ExecuteActions(now);
+            gvars.ExecuteActions(now, gvars, server, -1);
 
             var tempList = new List<Item>(gvars.Items.Values);
             //Everyone with everyone - later quadtree
@@ -84,16 +84,16 @@ namespace Fanior.Shared
             try
             {
 
-            foreach (int playerId in gvars.PlayerActions.Keys)
-            {
-                var list = gvars.PlayerActions[playerId];
-                foreach (var action in gvars.PlayerActions[playerId])
+                foreach (int playerId in gvars.PlayerActions.Keys)
                 {
-                    PlayerActions.InvokeAction(action.Item1, action.Item2, playerId, gvars, delay);
+                    var list = gvars.PlayerActions[playerId];
+                    foreach (var action in gvars.PlayerActions[playerId])
+                    {
+                        PlayerActions.InvokeAction(action.Item1, action.Item2, playerId, gvars, delay);
+                    }
                 }
-            }
 
-            PlayerActions.CheckForActions(gvars);
+                PlayerActions.CheckForActions(gvars);
 
             }
             catch (Exception e)
@@ -110,7 +110,7 @@ namespace Fanior.Shared
             var temp = new List<Item>(gvars.Items.Values);
             foreach (var item in temp)
             {
-                item.ExecuteActions(now, gvars, server);
+                item.ExecuteActions(now, gvars, server, item.Id);
             }
         }
 

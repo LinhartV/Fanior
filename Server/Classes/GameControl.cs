@@ -17,20 +17,23 @@ namespace Fanior.Server.Classes
         public int clientMessageId = -1;
         public readonly object actionLock = new object();
         public readonly object tempListsLock = new object();
-        public readonly object creatingObjectsLock = new object();
         //number of milliseconds from the launch of server
         public Stopwatch sw = new Stopwatch();
+        //for diagnostics
+        public Stopwatch swTest = new Stopwatch();
         //all games by string (url)
         public Dictionary<string, Gvars> games = new Dictionary<string, Gvars>();
         public ManualResetEvent mre = new ManualResetEvent(false);
         //gvarsId, ItemId, (angle, x, y)
         public Dictionary<string, Dictionary<int, double>> tempPlayerInfo = new();
-        //gvarsId, ItemId, (action, pressed/released)   
+        //gvarsId, ItemId, (action, pressed/released, exactReceiveTime)   
         public Dictionary<string, Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>>> tempPlayerActions = new();
         //gvars id, action (when to execute by random (actual time, lower and upper bound), action itself)
         public Dictionary<string, List<(double, int, int, Action<IHubContext<MyHub>>)>> gvarsActions = new();
         //control
         public int controlCount;
+        //collection of all changes that happened this frame
+        public Dictionary<string,List<Dictionary<int, object>>> changedState = new();
         public GameControl()
         {
             sw.Start();
@@ -61,6 +64,7 @@ namespace Fanior.Server.Classes
             games["someId"] = new Gvars("someId");
             games["someId"].StartMeasuringTime(sw.Elapsed.TotalMilliseconds);
             games["someId"].server = true;
+            //changedState.Add("someId", new List<Dictionary<int, object>>());
             tempPlayerInfo.Add("someId", new Dictionary<int, double>());
             tempPlayerActions.Add("someId", new Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>>());
             gvarsActions.Add("someId", new List<(double, int, int, Action<IHubContext<MyHub>>)>());

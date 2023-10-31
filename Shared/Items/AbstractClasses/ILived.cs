@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Fanior.Shared
 {
+    /// <summary>
+    /// Interface for items with lives
+    /// </summary>
     public interface ILived
     {
         public double Regeneration { get; set; }

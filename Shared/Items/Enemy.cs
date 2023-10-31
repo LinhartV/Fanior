@@ -39,5 +39,10 @@ namespace Fanior.Shared
         public override void CollideServer(Item collider, double angle, Gvars gvars)
         {
         }
+        public override void Death(Gvars gvars)
+        {
+            gvars.AddAction(gvars, new ItemAction("createBoss",ToolsGame.random.Next(3000,15000),ItemAction.ExecutionType.OnlyFirstTime));
+            base.Death(gvars);
+        }
     }
 }
