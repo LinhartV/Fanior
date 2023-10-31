@@ -136,14 +136,14 @@ namespace Fanior.Server
                     //Group(gvars.GameId)
                     //actual time for delay, message id for check if messages are in order, playerActions, angle of every player, itemsToCreate, itemsToDestroy
 
-                    //hub?.Clients.All.SendAsync("ExecuteList", game.sw.Elapsed.TotalMilliseconds, gvars.messageId/*, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings)*/, gvars.PlayersAngle,
-                     //   JsonConvert.SerializeObject(gvars.Msg.itemsToCreate, ToolsSystem.jsonSerializerSettings), gvars.Msg.itemsToDestroy
-                    //    , JsonConvert.SerializeObject(GetItemCoordinates(gvars), ToolsSystem.jsonSerializerSettings));
+                    hub?.Clients.All.SendAsync("ExecuteList", game.sw.Elapsed.TotalMilliseconds, gvars.messageId/*, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings)*/, gvars.PlayersAngle,
+                       JsonConvert.SerializeObject(gvars.Msg.itemsToCreate, ToolsSystem.jsonSerializerSettings), gvars.Msg.itemsToDestroy
+                        , JsonConvert.SerializeObject(GetItemCoordinates(gvars), ToolsSystem.jsonSerializerSettings));
                     /*if (gvars.Msg.randomNumbersList.Count > 0)
                     {
                         hub?.Clients.All.SendAsync("ReceiveRandomNumbers", JsonConvert.SerializeObject(gvars.Msg.randomNumbersList, ToolsSystem.jsonSerializerSettings));
                     }*/
-                    hub?.Clients.All.SendAsync("GetItems", JsonConvert.SerializeObject(gvars.Items, ToolsSystem.jsonSerializerSettings));
+                    
 
                     gvars.PlayerActions.Clear();
                     gvars.PlayersAngle.Clear();
