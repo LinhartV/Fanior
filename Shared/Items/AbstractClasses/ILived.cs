@@ -13,8 +13,8 @@ namespace Fanior.Shared
     {
         public double Regeneration { get; set; }
         public double MaxLives { get; set; }
+        public double CurLives { get; set; }
         public void ChangeCurLives(double amount, Item killer, Gvars gvars);
-        public double GetCurLives();
         protected void Death(Gvars gvars);
 
     }

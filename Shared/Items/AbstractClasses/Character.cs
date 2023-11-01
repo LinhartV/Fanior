@@ -16,18 +16,17 @@ namespace Fanior.Shared
         private double shield;
         public double Shield
         {
-            get => shield; 
+            get => shield;
             private set
             {
                 if (value < 0)
                     shield = 0;
                 else
                     shield = value;
+                AddProperty(ItemProperties.Shield, shield);
             }
         }
         public double MaxLives { get; set; }
-        [JsonProperty]
-        private double curLives;
         // Angle where the character is "looking" (for picture, shooting and stuff)
         private double angle;
         public double Angle
@@ -36,10 +35,29 @@ namespace Fanior.Shared
             set
             {
                 angle = value % (Math.PI * 2);
+                AddProperty(ItemProperties.Angle, angle);
             }
         }
-        public Weapon Weapon { get; set; }
+        private Weapon weapon;
+        public Weapon Weapon
+        {
+            get => weapon;
+            set
+            {
+                weapon = value;
+            }
+        }
         public double Regeneration { get; set; }
+        [JsonProperty]
+        private double curLives;
+        public double CurLives
+        {
+            get => curLives;
+            set
+            {
+                curLives = value;
+            }
+        }
 
         public Character() { }
         public Character(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, double acceleration, double friction, double lives, double regeneration, Weapon weapon, double shield = 0, IMovement defaultMovement = null, bool isVisible = true) :
@@ -80,11 +98,7 @@ namespace Fanior.Shared
             {
                 curLives = MaxLives;
             }
-        }
-
-        public double GetCurLives()
-        {
-            return curLives;
+            AddProperty(ItemProperties.Lives, curLives);
         }
 
         public override void CollideServer(Item collider, double angle, Gvars gvars)
@@ -101,7 +115,7 @@ namespace Fanior.Shared
             {
                 if (Shield - damage < 0)
                 {
-                    this.ChangeCurLives(-(damage - Shield), killer ,gvars);
+                    this.ChangeCurLives(-(damage - Shield), killer, gvars);
                 }
                 Shield -= damage;
             }
@@ -109,8 +123,9 @@ namespace Fanior.Shared
             {
                 this.ChangeCurLives(-damage, killer, gvars);
             }
-            
+
 
         }
+
     }
 }

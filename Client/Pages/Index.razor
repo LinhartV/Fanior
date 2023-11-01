@@ -111,7 +111,7 @@
                     var centerX = (item.X - Math.Round(player.X) - item.Shape.ImageWidth / 2 + width / 2);
                     var centerY = (item.Y - Math.Round(player.Y) + item.Shape.ImageHeight / 2 + height / 2 + item.Shape.ImageWidth / 10);
                     <rect x=@(centerX.ToString().Replace(',','.')) y=@(centerY.ToString().Replace(',','.')) width=@item.Shape.ImageWidth height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="black"></rect>
-                    <rect x=@(centerX.ToString().Replace(',','.')) y=@(centerY.ToString().Replace(',','.')) width=@(item.Shape.ImageWidth * l.GetCurLives()/l.MaxLives) height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="lightgreen"></rect>
+                    <rect x=@(centerX.ToString().Replace(',','.')) y=@(centerY.ToString().Replace(',','.')) width=@(item.Shape.ImageWidth * l.CurLives/l.MaxLives) height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="lightgreen"></rect>
 
                     if (item is Player)
                     {

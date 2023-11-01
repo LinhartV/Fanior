@@ -32,8 +32,6 @@ namespace Fanior.Server.Classes
         public Dictionary<string, List<(double, int, int, Action<IHubContext<MyHub>>)>> gvarsActions = new();
         //control
         public int controlCount;
-        //collection of all changes that happened this frame
-        public Dictionary<string,List<Dictionary<int, object>>> changedState = new();
         public GameControl()
         {
             sw.Start();
@@ -64,7 +62,6 @@ namespace Fanior.Server.Classes
             games["someId"] = new Gvars("someId");
             games["someId"].StartMeasuringTime(sw.Elapsed.TotalMilliseconds);
             games["someId"].server = true;
-            changedState.Add("someId", new List<Dictionary<int, object>>());
             tempPlayerInfo.Add("someId", new Dictionary<int, double>());
             tempPlayerActions.Add("someId", new Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>>());
             gvarsActions.Add("someId", new List<(double, int, int, Action<IHubContext<MyHub>>)>());

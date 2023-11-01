@@ -1,5 +1,6 @@
 ﻿using Fanior.Shared;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,6 +14,9 @@ namespace Fanior.Shared
 {
     public abstract class Item : ActionHandler
     {
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum ItemProperties { Angle = 0, X = 1, Y = 2, Lives = 3, Shield = 4, Score = 5 }
+
         private double x;
         public double X
         {
@@ -20,17 +24,45 @@ namespace Fanior.Shared
             set
             {
                 x = value;
-
+                AddProperty(ItemProperties.X, x);
             }
-
         }
         private double y;
-        public double Y { get; set; }
+        public double Y
+        {
+            get => y;
+            set
+            {
+                y = value;
+                AddProperty(ItemProperties.Y, y);
+            }
+        }
         public int Id { get; set; }
         public bool Solid { get; set; }
         public bool IsVisible { get; set; }
         public Mask Mask { get; set; }
         public Shape Shape { get; set; }
+
+        //idea is that every property has it's "id". I'll just add new thing to dictionary with key "Y" and value for Y and I know it's Y.
+        private Dictionary<ItemProperties, double> changedProperties = new();
+        //for communication
+        public Dictionary<ItemProperties, double> GetProperties()
+        {
+            return changedProperties;
+        }
+        public void ClearProperties()
+        {
+            changedProperties.Clear();
+        }
+        public void AddProperty(ItemProperties prop, double val)
+        {
+            if (changedProperties.ContainsKey(prop))
+            {
+                changedProperties[prop] = val;
+            }
+            else
+                changedProperties.Add(prop, val);
+        }
         /// <summary>
         /// Collision event executed both on server side and client side
         /// </summary>
@@ -51,46 +83,50 @@ namespace Fanior.Shared
         {
 
         }
-        //Idea that actions will be reversed, then I would add pending actions and then I would execute them several times to reach current state
+        /*//Idea that actions will be reversed, then I would add pending actions and then I would execute them several times to reach current state
         //This way I would execute pending actions in the past, when the actually happened... didn't work...
         /// <summary>
         /// Invokes playerActions
         /// </summary>
         public void SetActions(double now, Gvars gvars, int delay, List<(PlayerActions.PlayerActionsEnum, bool)> actionMethodNames)
         {
-            /*for (int i = 0; i < frames; i++)
+            for (int i = 0; i < frames; i++)
             {
                 foreach (var action in actionsEveryFrame.Values)
                 {
                     LambdaActions.executeAntiAction(action.ActionName, gvars, this.Id);
                 }
-            }*/
+            }
             foreach (var action in actionMethodNames)
             {
                 PlayerActions.InvokeAction(action.Item1, action.Item2, Id, gvars, delay);
             }
-            /*for (int i = 0; i < frames; i++)
+            for (int i = 0; i < frames; i++)
             {
                 foreach (var action in actionsEveryFrame.Values)
                 {
                     LambdaActions.executeAction(action.ActionName, gvars, this.Id);
                 }
-            }*/
-        }
+            }
+        }*/
 
 
         public virtual void Dispose(Gvars gvars)
         {
+            
             gvars.Items.Remove(this.Id);
-            if (gvars.ItemsPlayers.ContainsKey(Id))
+            if (gvars.ItemsPlayers.ContainsKey(this.Id))
             {
                 gvars.ItemsPlayers.Remove(this.Id);
             }
-            if (gvars.ItemsStep.ContainsKey(Id))
+            if (gvars.ItemsStep.ContainsKey(this.Id))
             {
                 gvars.ItemsStep.Remove(this.Id);
             }
-            gvars.Msg.itemsToDestroy.Add(this.Id);
+            if(gvars.server)
+                gvars.Msg.itemsToDestroy.Add(this.Id);
+
+
         }
         public virtual void SetItemFromClient(Gvars gvars)
         {
@@ -112,8 +148,6 @@ namespace Fanior.Shared
             }
             this.X = x;
             this.Y = y;
-            VirtualX = x;
-            VirtualY = y;
             this.IsVisible = isVisible;
             Solid = !justGraphics;
             this.Id = gvars.Id++;

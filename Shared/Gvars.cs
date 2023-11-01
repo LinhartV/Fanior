@@ -22,7 +22,6 @@ namespace Fanior.Shared
             public Message()
             {
             }
-
             public List<Item> itemsToCreate = new List<Item>();
             /// <summary>
             /// list of items to destroy by their id
@@ -54,6 +53,7 @@ namespace Fanior.Shared
                 randomNumbersList.Clear();
             }
         }
+        public readonly object generalLock = new object();
         //id of sent messages
         public long messageId = 0;
         //milliseconds elapsed from the launch of server
@@ -75,6 +75,8 @@ namespace Fanior.Shared
         //properties of items that changed from previous frame
         public Dictionary<int, string> ItemInfo { get; set; } = new();
         
+        //List of items that changed their property during this frame.
+        public List<Item> justChanged = new List<Item>();
         //count of items in arena.
         public Dictionary<ToolsGame.Counts, int> CountOfItems { get; set; } = new() { { ToolsGame.Counts.coins, 0 }, { ToolsGame.Counts.enemies, 0} };
         //size of arena

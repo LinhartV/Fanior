@@ -20,6 +20,7 @@ namespace Fanior.Shared
             get => score; set
             {
                 score = value;
+                AddProperty(ItemProperties.Score, score);
                 //this.BaseSpeed = BaseSpeed - (2 - (2000 / (score + 1000)));
             }
         }
@@ -89,6 +90,10 @@ namespace Fanior.Shared
             if (collider is Coin c)
             {
                 this.Score += c.Value;
+            }
+            if (collider is Enemy e)
+            {
+                ChangeCurLives(-2, e, gvars);
             }
         }
         /*public override void Collide(Item collider, double angle, params Globals.ActionsAtCollision[] actionsNotToPerform)

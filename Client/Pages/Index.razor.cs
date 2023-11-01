@@ -74,7 +74,7 @@ namespace Fanior.Client.Pages
 
 
 
-        
+
         #region Frame
         /*protected Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -131,28 +131,28 @@ namespace Fanior.Client.Pages
 
                 await hubConnection.SendAsync("ExecuteList", gvars.GameId, this.id, player.Angle, sendMessageId);
 
-               /* sendMessageId++;
-                gvars.PlayerActions[id] = new List<(PlayerActions.PlayerActionsEnum, bool)>(myActions);
-                myActions.Clear();
-                lock (frameLock)
-                {
-                    gvars.PercentageOfFrame = ToolsSystem.GetPercentageOfFrame(frameDuration, sw.Elapsed.TotalMilliseconds);
-                    if (gvars.PercentageOfFrame == -1)
-                    {
-                        //hubConnection.SendAsync("SendGvars", gvars.GameId);
-                    }
-                   
-                    frameDuration = sw.Elapsed.TotalMilliseconds;
-                    ToolsGame.ProceedFrame(gvars, gvars.GetNow(), delay, false);
-                    if (player.Score >= nextLevel)
-                    {
-                        //Bonus
-                        nextLevel = nextLevel * 5 / 2;
-                    }
-                    gvars.PlayerActions[id].Clear();
-                }*/
+                /* sendMessageId++;
+                 gvars.PlayerActions[id] = new List<(PlayerActions.PlayerActionsEnum, bool)>(myActions);
+                 myActions.Clear();
+                 lock (frameLock)
+                 {
+                     gvars.PercentageOfFrame = ToolsSystem.GetPercentageOfFrame(frameDuration, sw.Elapsed.TotalMilliseconds);
+                     if (gvars.PercentageOfFrame == -1)
+                     {
+                         //hubConnection.SendAsync("SendGvars", gvars.GameId);
+                     }
 
-                
+                     frameDuration = sw.Elapsed.TotalMilliseconds;
+                     ToolsGame.ProceedFrame(gvars, gvars.GetNow(), delay, false);
+                     if (player.Score >= nextLevel)
+                     {
+                         //Bonus
+                         nextLevel = nextLevel * 5 / 2;
+                     }
+                     gvars.PlayerActions[id].Clear();
+                 }*/
+
+
             }
             catch (Exception e)
             {
@@ -165,7 +165,7 @@ namespace Fanior.Client.Pages
             gvars.Items = JsonConvert.DeserializeObject<Dictionary<int, Item>>(itemsJson, ToolsSystem.jsonSerializerSettings);
             player = gvars.Items[this.id] as Player;
         }
-        private void ExecuteList(double now, long messageId,/* string actionMethodNamesJson,*/ Dictionary<int, double> playerInfo, string itemsToCreateJson, List<int> itemsToDestroy, string coordsJson)
+        private void ExecuteList(double now, long messageId,/* string actionMethodNamesJson, Dictionary<int, double> playerInfo,*/ string itemsToCreateJson, List<int> itemsToDestroy, Dictionary<int, Dictionary<Item.ItemProperties, double>> info)
         {
             /*if (counter == 0)
             {
@@ -184,42 +184,64 @@ namespace Fanior.Client.Pages
             //Console.WriteLine(delay);
             try
             {
-                //Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>> actionMethodNames = JsonConvert.DeserializeObject<Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
-                List<Item> itemsToCreate = JsonConvert.DeserializeObject<List<Item>>(itemsToCreateJson, ToolsSystem.jsonSerializerSettings);
-
-                Dictionary<int, (double, double)> coordinates = JsonConvert.DeserializeObject<Dictionary<int, (double, double)>>(coordsJson, ToolsSystem.jsonSerializerSettings);
-
-                foreach (var itemId in itemsToDestroy)
-                {
-                    gvars.Items[itemId].Dispose(gvars);
-                }
-                foreach (var item in itemsToCreate)
-                {
-                    if (id != 0)
-                    {
-                        item.SetItemFromClient(gvars);
-                    }
-                }
-                /*foreach (int itemId in actionMethodNames.Keys)
-                {
-                    gvars.ItemsPlayers[itemId].SetActions(now, gvars, Constants.DELAY, actionMethodNames[itemId]);
-                }*/
-                foreach (var id in playerInfo.Keys)
-                {
-                    if (id != this.id)
-                    {
-                        gvars.ItemsPlayers[id].Angle = playerInfo[id];
-                    }
-                }
                 lock (actionLock)
                 {
-                    foreach (var item in coordinates)
+                    //Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>> actionMethodNames = JsonConvert.DeserializeObject<Dictionary<int, List<(PlayerActions.PlayerActionsEnum, bool)>>>(actionMethodNamesJson, ToolsSystem.jsonSerializerSettings);
+                    List<Item> itemsToCreate = JsonConvert.DeserializeObject<List<Item>>(itemsToCreateJson, ToolsSystem.jsonSerializerSettings);
+
+                    //Dictionary<int, (double, double)> coordinates = JsonConvert.DeserializeObject<Dictionary<int, (double, double)>>(coordsJson, ToolsSystem.jsonSerializerSettings);
+
+                    
+                    foreach (var item in itemsToCreate)
                     {
-                        gvars.Items[item.Key].X = item.Value.Item1;
-                        gvars.Items[item.Key].Y = item.Value.Item2;
+                        if (id != 0)
+                        {
+                            item.SetItemFromClient(gvars);
+                        }
                     }
-                    //this.coordinates = coordinates;
-                    //movementCounter = 0;
+                    /*foreach (int itemId in actionMethodNames.Keys)
+                    {
+                        gvars.ItemsPlayers[itemId].SetActions(now, gvars, Constants.DELAY, actionMethodNames[itemId]);
+                    }*/
+                    /*foreach (var id in playerInfo.Keys)
+                    {
+                        if (id != this.id)
+                        {
+                            gvars.ItemsPlayers[id].Angle = playerInfo[id];
+                        }
+                    }*/
+                    foreach (var item in info)
+                    {
+                        gvars.Items[item.Key].ClearProperties();
+                        if (item.Value.ContainsKey(Item.ItemProperties.X))
+                        {
+                            gvars.Items[item.Key].X = (double)item.Value[Item.ItemProperties.X];
+                        }
+                        if (item.Value.ContainsKey(Item.ItemProperties.Y))
+                        {
+                            gvars.Items[item.Key].Y = (double)item.Value[Item.ItemProperties.Y];
+                        }
+                        if (item.Value.ContainsKey(Item.ItemProperties.Angle))
+                        {
+                            (gvars.Items[item.Key] as Character).Angle = (double)item.Value[Item.ItemProperties.Angle];
+                        }
+                        if (item.Value.ContainsKey(Item.ItemProperties.Lives))
+                        {
+                            (gvars.Items[item.Key] as Character).CurLives = (double)item.Value[Item.ItemProperties.Lives];
+                        }
+                        if (item.Value.ContainsKey(Item.ItemProperties.Score))
+                        {
+                            (gvars.Items[item.Key] as Player).Score = (int)item.Value[Item.ItemProperties.Score];
+                        }
+                    }
+                    foreach (var itemId in itemsToDestroy)
+                    {
+                        gvars.Items[itemId].Dispose(gvars);
+                        if (itemId == this.id)
+                        {
+                            EndGame();
+                        }
+                    }
                 }
             }
             catch (Exception e)

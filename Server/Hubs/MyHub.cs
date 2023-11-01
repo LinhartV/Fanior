@@ -64,7 +64,8 @@ namespace Fanior.Server.Hubs
         /// </summary>
         public void ExecuteAction(PlayerActions.PlayerActionsEnum action, bool down, string gameId, int itemId, double angle, int actionId)
         {
-            AddActionsToList(gameId, itemId, angle, action, down, actionId);
+            if (gameControl.games[gameId].ItemsPlayers.ContainsKey(itemId))
+                AddActionsToList(gameId, itemId, angle, action, down, actionId);
         }
         /// <summary>
         /// Listens to incoming messages from clients.

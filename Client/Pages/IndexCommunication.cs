@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using static Fanior.Shared.Item;
 
 namespace Fanior.Client.Pages
 {
@@ -45,14 +46,17 @@ namespace Fanior.Client.Pages
 
                 }
             });
-            hubConnection.On<int>("PlayerDied", (id) =>
+            /*hubConnection.On<int>("PlayerDied", (id) =>
             {
-                gvars.ItemsPlayers[id].Dispose(gvars);
-                if (id == this.id)
+                lock (actionLock)
                 {
-                    EndGame();
+                    gvars.ItemsPlayers[id].Dispose(gvars);
+                    if (id == this.id)
+                    {
+                        EndGame();
+                    }
                 }
-            });
+            });*/
             /*hubConnection.On<string>("CreateNewItem", (itemJson) =>
             {
                 if (id != 0)
@@ -64,18 +68,18 @@ namespace Fanior.Client.Pages
 
             hubConnection.On<PlayerActions.PlayerActionsEnum, bool, int, double, double, double, int>("ExecuteAction", (action, down, itemId, angle, x, y, actionIdReceived) =>
             {
-                ExecuteAction(action, down, itemId, angle, x,y,actionIdReceived); 
+                ExecuteAction(action, down, itemId, angle, x, y, actionIdReceived);
             });
             //Actions to be proceeded that server sent to client 
             //Dictionary of list of actions assigned to object id along with information, if it's keydown or keyup (true = keydown).
             //+messageId to check if connection was lost.
-            //time, messageId, PlayerActions, angles, itemsToCreate, itemsToDestroy (id), info
-            hubConnection.On<double, long/*, string*/, Dictionary<int, double>, string, List<int>, string>("ExecuteList", (now, messageId/*, actionMethodNamesJson*/, playerInfo, itemsToCreate, itemsToDestroy, infoJson) =>
+            //time, messageId, /*PlayerActions, angles,*/ itemsToCreate, itemsToDestroy (id), info
+            hubConnection.On<double, long/*, string, Dictionary<int, double>*/, string, List<int>, Dictionary<int, Dictionary<ItemProperties, double>>>("ExecuteList", (now, messageId/*, actionMethodNamesJson, playerInfo*/, itemsToCreate, itemsToDestroy, info) =>
             {
                 try
                 {
                     sw2.Start();
-                    ExecuteList(now, messageId/*, actionMethodNamesJson*/, playerInfo, itemsToCreate, itemsToDestroy, info);
+                    ExecuteList(now, messageId/*, actionMethodNamesJson, playerInfo*/, itemsToCreate, itemsToDestroy, info);
 
                     StateHasChanged();
                     sw2.Stop();

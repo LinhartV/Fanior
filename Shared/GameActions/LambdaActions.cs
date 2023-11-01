@@ -17,7 +17,7 @@ namespace Fanior.Shared
         /// Dictionary of actions. Key - name, Value - Action(gvars, id of item)
         /// </summary>
         private static Dictionary<string, Action<Gvars, int>> lambdaActions = new();
-        
+
 
         public static void SetupLambdaActions()
         {
@@ -50,18 +50,19 @@ namespace Fanior.Shared
             lambdaActions.Add("right", ((gvars, id) => { (gvars.Items[id] as Player).UpdateControlledMovement("right", gvars.PercentageOfFrame); }));
             lambdaActions.Add("left", ((gvars, id) => { (gvars.Items[id] as Player).UpdateControlledMovement("left", gvars.PercentageOfFrame); }));
 
-            lambdaActions.Add("regenerate", ((gvars, id) => { ILived l = gvars.Items[id] as ILived; if (l.GetCurLives() > 0) { l.ChangeCurLives(l.Regeneration*gvars.PercentageOfFrame, null, gvars); } }));
+            lambdaActions.Add("regenerate", ((gvars, id) => { ILived l = gvars.Items[id] as ILived; if (l.CurLives > 0 && l.CurLives < l.MaxLives) { l.ChangeCurLives(l.Regeneration * gvars.PercentageOfFrame, null, gvars); } }));
             lambdaActions.Add("outsideArena", ((gvars, id) =>
             {
-                Player player = gvars.Items[id] as Player;
+                Character player = gvars.Items[id] as Character;
                 if (player.X < 0 || player.X > gvars.ArenaWidth || player.Y > gvars.ArenaHeight || player.Y < 0)
                 {
-                    player.ChangeCurLives(-1*gvars.PercentageOfFrame, null, gvars);
+                    player.ChangeCurLives(-1 * gvars.PercentageOfFrame, null, gvars);
                 }
             }));
 
             lambdaActions.Add("enemyAI", ((gvars, id) => { (gvars.ItemsStep[id] as Enemy).ai.Control(gvars, gvars.ItemsStep[id] as Enemy); }));
-            lambdaActions.Add("createBoss", ((gvars, id) => {
+            lambdaActions.Add("createBoss", ((gvars, id) =>
+            {
 
                 if (gvars.CountOfItems[ToolsGame.Counts.enemies] < 1)
                 {
@@ -69,7 +70,8 @@ namespace Fanior.Shared
                 }
 
             }));
-            lambdaActions.Add("createCoin", ((gvars, id) => {
+            lambdaActions.Add("createCoin", ((gvars, id) =>
+            {
                 if (gvars.CountOfItems[ToolsGame.Counts.coins] < 12)
                 {
                     Coin c;
@@ -81,7 +83,7 @@ namespace Fanior.Shared
                 }
             }));
 
-            
+
 
 
         }

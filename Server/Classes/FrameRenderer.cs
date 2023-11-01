@@ -16,6 +16,7 @@ using System.Diagnostics;
 using Microsoft.Extensions.Options;
 using System.Reflection.Metadata;
 using Fanior.Server.Hubs;
+using static Fanior.Shared.Item;
 
 namespace Fanior.Server
 {
@@ -105,7 +106,7 @@ namespace Fanior.Server
                     gvars.messageId++;
                     foreach (var player in gvars.ItemsPlayers.Values)
                     {
-                        if (player.GetCurLives() <= 0)
+                        if (player.CurLives <= 0)
                         {
                             hub?.Clients.All.SendAsync("PlayerDied", player.Id);
                             player.Dispose(gvars);
@@ -136,23 +137,43 @@ namespace Fanior.Server
                     //Group(gvars.GameId)
                     //actual time for delay, message id for check if messages are in order, playerActions, angle of every player, itemsToCreate, itemsToDestroy
 
-                    hub?.Clients.All.SendAsync("ExecuteList", game.sw.Elapsed.TotalMilliseconds, gvars.messageId/*, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings)*/, gvars.PlayersAngle,
+                    hub?.Clients.All.SendAsync("ExecuteList", game.sw.Elapsed.TotalMilliseconds, gvars.messageId/*, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings)*/,
                        JsonConvert.SerializeObject(gvars.Msg.itemsToCreate, ToolsSystem.jsonSerializerSettings), gvars.Msg.itemsToDestroy
-                        , JsonConvert.SerializeObject(GetItemCoordinates(gvars), ToolsSystem.jsonSerializerSettings));
+                        , GetListOfProperties(gvars) /*JsonConvert.SerializeObject(GetItemCoordinates(gvars), ToolsSystem.jsonSerializerSettings)*/ );
                     /*if (gvars.Msg.randomNumbersList.Count > 0)
                     {
                         hub?.Clients.All.SendAsync("ReceiveRandomNumbers", JsonConvert.SerializeObject(gvars.Msg.randomNumbersList, ToolsSystem.jsonSerializerSettings));
                     }*/
-                    
 
+                    ClearListOfProperties(gvars);
                     gvars.PlayerActions.Clear();
                     gvars.PlayersAngle.Clear();
                     gvars.Msg.ClearThis();
+
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
                 }
+            }
+        }
+        private Dictionary<int, Dictionary<ItemProperties, double>> GetListOfProperties(Gvars gvars)
+        {
+            Dictionary<int, Dictionary<ItemProperties, double>> result = new();
+            foreach (var item in gvars.Items.Values)
+            {
+                if (item.GetProperties().Count > 0)
+                {
+                    result.Add(item.Id, item.GetProperties());
+                }
+            }
+            return result;
+        }
+        private void ClearListOfProperties(Gvars gvars)
+        {
+            foreach (var item in gvars.Items.Values)
+            {
+                item.ClearProperties();
             }
         }
 

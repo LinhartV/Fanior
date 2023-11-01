@@ -202,7 +202,7 @@ namespace Fanior.Client.Pages
             try
             {
                 animEnd = true;
-                timer.Change(Timeout.Infinite, Timeout.Infinite);
+                //timer.Change(Timeout.Infinite, Timeout.Infinite);
                 firstConnect = 1;
                 await Animate(false);
                 await hubConnection.DisposeAsync();

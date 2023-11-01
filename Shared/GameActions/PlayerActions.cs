@@ -41,49 +41,27 @@ namespace Fanior.Shared
         public enum PlayerActionsEnum { none = 0, moveUp = 1, moveDown = 2, moveLeft = 3, moveRight = 4, fire = 5, ability1 = 6, ability2 = 7, other = 8 }
 
         static Dictionary<PlayerActionsEnum, KeyCommand> actions = new();
-        //when; what; keydown?; id
-        static List<(double, PlayerActionsEnum, bool, int)> pendingActions = new();
 
 
 
-        /// <summary>
-        /// Invokes a predefined action from PlayerAction.actions list.
-        /// </summary>
-        /// <param name="actionName">Name of action to be invoked</param>
-        /// <param name="keyDown">Whether player pressed this particular key or released it</param>
-        /// <param name="itemId">Id of the player</param>
-        /// <param name="gvars">Gvars reference</param>
-        /// <param name="delay">Time delay caused by lag between server and client</param>
-        public static void InvokeAction(PlayerActionsEnum actionName, bool keyDown, int itemId, Gvars gvars, int delay)
+        public static void CheckForActions(Gvars gvars, double delay)
         {
-            try
+            foreach (int playerId in gvars.PlayerActions.Keys)
             {
-                if (actions.ContainsKey(actionName))
+                var list = gvars.PlayerActions[playerId];
+                foreach (var action in gvars.PlayerActions[playerId])
                 {
-                    pendingActions.Add((gvars.GetNow(), actionName, keyDown, itemId));
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-        }
-        public static void CheckForActions(Gvars gvars)
-        {
-            var tempList = new List<(double, PlayerActionsEnum, bool, int)>(pendingActions);
-            foreach (var item in tempList)
-            {
-                if (item.Item1 < gvars.GetNow())
-                {
-                    if (item.Item3)
+                    if (actions.ContainsKey(action.Item1))
                     {
-                        actions[item.Item2]?.KeyDown(item.Item4, gvars);
+                        if (action.Item2)
+                        {
+                            actions[action.Item1]?.KeyDown(playerId, gvars);
+                        }
+                        else
+                        {
+                            actions[action.Item1]?.KeyUp(playerId, gvars);
+                        }
                     }
-                    else
-                    {
-                        actions[item.Item2]?.KeyUp(item.Item4, gvars);
-                    }
-                    pendingActions.Remove(item);
                 }
             }
         }

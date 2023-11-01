@@ -34,9 +34,12 @@ namespace Fanior.Shared
         {
             try
             {
-                ProcedeGameAlgorithms(gvars, now, server);
-                ProcedePlayerActions(gvars, delay, server);
-                ProcedeItemActions(now, gvars, server);
+                lock (gvars.generalLock)
+                {
+                    ProcedeGameAlgorithms(gvars, now, server);
+                    ProcedePlayerActions(gvars, delay, server);
+                    ProcedeItemActions(now, gvars, server);
+                }
             }
             catch (Exception e)
             {
@@ -79,22 +82,11 @@ namespace Fanior.Shared
         /// <summary>
         /// Proceeds actions that players just did
         /// </summary>
-        private static void ProcedePlayerActions(Gvars gvars, int delay, bool server)
+        private static void ProcedePlayerActions(Gvars gvars, double delay, bool server)
         {
             try
             {
-
-                foreach (int playerId in gvars.PlayerActions.Keys)
-                {
-                    var list = gvars.PlayerActions[playerId];
-                    foreach (var action in gvars.PlayerActions[playerId])
-                    {
-                        PlayerActions.InvokeAction(action.Item1, action.Item2, playerId, gvars, delay);
-                    }
-                }
-
-                PlayerActions.CheckForActions(gvars);
-
+                PlayerActions.CheckForActions(gvars, delay);
             }
             catch (Exception e)
             {
