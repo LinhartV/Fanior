@@ -14,6 +14,17 @@ namespace Fanior.Shared
     /// </summary>
     public abstract class Movable : Item
     {
+        // Angle where the character is "looking" (for picture, shooting and stuff)
+        private double angle;
+        public double Angle
+        {
+            get => angle;
+            set
+            {
+                angle = value % (Math.PI * 2);
+                AddProperty(ItemProperties.Angle, angle);
+            }
+        }
         [JsonProperty]
         private double baseSpeed;
         /// <summary>
@@ -46,7 +57,7 @@ namespace Fanior.Shared
         private Dictionary<string, IMovement> MovementsControlled { get; set; } = new Dictionary<string, IMovement>();
         public bool ThroughSolid { get; set; } = false;
         public Movable() { }
-        public Movable(Gvars gvars, double x, double y, Shape shape, Mask mask, double baseSpeed, IMovement movement, double acceleration, double friction, bool isVisible = true) : base(gvars, x, y, shape, mask, isVisible)
+        public Movable(Gvars gvars, double x, double y, Shape shape, Mask mask, double baseSpeed, IMovement movement, double acceleration, double friction, bool setAngle,  bool isVisible = true) : base(gvars, x, y, shape, mask, isVisible)
         {
             this.Friction = friction;
             this.Acceleration = acceleration;
@@ -55,7 +66,7 @@ namespace Fanior.Shared
             {
                 AddControlledMovement(movement, "default");
             }
-            this.AddAction(gvars, new ItemAction("move", 1, ItemAction.ExecutionType.EveryTime, true));
+            this.AddAction(gvars, new ItemAction("move", 1, ItemAction.ExecutionType.EveryTime, true, setAngle));
             gvars.ItemsStep.Add(Id, this);
         }
         public override void SetItemFromClient(Gvars gvars)
@@ -150,8 +161,12 @@ namespace Fanior.Shared
             this.X += x;
             this.Y += y;
         }*/
-
-        public void Move(double percentage)
+        /// <summary>
+        /// Move the current object based on it's movements
+        /// </summary>
+        /// <param name="percentage">Percentage of current frame</param>
+        /// <param name="setAngle">Whether to set angle of object to match the movement angle</param>
+        public void Move(double percentage, bool setAngle)
         {
             List<IMovement> allMovements = new List<IMovement>(MovementsAutomated);
             allMovements.AddRange(MovementsControlled.Values);
@@ -167,6 +182,10 @@ namespace Fanior.Shared
             }
             this.X += x;
             this.Y += y;
+            if(setAngle)
+            {
+                 Angle = ToolsMath.GetAngleFromLengts(x, -y);
+            }
             /*
              PartialMovement pm = GetCurrentMovement();
              if (pm.MovementSpeed == 0)

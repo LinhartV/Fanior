@@ -13,8 +13,8 @@ namespace Fanior.Shared
         private int scoreToReturn;
         public IEnemyAI ai;
         public Enemy() : base() { }
-        public Enemy(Gvars gvars, double x, double y, Shape shape, IMovement defaultMovement, double movementSpeed, double acceleration, double friction, double lives, double regeneration, Weapon weapon, int bounty, IEnemyAI ai,double shield = 0, bool isVisible = true)
-            : base(gvars, x, y, shape, new Mask(shape.ImageWidth, shape.ImageHeight, shape.Geometry), movementSpeed, acceleration, friction, lives, regeneration, weapon, shield, defaultMovement, isVisible)
+        public Enemy(Gvars gvars, double x, double y, Shape shape, IMovement defaultMovement, double movementSpeed, double acceleration, double friction, double lives, double regeneration, Weapon weapon, int bounty, IEnemyAI ai, bool setAngle, double shield = 0, bool isVisible = true)
+            : base(gvars, x, y, shape, new Mask(shape.ImageWidth, shape.ImageHeight, shape.Geometry), movementSpeed, acceleration, friction, lives, regeneration, weapon, setAngle, shield, defaultMovement, isVisible)
         {
             scoreToReturn = bounty;
             gvars.CountOfItems[ToolsGame.Counts.enemies]++;
@@ -41,7 +41,7 @@ namespace Fanior.Shared
         }
         public override void Death(Gvars gvars)
         {
-            gvars.AddAction(gvars, new ItemAction("createBoss",ToolsGame.random.Next(3000,15000),ItemAction.ExecutionType.OnlyFirstTime));
+            gvars.AddAction(gvars, new ItemAction("createBoss", ToolsGame.random.Next(3000, 15000), ItemAction.ExecutionType.OnlyFirstTime));
             base.Death(gvars);
         }
     }

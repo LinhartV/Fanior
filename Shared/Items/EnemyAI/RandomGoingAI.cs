@@ -23,6 +23,7 @@ namespace Fanior.Shared
                 gvars.Msg.randomNumbersList.Add(new Gvars.Message.RandomNumbers(new List<double>() { randomX, randomY }, "randomAI", enemy.Id));
             }
             enemy.UpdateControlledMovement("default", gvars.PercentageOfFrame);
+
         }
         public void ReceiveRandomNumbers(List<double> numbers)
         {

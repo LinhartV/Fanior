@@ -5,11 +5,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Collections.Specialized.BitVector32;
 
 namespace Fanior.Shared
 {
     /// <summary>
-    /// Object that that actions can be assigned to
+    /// Object that actions can be assigned to
     /// </summary>
     public class ActionHandler
     {
@@ -24,11 +25,11 @@ namespace Fanior.Shared
         /// Due to possible differences in duration of particular frames, actions will be executed be number of frames, not real time
         /// </summary>
         /// <param name="id">Set -1 for gvars</param>
-        public void ExecuteActions(double now, Gvars gvars, bool server, int id)
+        public void ExecuteActions(double now, Gvars gvars, bool server, int id = -1)
         {
             foreach (var action in actionsEveryFrame.Values)
             {
-                LambdaActions.executeAction(action.ActionName, gvars, id);
+                LambdaActions.ExectureActions(action.ActionName, gvars, id, action.Parameters);
             }
 
             Dictionary<string, (double, ItemAction)> tempActions = new Dictionary<string, (double, ItemAction)>(actions);
@@ -38,7 +39,7 @@ namespace Fanior.Shared
                 {
                     if (actions[actionName].Item2.executionType == ItemAction.ExecutionType.EveryTime || (actions[actionName].Item2.Repeat == 0 && actions[actionName].Item2.executionType == ItemAction.ExecutionType.OnlyFirstTime))
                     {
-                        LambdaActions.executeAction(actions[actionName].Item2.ActionName, gvars, id);
+                        LambdaActions.ExectureActions(actions[actionName].Item2.ActionName, gvars, id, actions[actionName].Item2.Parameters);
                     }
                     else if (actions[actionName].Item2.executionType == ItemAction.ExecutionType.NotFirstTime)
                     {

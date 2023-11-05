@@ -105,7 +105,7 @@ namespace Fanior.Shared
             {
                 foreach (var action in actionsEveryFrame.Values)
                 {
-                    LambdaActions.executeAction(action.ActionName, gvars, this.Id);
+                    LambdaActions.ExectureActions(action.ActionName, gvars, this.Id);
                 }
             }
         }*/

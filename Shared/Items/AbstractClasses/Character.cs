@@ -27,17 +27,7 @@ namespace Fanior.Shared
             }
         }
         public double MaxLives { get; set; }
-        // Angle where the character is "looking" (for picture, shooting and stuff)
-        private double angle;
-        public double Angle
-        {
-            get => angle;
-            set
-            {
-                angle = value % (Math.PI * 2);
-                AddProperty(ItemProperties.Angle, angle);
-            }
-        }
+        
         private Weapon weapon;
         public Weapon Weapon
         {
@@ -60,8 +50,8 @@ namespace Fanior.Shared
         }
 
         public Character() { }
-        public Character(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, double acceleration, double friction, double lives, double regeneration, Weapon weapon, double shield = 0, IMovement defaultMovement = null, bool isVisible = true) :
-            base(gvars, x, y, shape, mask, movementSpeed, defaultMovement, acceleration, friction, isVisible)
+        public Character(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, double acceleration, double friction, double lives, double regeneration, Weapon weapon, bool setAngle, double shield = 0, IMovement defaultMovement = null, bool isVisible = true) :
+            base(gvars, x, y, shape, mask, movementSpeed, defaultMovement, acceleration, friction, setAngle, isVisible)
         {
             this.MaxShield = shield;
             this.Shield = shield;

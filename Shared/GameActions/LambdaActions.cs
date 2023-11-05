@@ -13,16 +13,17 @@ namespace Fanior.Shared
     /// </summary>
     public class LambdaActions
     {
+        delegate void LambdaAction(Gvars gvars, int id, params object[] parameters);
         /// <summary>
         /// Dictionary of actions. Key - name, Value - Action(gvars, id of item)
         /// </summary>
-        private static Dictionary<string, Action<Gvars, int>> lambdaActions = new();
+        private static Dictionary<string, LambdaAction> lambdaActions = new();
 
 
         public static void SetupLambdaActions()
         {
 
-            lambdaActions.Add("fire1", (gvars, id) =>
+            lambdaActions.Add("fire1", (gvars, id, parameters) =>
             {
                 Character character = gvars.Items[id] as Character;
                 if (!character.Weapon.reloaded)
@@ -37,21 +38,21 @@ namespace Fanior.Shared
 
             }
             );
-            lambdaActions.Add("fire2", ((gvars, id) => { (gvars.Items[id] as Character).Weapon.reloaded = true; }));
-            lambdaActions.Add("dispose", ((gvars, id) => { gvars.Items[id].Dispose(gvars); }));
+            lambdaActions.Add("fire2", ((gvars, id, parameters) => { (gvars.Items[id] as Character).Weapon.reloaded = true; }));
+            lambdaActions.Add("dispose", ((gvars, id, parameters) => { gvars.Items[id].Dispose(gvars); }));
 
-            lambdaActions.Add("move", (gvars, id) =>
+            lambdaActions.Add("move", (gvars, id, parameters) =>
             {
-                (gvars.Items[id] as Movable).Move(gvars.PercentageOfFrame);
+                (gvars.Items[id] as Movable).Move(gvars.PercentageOfFrame, parameters.Length > 0 ? (bool)parameters[0] : false);
             }
             );
-            lambdaActions.Add("up", ((gvars, id) => { (gvars.Items[id] as Player).UpdateControlledMovement("up", gvars.PercentageOfFrame); }));
-            lambdaActions.Add("down", ((gvars, id) => { (gvars.Items[id] as Player).UpdateControlledMovement("down", gvars.PercentageOfFrame); }));
-            lambdaActions.Add("right", ((gvars, id) => { (gvars.Items[id] as Player).UpdateControlledMovement("right", gvars.PercentageOfFrame); }));
-            lambdaActions.Add("left", ((gvars, id) => { (gvars.Items[id] as Player).UpdateControlledMovement("left", gvars.PercentageOfFrame); }));
+            lambdaActions.Add("up", ((gvars, id, parameters) => { (gvars.Items[id] as Player).UpdateControlledMovement("up", gvars.PercentageOfFrame); }));
+            lambdaActions.Add("down", ((gvars, id, parameters) => { (gvars.Items[id] as Player).UpdateControlledMovement("down", gvars.PercentageOfFrame); }));
+            lambdaActions.Add("right", ((gvars, id, parameters) => { (gvars.Items[id] as Player).UpdateControlledMovement("right", gvars.PercentageOfFrame); }));
+            lambdaActions.Add("left", ((gvars, id, parameters) => { (gvars.Items[id] as Player).UpdateControlledMovement("left", gvars.PercentageOfFrame); }));
 
-            lambdaActions.Add("regenerate", ((gvars, id) => { ILived l = gvars.Items[id] as ILived; if (l.CurLives > 0 && l.CurLives < l.MaxLives) { l.ChangeCurLives(l.Regeneration * gvars.PercentageOfFrame, null, gvars); } }));
-            lambdaActions.Add("outsideArena", ((gvars, id) =>
+            lambdaActions.Add("regenerate", ((gvars, id, parameters) => { ILived l = gvars.Items[id] as ILived; if (l.CurLives > 0 && l.CurLives < l.MaxLives) { l.ChangeCurLives(l.Regeneration * gvars.PercentageOfFrame, null, gvars); } }));
+            lambdaActions.Add("outsideArena", ((gvars, id, parameters) =>
             {
                 Character player = gvars.Items[id] as Character;
                 if (player.X < 0 || player.X > gvars.ArenaWidth || player.Y > gvars.ArenaHeight || player.Y < 0)
@@ -60,17 +61,17 @@ namespace Fanior.Shared
                 }
             }));
 
-            lambdaActions.Add("enemyAI", ((gvars, id) => { (gvars.ItemsStep[id] as Enemy).ai.Control(gvars, gvars.ItemsStep[id] as Enemy); }));
-            lambdaActions.Add("createBoss", ((gvars, id) =>
+            lambdaActions.Add("enemyAI", ((gvars, id, parameters) => { (gvars.ItemsStep[id] as Enemy).ai.Control(gvars, gvars.ItemsStep[id] as Enemy); }));
+            lambdaActions.Add("createBoss", ((gvars, id, parameters) =>
             {
 
                 if (gvars.CountOfItems[ToolsGame.Counts.enemies] < 1)
                 {
-                    Enemy e = new Enemy(gvars, 0, 0, new Shape("black", "black", 5, 300, 300, Shape.GeometryEnum.circle), new AcceleratedMovement(2, 0, 0.05, 5), 5, 0.05, 0, 200, 1, null, 2000, new RandomGoingAI(), 100);
+                    Enemy e = new Enemy(gvars, 0, 0, new Shape("black", "black", 5, 300, 300, Shape.GeometryEnum.circle), new AcceleratedMovement(2, 0, 0.05, 5), 5, 0.05, 0, 200, 1, null, 2000, new RandomGoingAI(), true, 100);
                 }
 
             }));
-            lambdaActions.Add("createCoin", ((gvars, id) =>
+            lambdaActions.Add("createCoin", ((gvars, id, parameters) =>
             {
                 if (gvars.CountOfItems[ToolsGame.Counts.coins] < 12)
                 {
@@ -87,9 +88,9 @@ namespace Fanior.Shared
 
 
         }
-        public static void executeAction(string actionName, Gvars gvars, int id)
+        public static void ExectureActions(string actionName, Gvars gvars, int id, params object[] parameters)
         {
-            lambdaActions[actionName](gvars, id);
+            lambdaActions[actionName].Invoke(gvars, id, parameters);
         }
     }
 }

@@ -16,6 +16,8 @@ namespace Fanior.Shared
         public enum ExecutionType { EveryTime, NotFirstTime, OnlyFirstTime, StopExecuting }
         //Action to be executed
         public string ActionName { get; private set; }
+        //Parameters
+        public object[] Parameters { get; private set; }
         //whether the action will be repeated and if so, how long it take between each repetition (number of frames)
         [JsonProperty]
         private double repeat;
@@ -29,12 +31,13 @@ namespace Fanior.Shared
         /// <param name="repeat">How many frames to wait between executions (0 = only first time, 1 = each frame)</param>
         /// <param name="clientAction">Whether this action should be executed on client side</param>
         /// <param name="executionType"></param>
-        public ItemAction(string actionName, double repeat, ExecutionType executionType = ExecutionType.EveryTime, bool clientAction = false)
+        public ItemAction(string actionName, double repeat, ExecutionType executionType = ExecutionType.EveryTime, bool clientAction = false, params object[] parameters)
         {
             this.ClientAction = clientAction;
             ActionName = actionName;
             Repeat = repeat;
             this.executionType = executionType;
+            this.Parameters = parameters;
         }
 
         public double Repeat
