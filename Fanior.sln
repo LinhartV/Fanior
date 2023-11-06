@@ -12,6 +12,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{40CFF351-EBF4-499F-A80B-C8529B1B010B}"
 	ProjectSection(SolutionItems) = preProject
 		Data k bakalářce.txt = Data k bakalářce.txt
+		GameIdeas.txt = GameIdeas.txt
 		Notes.txt = Notes.txt
 	EndProjectSection
 EndProject

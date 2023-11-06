@@ -146,6 +146,7 @@ namespace Fanior.Client.Pages
                     }
                     await Animate(true);
                     await JS.InvokeVoidAsync("SetFocus", mySvg);
+                    gvars.ready = true;
                 }
             });
             //new player joined game
@@ -170,7 +171,7 @@ namespace Fanior.Client.Pages
                 {
                     if (p.ConnectionId == connectionId)
                     {
-                        p.Dispose(gvars);
+                        p.Dispose();
                     }
                 }
             });

@@ -26,23 +26,24 @@ namespace Fanior.Shared
         {
             return scoreToReturn;
         }
-        public override void Dispose(Gvars gvars)
+        public override void Dispose()
         {
-            base.Dispose(gvars);
+            base.Dispose();
             gvars.CountOfItems[ToolsGame.Counts.enemies]--;
         }
 
-        public override void CollideClient(Item collider, double angle, Gvars gvars)
+        public override void CollideClient(Item collider, double angle)
         {
         }
 
-        public override void CollideServer(Item collider, double angle, Gvars gvars)
+        public override void CollideServer(Item collider, double angle)
         {
+            base.CollideServer(collider, angle);
         }
-        public override void Death(Gvars gvars)
+        public override void Death()
         {
             gvars.AddAction(gvars, new ItemAction("createBoss", ToolsGame.random.Next(3000, 15000), ItemAction.ExecutionType.OnlyFirstTime));
-            base.Death(gvars);
+            base.Death();
         }
     }
 }

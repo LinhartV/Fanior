@@ -175,7 +175,7 @@ namespace Fanior.Client.Pages
             {
                 counter2++;
             }*/
-            if (player == null)
+            if (player == null || !gvars.ready)
             {
                 return;
             }
@@ -212,7 +212,6 @@ namespace Fanior.Client.Pages
                     }*/
                     foreach (var item in info)
                     {
-                        gvars.Items[item.Key].ClearProperties();
                         if (item.Value.ContainsKey(Item.ItemProperties.X))
                         {
                             gvars.Items[item.Key].X = (double)item.Value[Item.ItemProperties.X];
@@ -233,10 +232,14 @@ namespace Fanior.Client.Pages
                         {
                             (gvars.Items[item.Key] as Player).Score = (int)item.Value[Item.ItemProperties.Score];
                         }
+                        if (item.Value.ContainsKey(Item.ItemProperties.Shield))
+                        {
+                            (gvars.Items[item.Key] as Character).Shield = item.Value[Item.ItemProperties.Shield];
+                        }
                     }
                     foreach (var itemId in itemsToDestroy)
                     {
-                        gvars.Items[itemId].Dispose(gvars);
+                        gvars.Items[itemId].Dispose();
                         if (itemId == this.id)
                         {
                             EndGame();

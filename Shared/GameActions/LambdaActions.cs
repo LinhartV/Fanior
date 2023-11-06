@@ -39,7 +39,7 @@ namespace Fanior.Shared
             }
             );
             lambdaActions.Add("fire2", ((gvars, id, parameters) => { (gvars.Items[id] as Character).Weapon.reloaded = true; }));
-            lambdaActions.Add("dispose", ((gvars, id, parameters) => { gvars.Items[id].Dispose(gvars); }));
+            lambdaActions.Add("dispose", ((gvars, id, parameters) => { gvars.Items[id].Dispose(); }));
 
             lambdaActions.Add("move", (gvars, id, parameters) =>
             {
@@ -51,13 +51,13 @@ namespace Fanior.Shared
             lambdaActions.Add("right", ((gvars, id, parameters) => { (gvars.Items[id] as Player).UpdateControlledMovement("right", gvars.PercentageOfFrame); }));
             lambdaActions.Add("left", ((gvars, id, parameters) => { (gvars.Items[id] as Player).UpdateControlledMovement("left", gvars.PercentageOfFrame); }));
 
-            lambdaActions.Add("regenerate", ((gvars, id, parameters) => { ILived l = gvars.Items[id] as ILived; if (l.CurLives > 0 && l.CurLives < l.MaxLives) { l.ChangeCurLives(l.Regeneration * gvars.PercentageOfFrame, null, gvars); } }));
+            lambdaActions.Add("regenerate", ((gvars, id, parameters) => { ILived l = gvars.Items[id] as ILived; if (l.CurLives > 0 && l.CurLives < l.MaxLives) { l.ChangeCurLives(l.Regeneration * gvars.PercentageOfFrame, null); } }));
             lambdaActions.Add("outsideArena", ((gvars, id, parameters) =>
             {
                 Character player = gvars.Items[id] as Character;
                 if (player.X < 0 || player.X > gvars.ArenaWidth || player.Y > gvars.ArenaHeight || player.Y < 0)
                 {
-                    player.ChangeCurLives(-1 * gvars.PercentageOfFrame, null, gvars);
+                    player.ChangeCurLives(-1 * gvars.PercentageOfFrame, null);
                 }
             }));
 
@@ -67,7 +67,7 @@ namespace Fanior.Shared
 
                 if (gvars.CountOfItems[ToolsGame.Counts.enemies] < 1)
                 {
-                    Enemy e = new Enemy(gvars, 0, 0, new Shape("black", "black", 5, 300, 300, Shape.GeometryEnum.circle), new AcceleratedMovement(2, 0, 0.05, 5), 5, 0.05, 0, 200, 1, null, 2000, new RandomGoingAI(), true, 100);
+                    Enemy e = new Enemy(gvars, 0, 0, new Shape("black", "black", 5, 300, 300, Shape.GeometryEnum.circle), new AcceleratedMovement(2, 0, 0.05, 5), 5, 0.05, 0, 200, 0.2, null, 2000, new RandomGoingAI(), true, 100);
                 }
 
             }));

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using Fanior.Shared;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using static Fanior.Shared.Item;
 
 namespace Fanior.Shared
 {
@@ -13,7 +14,7 @@ namespace Fanior.Shared
     /// </summary>
     public class Gvars : ActionHandler
     {
-        public Message Msg { get;} = new Message();
+        public Message Msg { get; } = new Message();
         /// <summary>
         /// class for collection messages sent to client
         /// </summary>
@@ -53,7 +54,10 @@ namespace Fanior.Shared
                 randomNumbersList.Clear();
             }
         }
-        public readonly object generalLock = new object();
+
+
+        public readonly object frameLock = new object();
+        public readonly object addPropertyLock = new object();
         //id of sent messages
         public long messageId = 0;
         //milliseconds elapsed from the launch of server
@@ -74,15 +78,16 @@ namespace Fanior.Shared
         public Dictionary<int, double> PlayersAngle { get; set; } = new();
         //properties of items that changed from previous frame
         public Dictionary<int, string> ItemInfo { get; set; } = new();
-        
+
         //List of items that changed their property during this frame.
         public List<Item> justChanged = new List<Item>();
         //count of items in arena.
-        public Dictionary<ToolsGame.Counts, int> CountOfItems { get; set; } = new() { { ToolsGame.Counts.coins, 0 }, { ToolsGame.Counts.enemies, 0} };
+        public Dictionary<ToolsGame.Counts, int> CountOfItems { get; set; } = new() { { ToolsGame.Counts.coins, 0 }, { ToolsGame.Counts.enemies, 0 } };
         //size of arena
         public double ArenaWidth { get; set; }
         public double ArenaHeight { get; set; }
         //indication whether arena is fully ready
+        [JsonIgnore]
         public bool ready = false;
         //Game id of this arena
         public string GameId { get; set; }
@@ -91,6 +96,39 @@ namespace Fanior.Shared
 
         //Id for item creation
         public int Id { get; set; } = 1;
+
+        //idea is that every property has it's "id". I'll just add new thing to dictionary with key "Y" and value for Y and I know it's Y.
+        //int = id; Dictionary of ItemProperties and it's value
+        private Dictionary<int, Dictionary<ItemProperties, double>> changedProperties = new();
+        //for communication
+        public Dictionary<int, Dictionary<ItemProperties, double>> GetProperties()
+        {
+            return changedProperties;
+        }
+        public void ClearProperties()
+        {
+            changedProperties.Clear();
+        }
+        public void AddProperty(int id, ItemProperties prop, double val)
+        {
+            lock (addPropertyLock)
+            {
+                if (server)
+                {
+                    if (changedProperties.ContainsKey(id))
+                    {
+                        if (changedProperties[id].ContainsKey(prop))
+                            changedProperties[id][prop] = val;
+                        else
+                            changedProperties[id].Add(prop, val);
+                    }
+                    else
+                    {
+                        changedProperties.Add(id, new Dictionary<ItemProperties, double>() { { prop, val } });
+                    }
+                }
+            }
+        }
         public Gvars(string gameId)
         {
             GameId = gameId;
@@ -108,6 +146,6 @@ namespace Fanior.Shared
         {
             return now + sw.Elapsed.TotalMilliseconds;
         }
-        
+
     }
 }

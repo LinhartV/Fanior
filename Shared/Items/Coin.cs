@@ -17,17 +17,17 @@ namespace Fanior.Shared
 
         public int Value { get; set; }
 
-        public override void CollideServer(Item collider, double angle, Gvars gvars)
+        public override void CollideServer(Item collider, double angle)
         {
             if (collider is Player)
             {
-                this.Dispose(gvars);
+                this.Dispose();
             }
         }
 
-        public override void Dispose(Gvars gvars)
+        public override void Dispose()
         {
-            base.Dispose(gvars);
+            base.Dispose();
             gvars.CountOfItems[ToolsGame.Counts.coins]--;
         }
     }

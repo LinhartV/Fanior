@@ -109,7 +109,7 @@ namespace Fanior.Server
                         if (player.CurLives <= 0)
                         {
                             hub?.Clients.All.SendAsync("PlayerDied", player.Id);
-                            player.Dispose(gvars);
+                            player.Dispose();
                             break;
                         }
                     }
@@ -134,20 +134,24 @@ namespace Fanior.Server
             {
                 try
                 {
-                    //Group(gvars.GameId)
-                    //actual time for delay, message id for check if messages are in order, playerActions, angle of every player, itemsToCreate, itemsToDestroy
-                    hub?.Clients.All.SendAsync("ExecuteList", game.sw.Elapsed.TotalMilliseconds, gvars.messageId/*, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings)*/,
-                       JsonConvert.SerializeObject(gvars.Msg.itemsToCreate, ToolsSystem.jsonSerializerSettings), gvars.Msg.itemsToDestroy
-                        , GetListOfProperties(gvars) /*JsonConvert.SerializeObject(GetItemCoordinates(gvars), ToolsSystem.jsonSerializerSettings)*/ );
-                    /*if (gvars.Msg.randomNumbersList.Count > 0)
+                    lock (gvars.addPropertyLock)
                     {
-                        hub?.Clients.All.SendAsync("ReceiveRandomNumbers", JsonConvert.SerializeObject(gvars.Msg.randomNumbersList, ToolsSystem.jsonSerializerSettings));
-                    }*/
 
-                    ClearListOfProperties(gvars);
-                    gvars.PlayerActions.Clear();
-                    gvars.PlayersAngle.Clear();
-                    gvars.Msg.ClearThis();
+                        //Group(gvars.GameId)
+                        //actual time for delay, message id for check if messages are in order, playerActions, angle of every player, itemsToCreate, itemsToDestroy
+                        hub?.Clients.All.SendAsync("ExecuteList", game.sw.Elapsed.TotalMilliseconds, gvars.messageId/*, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings)*/,
+                           JsonConvert.SerializeObject(gvars.Msg.itemsToCreate, ToolsSystem.jsonSerializerSettings), gvars.Msg.itemsToDestroy
+                            , gvars.GetProperties() /*JsonConvert.SerializeObject(GetItemCoordinates(gvars), ToolsSystem.jsonSerializerSettings)*/ );
+                        /*if (gvars.Msg.randomNumbersList.Count > 0)
+                        {
+                            hub?.Clients.All.SendAsync("ReceiveRandomNumbers", JsonConvert.SerializeObject(gvars.Msg.randomNumbersList, ToolsSystem.jsonSerializerSettings));
+                        }*/
+
+                        gvars.ClearProperties();
+                        gvars.PlayerActions.Clear();
+                        gvars.PlayersAngle.Clear();
+                        gvars.Msg.ClearThis();
+                    }
 
                 }
                 catch (Exception e)
@@ -156,25 +160,7 @@ namespace Fanior.Server
                 }
             }
         }
-        private Dictionary<int, Dictionary<ItemProperties, double>> GetListOfProperties(Gvars gvars)
-        {
-            Dictionary<int, Dictionary<ItemProperties, double>> result = new();
-            foreach (var item in gvars.Items.Values)
-            {
-                if (item.GetProperties().Count > 0)
-                {
-                    result.Add(item.Id, item.GetProperties());
-                }
-            }
-            return result;
-        }
-        private void ClearListOfProperties(Gvars gvars)
-        {
-            foreach (var item in gvars.Items.Values)
-            {
-                item.ClearProperties();
-            }
-        }
+
 
         private Dictionary<int, (double, double)> GetItemCoordinates(Gvars gvars)
         {

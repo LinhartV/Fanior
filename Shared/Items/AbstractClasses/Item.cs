@@ -24,7 +24,7 @@ namespace Fanior.Shared
             set
             {
                 x = value;
-                AddProperty(ItemProperties.X, x);
+                gvars?.AddProperty(Id, ItemProperties.X, x);
             }
         }
         private double y;
@@ -34,7 +34,7 @@ namespace Fanior.Shared
             set
             {
                 y = value;
-                AddProperty(ItemProperties.Y, y);
+                gvars?.AddProperty(Id, ItemProperties.Y, y);
             }
         }
         public int Id { get; set; }
@@ -43,41 +43,25 @@ namespace Fanior.Shared
         public Mask Mask { get; set; }
         public Shape Shape { get; set; }
 
+        //reference to game variables
+        [JsonIgnore]
+        protected Gvars gvars;
 
-        //idea is that every property has it's "id". I'll just add new thing to dictionary with key "Y" and value for Y and I know it's Y.
-        private Dictionary<ItemProperties, double> changedProperties = new();
-        //for communication
-        public Dictionary<ItemProperties, double> GetProperties()
-        {
-            return changedProperties;
-        }
-        public void ClearProperties()
-        {
-            changedProperties.Clear();
-        }
-        public void AddProperty(ItemProperties prop, double val)
-        {
-            if (changedProperties.ContainsKey(prop))
-            {
-                changedProperties[prop] = val;
-            }
-            else
-                changedProperties.Add(prop, val);
-        }
+        
         /// <summary>
         /// Collision event executed both on server side and client side
         /// </summary>
         /// <param name="collider">Item that collided</param>
         /// <param name="angle">Angle of collision</param>
         /// <param name="gvars">Reference to gvars</param>
-        public virtual void CollideClient(Item collider, double angle, Gvars gvars) { }
+        public virtual void CollideClient(Item collider, double angle) { }
         /// <summary>
         /// Collision event executed only on server side
         /// </summary>
         /// <param name="collider">Item that collided</param>
         /// <param name="angle">Angle of collision</param>
         /// <param name="gvars">Reference to gvars</param>
-        public virtual void CollideServer(Item collider, double angle, Gvars gvars) { }
+        public virtual void CollideServer(Item collider, double angle) { }
 
 
         public virtual void ReceiveRandomNumbers(List<double> numbers)
@@ -112,7 +96,7 @@ namespace Fanior.Shared
         }*/
 
 
-        public virtual void Dispose(Gvars gvars)
+        public virtual void Dispose()
         {
             
             gvars.Items.Remove(this.Id);
@@ -131,6 +115,7 @@ namespace Fanior.Shared
         }
         public virtual void SetItemFromClient(Gvars gvars)
         {
+            this.gvars = gvars;
             if (!gvars.Items.ContainsKey(Id))
             {
                 gvars.Items.Add(Id, this);
@@ -141,6 +126,8 @@ namespace Fanior.Shared
         public Item() { }
         public Item(Gvars gvars, double x, double y, Shape shape, Mask mask, bool isVisible = true, bool justGraphics = false)
         {
+            this.gvars = gvars;
+            this.Id = gvars.Id++;
             this.Shape = shape;
             this.Mask = mask;
             if (mask == null)
@@ -151,7 +138,6 @@ namespace Fanior.Shared
             this.Y = y;
             this.IsVisible = isVisible;
             Solid = !justGraphics;
-            this.Id = gvars.Id++;
             gvars.Items.Add(Id, this);
 
             if (this is not Player)

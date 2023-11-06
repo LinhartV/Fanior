@@ -1,0 +1,18 @@
+Hráè má 3 možnosti vylepšení:
+1) za 1b jedno vylepšení vlastnosti:
+	MaxHealth
+	Regen
+	Weapon damage
+	Weapon reload
+	Weapon speed
+	Movement speed
+	Meelee damage
+2) za 5b novou ability nebo vylepšení stávající (max 2 abilitky):
+	Popis|duration|cooldown|
+	Extrémní vylepšení jedné vlastnosti|10s|30s
+	Sucktion field|15s|30s|
+	Random missiles around|0s|30s
+	Nezranitelnost|5s|30s
+	Klon (sám stojí a je nezranitelný)|do znièení|60s
+3)
+	

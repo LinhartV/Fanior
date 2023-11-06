@@ -9,6 +9,9 @@ namespace Fanior.Shared
 {
     public abstract class Shot : Movable
     {
+        /// <summary>
+        /// Id of play that created this shot
+        /// </summary>
         public int CharacterId { get; set; }
         public double Damage { get; set; }
 
@@ -23,11 +26,11 @@ namespace Fanior.Shared
             AddMovement(movementSpeed, angle, acceleration);
             this.AddAction(gvars, new ItemAction("dispose", lifeSpan, ItemAction.ExecutionType.OnlyFirstTime), "dispose");
         }
-        public override void CollideServer(Item collider, double angle, Gvars gvars)
+        public override void CollideServer(Item collider, double angle)
         {
             if ((collider.Solid || collider is Character) && collider.Id != this.CharacterId)
             {
-                this.Dispose(gvars);
+                this.Dispose();
             }
         }
         protected virtual void AddMovement(double movementSpeed, double angle, double acceleration)

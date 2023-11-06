@@ -34,7 +34,7 @@ namespace Fanior.Shared
         {
             try
             {
-                lock (gvars.generalLock)
+                lock (gvars.frameLock)
                 {
                     ProcedeGameAlgorithms(gvars, now, server);
                     ProcedePlayerActions(gvars, delay, server);
@@ -68,11 +68,11 @@ namespace Fanior.Shared
                     {
                         if (server)
                         {
-                            tempList[i].CollideServer(tempList[j], 0, gvars);
-                            tempList[j].CollideServer(tempList[i], 0, gvars);
+                            tempList[i].CollideServer(tempList[j], 0);
+                            tempList[j].CollideServer(tempList[i], 0);
                         }
-                        tempList[i].CollideClient(tempList[j], 0, gvars);
-                        tempList[j].CollideClient(tempList[i], 0, gvars);
+                        tempList[i].CollideClient(tempList[j], 0);
+                        tempList[j].CollideClient(tempList[i], 0);
 
                     }
                 }

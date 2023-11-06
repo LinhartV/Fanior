@@ -161,7 +161,7 @@ namespace Fanior.Server.Hubs
                     if (player.ConnectionId == Context.ConnectionId)
                     {
                         Clients.All.SendAsync("PlayerDisconnected", player.ConnectionId);
-                        player.Dispose(game);
+                        player.Dispose();
                         doublebreak = true;
                         break;
                     }

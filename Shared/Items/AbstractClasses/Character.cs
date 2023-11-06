@@ -17,13 +17,13 @@ namespace Fanior.Shared
         public double Shield
         {
             get => shield;
-            private set
+            set
             {
                 if (value < 0)
                     shield = 0;
                 else
                     shield = value;
-                AddProperty(ItemProperties.Shield, shield);
+                gvars?.AddProperty(Id, ItemProperties.Shield, shield);
             }
         }
         public double MaxLives { get; set; }
@@ -65,20 +65,20 @@ namespace Fanior.Shared
             }
             this.AddAction(gvars, new ItemAction("regenerate", 1));
         }
-        public virtual void Death(Gvars gvars)
+        public virtual void Death()
         {
-            this.Dispose(gvars);
+            this.Dispose();
         }
 
         public abstract int Bounty();
 
-        public void ChangeCurLives(double amount, Item killer, Gvars g)
+        public void ChangeCurLives(double amount, Item killer)
         {
             curLives += amount;
             if (curLives < 0)
             {
                 curLives = 0;
-                Death(g);
+                Death();
                 if (killer is Player p)
                 {
                     p.Score += this.Bounty();
@@ -88,31 +88,31 @@ namespace Fanior.Shared
             {
                 curLives = MaxLives;
             }
-            AddProperty(ItemProperties.Lives, curLives);
+            gvars?.AddProperty(Id, ItemProperties.Lives, curLives);
         }
 
-        public override void CollideServer(Item collider, double angle, Gvars gvars)
+        public override void CollideServer(Item collider, double angle)
         {
             if (collider is Shot s && s.CharacterId != this.Id)
             {
-                this.ReceiveDamage(s.Damage, gvars.ItemsPlayers.ContainsKey(s.CharacterId) ? gvars.ItemsPlayers[s.CharacterId] : null, gvars);
+                this.ReceiveDamage(s.Damage, gvars.ItemsPlayers.ContainsKey(s.CharacterId) ? gvars.ItemsPlayers[s.CharacterId] : null);
             }
         }
 
-        protected virtual void ReceiveDamage(double damage, Item killer, Gvars gvars)
+        protected virtual void ReceiveDamage(double damage, Item killer)
         {
             if (Shield > 0)
             {
                 if (Shield - damage < 0)
                 {
-                    this.ChangeCurLives(-(damage - Shield), killer, gvars);
+                    this.ChangeCurLives(-(damage - Shield), killer);
                 }
                 Shield -= damage;
-                AddProperty(ItemProperties.Shield, shield);
+                gvars?.AddProperty(Id, ItemProperties.Shield, Shield);
             }
             else
             {
-                this.ChangeCurLives(-damage, killer, gvars);
+                this.ChangeCurLives(-damage, killer);
             }
 
 

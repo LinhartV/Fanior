@@ -22,7 +22,7 @@ namespace Fanior.Shared
             set
             {
                 angle = value % (Math.PI * 2);
-                AddProperty(ItemProperties.Angle, angle);
+                gvars?.AddProperty(Id, ItemProperties.Angle, angle);
             }
         }
         [JsonProperty]

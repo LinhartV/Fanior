@@ -20,8 +20,14 @@ namespace Fanior.Shared
             get => score; set
             {
                 score = value;
-                AddProperty(ItemProperties.Score, score);
+                gvars?.AddProperty(Id, ItemProperties.Score, score);
                 //this.BaseSpeed = BaseSpeed - (2 - (2000 / (score + 1000)));
+                while (score > nextLevel)
+                {
+                    score -= nextLevel;
+                    nextLevel*= 5/2;
+                    level++;
+                }
             }
         }
         //current level of upgrade
@@ -72,7 +78,7 @@ namespace Fanior.Shared
             }
         }
 
-        public override void Death(Gvars gvars)
+        public override void Death()
         {
             //base.Death(gvars);
             ToolsGame.EndGame();
@@ -88,16 +94,16 @@ namespace Fanior.Shared
                 return 1000;
         }
 
-        public override void CollideServer(Item collider, double angle, Gvars gvars)
+        public override void CollideServer(Item collider, double angle)
         {
-            base.CollideServer(collider, angle, gvars);
+            base.CollideServer(collider, angle);
             if (collider is Coin c)
             {
                 this.Score += c.Value;
             }
             if (collider is Enemy e)
             {
-                ReceiveDamage(-2, e, gvars);
+                ReceiveDamage(2, e);
             }
         }
         /*public override void Collide(Item collider, double angle, params Globals.ActionsAtCollision[] actionsNotToPerform)
