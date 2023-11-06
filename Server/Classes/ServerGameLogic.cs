@@ -13,9 +13,9 @@ namespace Fanior.Server.Classes
         
         public static void SetupGvarsActions(Gvars gvars, GameControl gameControl)
         {
-            gameControl.games[gvars.GameId].AddAction(gameControl.games[gvars.GameId], new ItemAction("createCoin", 2, ItemAction.ExecutionType.EveryTime, false));
+            //gameControl.games[gvars.GameId].AddAction(gameControl.games[gvars.GameId], new ItemAction("createCoin", 2, ItemAction.ExecutionType.EveryTime, false));
             //Create boss
-            gameControl.games[gvars.GameId].AddAction(gameControl.games[gvars.GameId], new ItemAction("createBoss",100,ItemAction.ExecutionType.OnlyFirstTime,false));              
+            //gameControl.games[gvars.GameId].AddAction(gameControl.games[gvars.GameId], new ItemAction("createBoss",100,ItemAction.ExecutionType.OnlyFirstTime,false));              
         }
         
     }

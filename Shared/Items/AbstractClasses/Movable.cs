@@ -76,7 +76,7 @@ namespace Fanior.Shared
                 gvars.ItemsStep.Add(Id, this);
             }
             base.SetItemFromClient(gvars);
-            this.AddAction(gvars, new ItemAction("move", 1, ItemAction.ExecutionType.EveryTime, true));
+            this.AddAction(gvars, new ItemAction("move", 1, ItemAction.ExecutionType.EveryTime, true, false));
         }
         /// <summary>
         /// Creates new movement

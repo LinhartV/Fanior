@@ -136,7 +136,6 @@ namespace Fanior.Server
                 {
                     //Group(gvars.GameId)
                     //actual time for delay, message id for check if messages are in order, playerActions, angle of every player, itemsToCreate, itemsToDestroy
-
                     hub?.Clients.All.SendAsync("ExecuteList", game.sw.Elapsed.TotalMilliseconds, gvars.messageId/*, JsonConvert.SerializeObject(gvars.PlayerActions, ToolsSystem.jsonSerializerSettings)*/,
                        JsonConvert.SerializeObject(gvars.Msg.itemsToCreate, ToolsSystem.jsonSerializerSettings), gvars.Msg.itemsToDestroy
                         , GetListOfProperties(gvars) /*JsonConvert.SerializeObject(GetItemCoordinates(gvars), ToolsSystem.jsonSerializerSettings)*/ );

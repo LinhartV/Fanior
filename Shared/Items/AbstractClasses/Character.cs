@@ -108,6 +108,7 @@ namespace Fanior.Shared
                     this.ChangeCurLives(-(damage - Shield), killer, gvars);
                 }
                 Shield -= damage;
+                AddProperty(ItemProperties.Shield, shield);
             }
             else
             {

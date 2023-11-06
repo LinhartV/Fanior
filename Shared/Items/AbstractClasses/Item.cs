@@ -43,6 +43,7 @@ namespace Fanior.Shared
         public Mask Mask { get; set; }
         public Shape Shape { get; set; }
 
+
         //idea is that every property has it's "id". I'll just add new thing to dictionary with key "Y" and value for Y and I know it's Y.
         private Dictionary<ItemProperties, double> changedProperties = new();
         //for communication

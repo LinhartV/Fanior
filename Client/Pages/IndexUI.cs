@@ -155,8 +155,8 @@ namespace Fanior.Client.Pages
                     selfReference = DotNetObjectReference.Create(this);
 
                     var minInterval = 20;
-                    /*await JS.InvokeVoidAsync("onThrottledMouseMove",
-                         mySvg, selfReference, minInterval);*/
+                    await JS.InvokeVoidAsync("onThrottledMouseMove",
+                         mySvg, selfReference, minInterval);
                     await JS.InvokeVoidAsync("onKeyDown",
                         mySvg, selfReference);
                     await JS.InvokeVoidAsync("onKeyUp",
@@ -202,7 +202,7 @@ namespace Fanior.Client.Pages
             try
             {
                 animEnd = true;
-                //timer.Change(Timeout.Infinite, Timeout.Infinite);
+                timer.Change(Timeout.Infinite, Timeout.Infinite);
                 firstConnect = 1;
                 await Animate(false);
                 await hubConnection.DisposeAsync();

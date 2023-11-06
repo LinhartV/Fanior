@@ -221,13 +221,13 @@ namespace Fanior.Client.Pages
                         {
                             gvars.Items[item.Key].Y = (double)item.Value[Item.ItemProperties.Y];
                         }
-                        if (item.Value.ContainsKey(Item.ItemProperties.Angle))
+                        if (item.Value.ContainsKey(Item.ItemProperties.Angle) && this.id != item.Key)
                         {
-                            (gvars.Items[item.Key] as Character).Angle = (double)item.Value[Item.ItemProperties.Angle];
+                            (gvars.Items[item.Key] as Movable).Angle = (double)item.Value[Item.ItemProperties.Angle];
                         }
                         if (item.Value.ContainsKey(Item.ItemProperties.Lives))
                         {
-                            (gvars.Items[item.Key] as Character).CurLives = (double)item.Value[Item.ItemProperties.Lives];
+                            (gvars.Items[item.Key] as ILived).CurLives = (double)item.Value[Item.ItemProperties.Lives];
                         }
                         if (item.Value.ContainsKey(Item.ItemProperties.Score))
                         {

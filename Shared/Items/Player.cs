@@ -24,6 +24,10 @@ namespace Fanior.Shared
                 //this.BaseSpeed = BaseSpeed - (2 - (2000 / (score + 1000)));
             }
         }
+        //current level of upgrade
+        private int level = 0;
+        //score needed to reach next level
+        private int nextLevel = 50;
         public bool MovementEnabled { get; set; } = true;
         public string ConnectionId { get; set; }
         public string Name { get; set; }
@@ -93,7 +97,7 @@ namespace Fanior.Shared
             }
             if (collider is Enemy e)
             {
-                ChangeCurLives(-2, e, gvars);
+                ReceiveDamage(-2, e, gvars);
             }
         }
         /*public override void Collide(Item collider, double angle, params Globals.ActionsAtCollision[] actionsNotToPerform)

@@ -11,7 +11,9 @@ namespace Fanior.Shared
     {
         public int CharacterId { get; set; }
         public double Damage { get; set; }
-        public Shot(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, double acceleration, double friction, double damage, int characterId, double angle, int lifeSpan, bool setAngle, bool isVisible = true)
+
+        public Shot() { }
+        public Shot(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, double acceleration, double friction, double damage, int characterId, double angle, int lifeSpan, bool setAngle,bool isVisible = true)
             : base(gvars, x, y, shape, mask, movementSpeed, null, acceleration, friction, setAngle,isVisible)
         {
             this.Damage = damage;

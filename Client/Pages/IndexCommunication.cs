@@ -131,23 +131,17 @@ namespace Fanior.Client.Pages
                     if (firstConnect > 0)
                     {
                         //ExecuteAsync(new CancellationToken(false));
-                        /*Task framTask = Task.Run(async () =>
+                        Task framTask = Task.Run(async () =>
                         {
                             timer = new System.Threading.Timer(async _ =>
                             {
-
-                                sw2.Start();
                                 if (firstConnect == 0)
                                     Frame();
                                 await InvokeAsync(StateHasChanged);
 
 
-                                sw2.Stop();
-                                Console.WriteLine("frame:" + sw2.Elapsed.TotalMilliseconds);
-
-                                sw2.Reset();
                             }, null, 0, Constants.CONTROL_FRAME_TIME);
-                        });*/
+                        });
                         firstConnect = 0;
                     }
                     await Animate(true);
