@@ -17,7 +17,7 @@ namespace Fanior.Client.Pages
         public async Task SetConnection()
         {
             hubConnection = new HubConnectionBuilder()
-           .WithUrl(NavigationManager.ToAbsoluteUri("/myhub"))
+           .WithUrl(NavigationManager.ToAbsoluteUri("myhub"))
            .Build();
             hubConnection.On<string>("ReceiveMessage", (str) =>
             {
@@ -147,6 +147,7 @@ namespace Fanior.Client.Pages
                     await Animate(true);
                     await JS.InvokeVoidAsync("SetFocus", mySvg);
                     gvars.ready = true;
+                    JsSetup();
                 }
             });
             //new player joined game

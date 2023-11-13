@@ -1,3 +1,4 @@
+Za každý level dostane tøeba 3 body
 Hráè má 3 možnosti vylepšení:
 1) za 1b jedno vylepšení vlastnosti:
 	MaxHealth
@@ -14,5 +15,27 @@ Hráè má 3 možnosti vylepšení:
 	Random missiles around|0s|30s
 	Nezranitelnost|5s|30s
 	Klon (sám stojí a je nezranitelný)|do znièení|60s
-3)
-	
+3) za 7b novou zbraò
+											Pìst
+								Kámen 	|	Klacek	|	Èarodìjná hùl
+	Balvan	;	Sprška	;	Hvìzdice | Øemdich ; Meè ; Kopí |	FirePit	;	Trojzubec	;	Lightning
+
+
+
+Pìst - just meelee
+
+Kámen - relativnì silný, potøebuje sebrat ze zemì (tím, že bude chvíli stát a zmáèkne "sbírám")
+Klacek - švihne pøed sebe
+Èarodìjná hùl - vystøelí støelu, která pomalu letí za kurzorem
+
+Balvan - zraòuje mega, letí pomalu
+Sprška - rozhodí hodnì kamenù relativnì náhodným smìrem
+Hvìzdice - letí trochu náhodnì vlevo nebo vpravo
+
+Øemdich - nìco jak ze zlap.io
+Meè - silnìjší klacek
+Kopí - bodne smìrem
+
+FirePit - tam, kam klikne, se za chvilku objeví støely
+Trojzubec - tøi støely, které pronásledují kurzor
+Lightning - sniper like (hodnì støel hodnì rychle jedním smìrem, pomalý reload)

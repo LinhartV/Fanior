@@ -124,7 +124,7 @@ namespace Fanior.Shared
             DeleteNonClientActions();
         }
         public Item() { }
-        public Item(Gvars gvars, double x, double y, Shape shape, Mask mask, bool isVisible = true, bool justGraphics = false)
+        public Item(Gvars gvars, double x, double y, Shape shape, Mask mask, bool isVisible = true, bool solid = true)
         {
             this.gvars = gvars;
             this.Id = gvars.Id++;
@@ -137,7 +137,7 @@ namespace Fanior.Shared
             this.X = x;
             this.Y = y;
             this.IsVisible = isVisible;
-            Solid = !justGraphics;
+            Solid = solid;
             gvars.Items.Add(Id, this);
 
             if (this is not Player)

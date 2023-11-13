@@ -26,10 +26,10 @@ namespace Fanior.Shared
             lambdaActions.Add("fire1", (gvars, id, parameters) =>
             {
                 Character character = gvars.Items[id] as Character;
-                if (!character.Weapon.reloaded)
+                if (!character.Weapon.Reloaded)
                 {
                     character.DeleteAction("fire");
-                    character.Weapon.reloaded = true;
+                    character.Weapon.Reloaded = true;
                 }
                 else
                 {
@@ -38,7 +38,7 @@ namespace Fanior.Shared
 
             }
             );
-            lambdaActions.Add("fire2", ((gvars, id, parameters) => { (gvars.Items[id] as Character).Weapon.reloaded = true; }));
+            lambdaActions.Add("fire2", ((gvars, id, parameters) => { (gvars.Items[id] as Character).Weapon.Reloaded = true; }));
             lambdaActions.Add("dispose", ((gvars, id, parameters) => { gvars.Items[id].Dispose(); }));
 
             lambdaActions.Add("move", (gvars, id, parameters) =>

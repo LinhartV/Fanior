@@ -2,6 +2,7 @@
     margin: 0;
     height: 100%;
     background-image: linear-gradient(to bottom right, lightgreen, lightgrey);
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 #introDiv {
@@ -73,8 +74,81 @@ button {
     top: 0px;
     left: 0px;
     background-image: linear-gradient(to bottom right, lightgreen, lightgrey);
-    opacity:0;
+    opacity: 0;
 }
 
 #app {
+}
+
+#statsDiv {
+    font-family: arial;
+    font-size: 10px;
+}
+
+.stats {
+    margin: 0 0 8px 0;
+    padding: 3px 0 3px 15px;
+    background-color: #8080803d;
+    border-radius: 10px;
+    border: 2px solid #717171;
+    width: 150px;
+    transition: border 0.2s, background-color 0.2s;
+    position: relative;
+}
+
+
+.available .stats:hover {
+    border: 2px solid black;
+    background-color: #d2d2d2;
+    cursor: pointer
+}
+
+.statsCoverDiv {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.upgradedTimes {
+    font-size: 17px;
+    position: absolute;
+    right: -29px;
+    top: 0;
+}
+
+#upgradeDiv {
+    user-select: none;
+    position: absolute;
+    display: flex;
+    top: 0px;
+    background-image: linear-gradient(to right,#fffffff7 0%, transparent 100%);
+    padding: 10px 20px;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    align-content: center;
+    left: 0;
+    transform: translate(-105%, 0);
+    transition: transform 0.5s;
+}
+
+#upgradeDiv.active, #upgradeDiv:hover {
+    transform: translate(0, 0)
+}
+
+#upgradePoints {
+    user-select: none;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1;
+    background-image: radial-gradient(#ff8401 0%, transparent 70%);
+    width: 100px;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 50px;
 }

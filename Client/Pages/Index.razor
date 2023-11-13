@@ -4,6 +4,7 @@
 @inject IJSRuntime JS
 @implements IAsyncDisposable
 @implements IDisposable
+<div id="root" @ref="root">
 @if ((id == -1 || player == null))
 {
     <div id="introDiv">
@@ -16,16 +17,48 @@
 {
     <div id="coverDiv" style="opacity: @opacity; z-index: @zindex"></div>
 }
-<svg x=0 y=0 width="@width" height="@(height)" style="z-index: 0" tabindex="-1" @ref="mySvg">
+@if (id != -1 && player != null)
+{
+    <div id="upgradePoints">
+        @player.UpgradePoints
+    </div>
+    <div style="height: @(height)px;" id="upgradeDiv" class="@upgradeDivClass">
+        <div id="classDiv">
+        </div>
+        <div id="abilityDiv">
+        </div>
+        <div id="statsDiv" class="@(player.UpgradePoints > 0 ? "available" : "unavailable")">
+            <div class="statsCoverDiv">
+                @for (int i = 0; i < player.Upgrades.Count; i++)
+                {
+                    //blazor's wierd sometimes...
+                    var j = i;
+                    var stat = player.Upgrades[j];
+                    <div class="stats" @onclick="()=>UpgradeStat(j)" style="
+    background-image: linear-gradient(to right, @stat.Color, transparent @(10+stat.Points*10)%);">
+                        <div>
+                            @stat.Name
+                        </div>
+                        <div class="upgradedTimes">@(stat.Points)x</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    //main svg
+    <svg x=0 y=0 width="@width" height="@(height)" style="z-index: 0" tabindex="-1" @ref="mySvg">
 
-    @if (id != -1 && player != null)
-    {
         <rect x=0 y=0 width="@width" height="@(height)" fill="#CDCDCD"></rect>
         <rect x=@(-Math.Round(player.X) + width/2-player.Shape.ImageWidth/2) y=@(-Math.Round(player.Y) + height/2-player.Shape.ImageHeight/2) width=@(gvars.ArenaWidth) height=@(gvars.ArenaHeight) fill="#D8EAED"></rect>
-        const int LINESPACE = 125;
-        const string LINECOLOR = "lightgrey";
+
+        @{
+            string strokeColor;
+            string fillColor;
+            const int LINESPACE = 125;
+            const string LINECOLOR = "lightgrey";
+        }
         //horizontal
-        for (int i = 0; i < (gvars.ArenaHeight) / LINESPACE; i++)
+        @for (int i = 0; i < (gvars.ArenaHeight) / LINESPACE; i++)
         {
             if (i % 10 == 0)
             {
@@ -37,7 +70,7 @@
             }
         }
         //vertical
-        for (int i = 0; i < (gvars.ArenaWidth) / LINESPACE; i++)
+        @for (int i = 0; i < (gvars.ArenaWidth) / LINESPACE; i++)
         {
             if (i % 10 == 0)
             {
@@ -48,9 +81,6 @@
                 <line x1=@(i * LINESPACE -Math.Round(player.X) + width / 2) x2=@(i * LINESPACE -Math.Round(player.X) + width / 2) y1="0" y2=@height stroke-width="0.4" stroke=@LINECOLOR></line>
             }
         }
-        
-        string strokeColor;
-        string fillColor;
         @foreach (Item item in gvars.Items.Values)
         {
             if (item.X - item.Shape.ImageWidth - player.X < width / 2 && item.X + item.Shape.ImageWidth - player.X > -width / 2 && item.Y - item.Shape.ImageHeight - player.Y < height / 2 && item.Y + item.Shape.ImageHeight - player.Y > -height / 2)
@@ -73,7 +103,7 @@
                     var centerY = (item.Y - Math.Round(player.Y) + height / 2);
 
 
-
+                    //character, shield...
                     if (item is Character c)
                     {
                         var leftEyeX = (centerX + item.Shape.ImageHeight / 2.5 * Math.Cos(c.Angle - Math.PI / 6)).ToString().Replace(',', '.');
@@ -106,6 +136,7 @@
                 {
                     <rect x=@item.X y=@item.Y width=@item.Shape.ImageWidth height=@item.Shape.ImageHeight stroke=@strokeColor fill=@fillColor stroke-width=@item.Shape.StrokeWidth></rect>
                 }
+                //lives, players name...
                 if (item is ILived l)
                 {
                     var centerX = (item.X - Math.Round(player.X) - item.Shape.ImageWidth / 2 + width / 2);
@@ -129,9 +160,10 @@
         }
         //Score
         <rect x=@(width/2 - width / 4) y=@(height - 100) width=@(width / 2) height="40" rx="15" ry="15" stroke="black" stroke-width=5 fill="rgb(155,155,155)" opacity="0.7" />
-        <rect x=@(width/2 - width / 4) y=@(height - 100) width=@(width / 2 * player.Score / nextLevel) height="40" rx="15" ry="15" fill="rgb(255,153,0)" opacity="0.7" />
+        <rect x=@(width/2 - width / 4) y=@(height - 100) width=@(width / 2 * (player.Score-player.PrevLevel) / (player.NextLevel-player.PrevLevel)) height="40" rx="15" ry="15" fill="rgb(255,153,0)" opacity="0.7" style="transition:width 0.2s;"/>
         <g>
             <text x=@(width/2) y=@(height - 80) style="font-size: 200%; font-family: Verdana, Geneva, Tahoma, sans-serif;" text-anchor="middle" alignment-baseline="central" opacity="0.9">@(player.Score)</text>
         </g>
-    }
-</svg>
+    </svg>
+}
+</div>

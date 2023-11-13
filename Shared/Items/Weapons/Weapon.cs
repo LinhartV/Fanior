@@ -18,26 +18,24 @@ namespace Fanior.Shared
         /// <param name="damage">Damage of the created shot</param>
         public Weapon(bool autoFire, double reloadTime, int shotSpeed, double damage)
         {
-            this.reloadTime = reloadTime;
-            this.shotSpeed = shotSpeed;
-            this.damage = damage;
-            this.autoFire = autoFire;
+            this.ReloadTime = reloadTime;
+            this.WeaponSpeed = shotSpeed;
+            this.Damage = damage;
+            this.AutoFire = autoFire;
         }
-        public bool reloaded = true;
+        public bool Reloaded { get; set; } = true;
         //number of frames it takes to reload
-        public double reloadTime;
-        [JsonProperty]
-        protected int shotSpeed;
-        [JsonProperty]
-        protected double damage;
-        public int characterId;
-        public bool autoFire;
+        public double ReloadTime { get; set; }
+        public double WeaponSpeed { get; set; }
+        public double Damage { get; set; }
+        public int CharacterId { get; set; }
+        public bool AutoFire { get; set; }
 
         public virtual void Fire(Gvars gvars)
         {
             CreateShot(gvars);
         }
-        protected abstract void CreateShot(Gvars gvars);
+        protected virtual void CreateShot(Gvars gvars) { }
 
     }
 }

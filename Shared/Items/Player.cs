@@ -8,11 +8,13 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Fanior.Shared
 {
     public class Player : Character
     {
+
         [JsonProperty]
         private int score;
         public int Score
@@ -22,18 +24,24 @@ namespace Fanior.Shared
                 score = value;
                 gvars?.AddProperty(Id, ItemProperties.Score, score);
                 //this.BaseSpeed = BaseSpeed - (2 - (2000 / (score + 1000)));
-                while (score > nextLevel)
+                while (score >= NextLevel)
                 {
-                    score -= nextLevel;
-                    nextLevel*= 5/2;
-                    level++;
+                    PrevLevel = NextLevel;
+                    NextLevel = (int)(NextLevel * (2 + Constants.NEXTLEVELINCRESE / NextLevel));
+
+                    UpgradePoints++;
                 }
             }
         }
-        //current level of upgrade
-        private int level = 0;
+        //number of upgrade points
+        public int UpgradePoints { get; set; } = 0;
+        //upgrades
+        [JsonIgnore]
+        public List<Upgrades> Upgrades { get; private set; } = ToolsGame.InicializeUpgradeDictionary();
+
         //score needed to reach next level
-        private int nextLevel = 50;
+        public int NextLevel { get; private set; } = 50;
+        public int PrevLevel { get; private set; } = 0;
         public bool MovementEnabled { get; set; } = true;
         public string ConnectionId { get; set; }
         public string Name { get; set; }

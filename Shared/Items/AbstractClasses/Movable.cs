@@ -35,10 +35,6 @@ namespace Fanior.Shared
             get => baseSpeed; set
             {
                 baseSpeed = value;
-                foreach (var movement in MovementsAutomated)
-                {
-                    movement.ResetMovementSpeed(value);
-                }
                 foreach (var movement in MovementsControlled.Values)
                 {
                     movement.ResetMovementSpeed(value);
@@ -48,16 +44,28 @@ namespace Fanior.Shared
         [JsonProperty]
         private double friction;
         public double Friction { get => friction; set => friction = Math.Abs(value); }
-        public double Acceleration;
-        //Movements once set and controlled just by the movement itself. It deletes itself when speed is 0.
+        private double acceleration;
+        public double Acceleration
+        {
+            get => acceleration;
+            set {
+                acceleration = value;
+                foreach (var movement in MovementsControlled.Values)
+                {
+                    if(movement is AcceleratedMovement am)
+                        am.Acceleration = value;
+                }
+            }
+        }
+        //Movements once set and controlled just by the movement itself. It deletes itself when speed is 0. (e.g. explosion)
         [JsonProperty]
-        private List<IMovement> MovementsAutomated { get; set; } = new List<IMovement>();
+        protected List<IMovement> MovementsAutomated { get; set; } = new List<IMovement>();
         //Movements controlled by other actions, such as player control. Accesed by id and not deleted even when speed is 0.
         [JsonProperty]
-        private Dictionary<string, IMovement> MovementsControlled { get; set; } = new Dictionary<string, IMovement>();
+        protected Dictionary<string, IMovement> MovementsControlled { get; set; } = new Dictionary<string, IMovement>();
         public bool ThroughSolid { get; set; } = false;
         public Movable() { }
-        public Movable(Gvars gvars, double x, double y, Shape shape, Mask mask, double baseSpeed, IMovement movement, double acceleration, double friction, bool setAngle,  bool isVisible = true) : base(gvars, x, y, shape, mask, isVisible)
+        public Movable(Gvars gvars, double x, double y, Shape shape, Mask mask, double baseSpeed, IMovement movement, double acceleration, double friction, bool setAngle, bool isVisible = true) : base(gvars, x, y, shape, mask, isVisible)
         {
             this.Friction = friction;
             this.Acceleration = acceleration;
@@ -182,9 +190,9 @@ namespace Fanior.Shared
             }
             this.X += x;
             this.Y += y;
-            if(setAngle)
+            if (setAngle)
             {
-                 Angle = ToolsMath.GetAngleFromLengts(x, -y);
+                Angle = ToolsMath.GetAngleFromLengts(x, -y);
             }
             /*
              PartialMovement pm = GetCurrentMovement();

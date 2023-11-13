@@ -13,10 +13,10 @@ namespace Fanior.Shared
         [JsonProperty]
         private double maxSpeed;
         [JsonProperty]
-        private double acceleration;
+        public double Acceleration { get; set; }
         public AcceleratedMovement(double initialSpeed, double angle, double acceleration, double maxSpeed) : base(initialSpeed, angle)
         {
-            this.acceleration = acceleration;
+            this.Acceleration = acceleration;
             this.maxSpeed = maxSpeed;
         }
 
@@ -29,7 +29,7 @@ namespace Fanior.Shared
         {
             if (MovementSpeed > 0)
             {
-                MovementSpeed -= acceleration;
+                MovementSpeed -= Acceleration;
             }
             else
             {
@@ -63,7 +63,7 @@ namespace Fanior.Shared
         {
             if (MovementSpeed < maxSpeed)
             {
-                MovementSpeed += acceleration * percentage;
+                MovementSpeed += Acceleration * percentage;
             }
             else
             {

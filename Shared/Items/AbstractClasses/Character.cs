@@ -49,6 +49,10 @@ namespace Fanior.Shared
             }
         }
 
+
+
+
+
         public Character() { }
         public Character(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, double acceleration, double friction, double lives, double regeneration, Weapon weapon, bool setAngle, double shield = 0, IMovement defaultMovement = null, bool isVisible = true) :
             base(gvars, x, y, shape, mask, movementSpeed, defaultMovement, acceleration, friction, setAngle, isVisible)
@@ -61,7 +65,7 @@ namespace Fanior.Shared
             this.Weapon = weapon;
             if (Weapon != null)
             {
-                weapon.characterId = this.Id;
+                weapon.CharacterId = this.Id;
             }
             this.AddAction(gvars, new ItemAction("regenerate", 1));
         }

@@ -38,7 +38,7 @@ namespace Fanior.Shared
             }
         }
         [JsonConverter(typeof(StringEnumConverter))]
-        public enum PlayerActionsEnum { none = 0, moveUp = 1, moveDown = 2, moveLeft = 3, moveRight = 4, fire = 5, ability1 = 6, ability2 = 7, other = 8 }
+        public enum PlayerActionsEnum { none = 0, moveUp = 1, moveDown = 2, moveLeft = 3, moveRight = 4, fire = 5, ability1 = 6, ability2 = 7, other = 8, cheat = 9 }
 
         static Dictionary<PlayerActionsEnum, KeyCommand> actions = new();
 
@@ -70,27 +70,27 @@ namespace Fanior.Shared
         {
             actions.Add(PlayerActionsEnum.fire, new KeyCommand((id, gvars) =>
               {
-                  if (gvars.ItemsPlayers[id].Weapon.reloaded)
+                  if (gvars.ItemsPlayers[id].Weapon.Reloaded)
                   {
-                      if (gvars.ItemsPlayers[id].Weapon.autoFire)
+                      if (gvars.ItemsPlayers[id].Weapon.AutoFire)
                       {
-                          gvars.ItemsPlayers[id].AddAction(gvars, new ItemAction("fire1", gvars.ItemsPlayers[id].Weapon.reloadTime, ItemAction.ExecutionType.EveryTime), "fire");
+                          gvars.ItemsPlayers[id].AddAction(gvars, new ItemAction("fire1", gvars.ItemsPlayers[id].Weapon.ReloadTime, ItemAction.ExecutionType.EveryTime), "fire");
                       }
                       else
                       {
                           gvars.ItemsPlayers[id].Weapon.Fire(gvars);
-                          gvars.ItemsPlayers[id].Weapon.reloaded = false;
-                          gvars.ItemsPlayers[id].AddAction(gvars, new ItemAction("fire2", gvars.ItemsPlayers[id].Weapon.reloadTime, ItemAction.ExecutionType.OnlyFirstTime), "fire");
+                          gvars.ItemsPlayers[id].Weapon.Reloaded = false;
+                          gvars.ItemsPlayers[id].AddAction(gvars, new ItemAction("fire2", gvars.ItemsPlayers[id].Weapon.ReloadTime, ItemAction.ExecutionType.OnlyFirstTime), "fire");
                       }
                   }
                   else
                   {
-                      gvars.ItemsPlayers[id].Weapon.reloaded = true;
+                      gvars.ItemsPlayers[id].Weapon.Reloaded = true;
                   }
               },
             (id, gvars) =>
             {
-                gvars.ItemsPlayers[id].Weapon.reloaded = false;
+                gvars.ItemsPlayers[id].Weapon.Reloaded = false;
             }));
             //Movements
             actions.Add(PlayerActionsEnum.moveUp, new KeyCommand((id, gvars) =>
@@ -131,6 +131,15 @@ namespace Fanior.Shared
             (id, gvars) =>
             {
                 gvars.ItemsPlayers[id].DeleteAction("left");
+            }));
+
+            actions.Add(PlayerActionsEnum.cheat, new KeyCommand((id, gvars) =>
+            {
+                gvars.ItemsPlayers[id].Score += 1000;
+            },
+            (id, gvars) =>
+            {
+                
             }));
         }
     }

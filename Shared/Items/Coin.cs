@@ -9,7 +9,7 @@ namespace Fanior.Shared
     public class Coin : Item
     {
         public Coin() : base() { }
-        public Coin(int value, Gvars gvars, double x, double y, Shape shape, Mask mask = null) : base(gvars, x, y, shape, mask)
+        public Coin(int value, Gvars gvars, double x, double y, Shape shape, Mask mask = null) : base(gvars, x, y, shape, mask, true, false)
         {
             gvars.CountOfItems[ToolsGame.Counts.coins]++;
             this.Value = value;

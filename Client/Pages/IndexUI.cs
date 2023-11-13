@@ -26,9 +26,11 @@ namespace Fanior.Client.Pages
 
                 if (firstConnect == 2)
                 {
+
                     DefaultAssingOfKeys();
                     PlayerActions.SetupActions();
                     LambdaActions.SetupLambdaActions();
+                    WeaponTree.SetWeaponTree();
                 }
                 await InvokeAsync(() => this.StateHasChanged());
                 animEnd = false;
@@ -48,6 +50,7 @@ namespace Fanior.Client.Pages
             KeyController.AddKey("s", new RegisteredKey(PlayerActions.PlayerActionsEnum.moveDown, myActions));
             KeyController.AddKey("d", new RegisteredKey(PlayerActions.PlayerActionsEnum.moveRight, myActions));
             KeyController.AddKey("a", new RegisteredKey(PlayerActions.PlayerActionsEnum.moveLeft, myActions));
+            KeyController.AddKey("c", new RegisteredKey(PlayerActions.PlayerActionsEnum.cheat, myActions));
             KeyController.AddKey(" ", new RegisteredKey(PlayerActions.PlayerActionsEnum.fire, myActions));
         }
 
@@ -56,11 +59,19 @@ namespace Fanior.Client.Pages
 
 
         [JSInvokable]
-        public void HandleMouseMove(int x, int y)
+        public async void HandleMouseMove(int x, int y)
         {
             if (player != null)
             {
                 this.player.Angle = ToolsMath.GetAngleFromLengts(x - width / 2, height / 2 - y);
+            }
+            if (x < 100)
+            {
+                upgradeDivClass = "active";
+            }
+            else
+            {
+                upgradeDivClass = "";
             }
             //counter = (int)(player.Angle * 180 / Math.PI);
         }
@@ -130,6 +141,29 @@ namespace Fanior.Client.Pages
 
 
         }
+
+        async void JsSetup()
+        {
+            try
+            {
+                selfReference = DotNetObjectReference.Create(this);
+
+                var minInterval = 20;
+                await JS.InvokeVoidAsync("onThrottledMouseMove",
+                     root, selfReference, minInterval);
+                await JS.InvokeVoidAsync("onKeyDown",
+                    mySvg, selfReference);
+                await JS.InvokeVoidAsync("onKeyUp",
+                    mySvg, selfReference);
+                await JS.InvokeVoidAsync("onResize", selfReference);
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+        }
+
         #endregion
 
         #region Other
@@ -148,28 +182,7 @@ namespace Fanior.Client.Pages
 
         protected async override Task OnAfterRenderAsync(bool firstRender)
         {
-            try
-            {
-                if (firstRender)
-                {
-                    selfReference = DotNetObjectReference.Create(this);
 
-                    var minInterval = 20;
-                    await JS.InvokeVoidAsync("onThrottledMouseMove",
-                         mySvg, selfReference, minInterval);
-                    await JS.InvokeVoidAsync("onKeyDown",
-                        mySvg, selfReference);
-                    await JS.InvokeVoidAsync("onKeyUp",
-                        mySvg, selfReference);
-                    await JS.InvokeVoidAsync("onResize", selfReference);
-                }
-
-            }
-            catch (Exception e)
-            {
-
-                throw;
-            }
         }
         private async Task Animate(bool down)
         {
@@ -220,6 +233,17 @@ namespace Fanior.Client.Pages
                 throw;
             }
 
+        }
+        #endregion
+        #region Upgrades
+        public async void UpgradeStat(int statNum)
+        {
+            if (player.UpgradePoints > 0)
+            {
+                player.Upgrades[statNum].IncreasePoint(player);
+                player.UpgradePoints--;
+                await hubConnection.SendAsync("UpgradeStat", gvars.GameId, this.id, statNum);
+            }
         }
         #endregion
 

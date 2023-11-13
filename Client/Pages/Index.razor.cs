@@ -28,8 +28,6 @@ namespace Fanior.Client.Pages
         int id = 0;
         //name of the player
         public string name;
-        //number of score needed for next level
-        public int nextLevel = 50;
         //intro animation
         private double opacity = 0;
         private int zindex = -100;
@@ -46,6 +44,7 @@ namespace Fanior.Client.Pages
         private int height = 500;
         //reference to canvas
         public ElementReference mySvg;
+        public ElementReference root;
         public HubConnection hubConnection;
         long currentMessageId = 0;
         //action, down, now
@@ -70,6 +69,7 @@ namespace Fanior.Client.Pages
         //dicionary of actions (pressed or released) waiting for server to confirm with time of execution
         Dictionary<int, (PlayerActions.PlayerActionsEnum, bool, double)> actions = new();
         int actionId = 0;
+        string upgradeDivClass = "";
         #endregion
 
 
@@ -130,6 +130,7 @@ namespace Fanior.Client.Pages
                 }*/
 
                 await hubConnection.SendAsync("ExecuteList", gvars.GameId, this.id, player.Angle, sendMessageId);
+                await JS.InvokeVoidAsync("SetFocus", mySvg);
 
                 /* sendMessageId++;
                  gvars.PlayerActions[id] = new List<(PlayerActions.PlayerActionsEnum, bool)>(myActions);

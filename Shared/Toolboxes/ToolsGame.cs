@@ -3,32 +3,18 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Fanior.Shared
 {
     public static class ToolsGame
     {
-        //public static List<ItemAction> actionsToDelete = new();
-        public enum Counts { coins, enemies };
-        public static List<Item> itemsToDelete = new();
-        public static List<(Action<Item>, Item)> startActionsToPerform = new();
-        public static int counter = 0;
-        public static Random random = new();
 
+        public enum Counts { coins, enemies };
+        public static Random random = new();
         public static Player CreateNewPlayer(Gvars gvars, string connectionId, string name)
         {
             return new Player(name, connectionId, gvars, (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", 1, 40, 40, Shape.GeometryEnum.circle, "red", "darkred"), null, 8, 1, 0.2, 100, 0.02, new BasicWeapon(true, 30, 30, 10), 50);
-        }
-        public class Coords
-        {
-            public double x;
-            public double y;
-
-            public Coords(double x, double y)
-            {
-                this.x = x;
-                this.y = y;
-            }
         }
         public static void ProceedFrame(Gvars gvars, double now, int delay, bool server)
         {
@@ -110,6 +96,20 @@ namespace Fanior.Shared
         static public void EndGame()
         {
             Console.WriteLine("GameEnded");
+        }
+
+        public static List<Upgrades> InicializeUpgradeDictionary()
+        {
+            return new List<Upgrades>
+            {
+                { new Upgrades("MAX HEALTH", "pink", (Player player)=>{player.MaxLives += 15; }) },
+                { new Upgrades("REGENERATION", "violet", (Player player)=>{player.Regeneration *= 1.4; }) },
+                { new Upgrades("WEAPON DAMAGE", "red", (Player player) => { player.Weapon.Damage *= 1.1; }) },
+                { new Upgrades("WEAPON SPEED", "orange", (Player player) => { player.Weapon.WeaponSpeed *= 1.1; }) },
+                { new Upgrades("RELOAD", "green", (Player player) => { player.Weapon.ReloadTime *= 0.8; }) },
+                { new Upgrades("BODY DAMAGE", "yellow", (Player player) => { }) },
+                { new Upgrades("MOVEMENT SPEED", "blue", (Player player) => { player.BaseSpeed += 1+1/player.BaseSpeed; player.Friction*=1.1; player.Acceleration+=1.1; }) }
+            };
         }
 
         /*static public bool ResetActionByName(Item item, string actionName, bool invokeStartAction)

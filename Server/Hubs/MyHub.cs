@@ -143,6 +143,19 @@ namespace Fanior.Server.Hubs
             
         }
         /// <summary>
+        /// Receive chosen stat upgrade.
+        /// </summary>
+        public void UpgradeStat(string gameId, int itemId, int statNum)
+        {
+            Player p = gameControl.games[gameId].ItemsPlayers[itemId];
+            if (p.UpgradePoints > 0)
+            {
+                p.Upgrades[statNum].IncreasePoint(p);
+            }
+        }
+
+
+        /// <summary>
         /// Sends all GVars to caller.
         /// </summary>
         public async void SendGvars(string gameId)
