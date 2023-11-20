@@ -29,7 +29,11 @@ namespace Fanior.Client
             if (registeredKeys.ContainsKey(keyName) && registeredKeys[keyName].Count > 0)
                 registeredKeys[keyName].Pop();
         }
-        //Pushes or creates new functionality for particular key
+        /// <summary>
+        ///Pushes or creates new functionality for particular key 
+        /// </summary>
+        /// <param name="keyName">Name of key (lowercase)</param>
+        /// <param name="registeredKey"></param>
         public static void AddKey(string keyName, RegisteredKey registeredKey)
         {
             if (!registeredKeys.ContainsKey(keyName))

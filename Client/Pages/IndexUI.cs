@@ -5,11 +5,13 @@ using Microsoft.JSInterop;
 using System.Threading.Tasks;
 using System;
 using System.Threading;
+using Newtonsoft.Json;
 
 namespace Fanior.Client.Pages
 {
     public partial class Index
     {
+
         /// <summary>
         /// Method containing all stuff that are to be proceeded at the start of the load up.
         /// </summary>
@@ -51,10 +53,28 @@ namespace Fanior.Client.Pages
             KeyController.AddKey("d", new RegisteredKey(PlayerActions.PlayerActionsEnum.moveRight, myActions));
             KeyController.AddKey("a", new RegisteredKey(PlayerActions.PlayerActionsEnum.moveLeft, myActions));
             KeyController.AddKey("c", new RegisteredKey(PlayerActions.PlayerActionsEnum.cheat, myActions));
+            KeyController.AddKey("e", new RegisteredKey(PlayerActions.PlayerActionsEnum.abilityE, myActions, AbilityPressedE));
+            KeyController.AddKey("q", new RegisteredKey(PlayerActions.PlayerActionsEnum.abilityQ, myActions, AbilityPressedQ));
             KeyController.AddKey(" ", new RegisteredKey(PlayerActions.PlayerActionsEnum.fire, myActions));
         }
 
-
+        void AbilityPressedE()
+        {
+            if (player.AbilityE != null)
+                AbilityPressed(player.AbilityE);
+        }
+        void AbilityPressedQ()
+        {
+            if (player.AbilityQ != null)
+                AbilityPressed(player.AbilityQ);
+        }
+        void AbilityPressed(Ability ability)
+        {
+            ability.BeingUsed = true;
+            ability.Reloaded = false;
+            cah.AddAction(gvars, new ItemAction("abilityRunOut", ToolsMath.TimeToFrames(ability.Duration), ItemAction.ExecutionType.OnlyFirstTime, true, ability));
+            cah.AddAction(gvars, new ItemAction("abilityReload", ToolsMath.TimeToFrames(ability.ReloadTime + ability.Duration), ItemAction.ExecutionType.OnlyFirstTime, true, ability));
+        }
 
 
 
@@ -240,9 +260,27 @@ namespace Fanior.Client.Pages
         {
             if (player.UpgradePoints > 0)
             {
-                player.Upgrades[statNum].IncreasePoint(player);
+                ToolsGame.upgrades[statNum].IncreasePoint(player);
                 player.UpgradePoints--;
                 await hubConnection.SendAsync("UpgradeStat", gvars.GameId, this.id, statNum);
+            }
+        }
+        public async void ObtainAbility(int abilityNum)
+        {
+            //Deep copy
+            var ability = JsonConvert.DeserializeObject<Ability>(JsonConvert.SerializeObject(ToolsGame.abilities[abilityNum]));
+            if (player.UpgradePoints >= ability.Cost)
+            {
+                if (player.AbilityE == null)
+                {
+                    player.AbilityE = ability;
+                }
+                else if (player.AbilityQ == null)
+                {
+                    player.AbilityQ = ability;
+                }
+                player.UpgradePoints -= ability.Cost;
+                await hubConnection.SendAsync("ObtainAbility", gvars.GameId, this.id, abilityNum);
             }
         }
         #endregion

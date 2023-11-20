@@ -5,165 +5,218 @@
 @implements IAsyncDisposable
 @implements IDisposable
 <div id="root" @ref="root">
-@if ((id == -1 || player == null))
-{
-    <div id="introDiv">
-        <div id="fanior">FANIOR</div>
-        <InputText id="name" @bind-Value="@name" placeholder="Fighter's name" maxlength="10" />
-        <button @onclick=Start>START IT</button>
-    </div>
-}
-@if (opacity > 0)
-{
-    <div id="coverDiv" style="opacity: @opacity; z-index: @zindex"></div>
-}
-@if (id != -1 && player != null)
-{
-    <div id="upgradePoints">
-        @player.UpgradePoints
-    </div>
-    <div style="height: @(height)px;" id="upgradeDiv" class="@upgradeDivClass">
-        <div id="classDiv">
+    @if ((id == -1 || player == null))
+    {
+        <div id="introDiv">
+            <div id="fanior">FANIOR</div>
+            <InputText id="name" @bind-Value="@name" placeholder="Fighter's name" maxlength="10" />
+            <button @onclick=Start>START IT</button>
         </div>
-        <div id="abilityDiv">
-        </div>
-        <div id="statsDiv" class="@(player.UpgradePoints > 0 ? "available" : "unavailable")">
-            <div class="statsCoverDiv">
-                @for (int i = 0; i < player.Upgrades.Count; i++)
+    }
+    @if (opacity > 0)
+    {
+        <div id="coverDiv" style="opacity: @opacity; z-index: @zindex"></div>
+    }
+    @if (id != -1 && player != null)
+    {
+        //player bar
+        <div id="playerBar">
+            <!--Score-->
+            @{
+                int barWidth = 55;
+            }
+            <div style="opacity:0.7; background-color:rgb(155,155,155); border: 5px solid black; border-radius:15px; height:40px; width:@barWidth%; position:absolute; bottom: 40px; left: @((100-@barWidth)/2)%;"></div>
+            <div style="opacity:0.7; background-color:rgb(255,153,0); border-radius:10px; height:40px; width:@(width * barWidth / 100 * (player.Score-player.PrevLevel) / (player.NextLevel-player.PrevLevel))px; position:absolute; bottom: 45px; left: calc(@((100-@barWidth)/2)% + 5px);transition:width 0.2s;"></div>
+            <p style="position:absolute; left:50%; transform:translate(-50%, 60%); bottom:40px; font-size: 200%; font-family: Verdana, Geneva, Tahoma, sans-serif; text-align:center; opacity:0.9;">@(player.Score)</p>
+            <!--Abilities-->
+            <div class="selectedAbility abilityE">
+                @if (player.AbilityE == null)
                 {
-                    //blazor's wierd sometimes...
-                    var j = i;
-                    var stat = player.Upgrades[j];
-                    <div class="stats" @onclick="()=>UpgradeStat(j)" style="
-    background-image: linear-gradient(to right, @stat.Color, transparent @(10+stat.Points*10)%);">
-                        <div>
-                            @stat.Name
-                        </div>
-                        <div class="upgradedTimes">@(stat.Points)x</div>
-                    </div>
-                }
-            </div>
-        </div>
-    </div>
-    //main svg
-    <svg x=0 y=0 width="@width" height="@(height)" style="z-index: 0" tabindex="-1" @ref="mySvg">
-
-        <rect x=0 y=0 width="@width" height="@(height)" fill="#CDCDCD"></rect>
-        <rect x=@(-Math.Round(player.X) + width/2-player.Shape.ImageWidth/2) y=@(-Math.Round(player.Y) + height/2-player.Shape.ImageHeight/2) width=@(gvars.ArenaWidth) height=@(gvars.ArenaHeight) fill="#D8EAED"></rect>
-
-        @{
-            string strokeColor;
-            string fillColor;
-            const int LINESPACE = 125;
-            const string LINECOLOR = "lightgrey";
-        }
-        //horizontal
-        @for (int i = 0; i < (gvars.ArenaHeight) / LINESPACE; i++)
-        {
-            if (i % 10 == 0)
-            {
-                <line x1="0" x2=@width y1=@(i * LINESPACE - Math.Round(player.Y) + height / 2) y2=@(i * LINESPACE - Math.Round(player.Y) + height / 2) stroke-width="0.5" stroke=@LINECOLOR></line>
-            }
-            else
-            {
-                <line x1="0" x2=@width y1=@(i * LINESPACE - Math.Round(player.Y) + height / 2) y2=@(i * LINESPACE - Math.Round(player.Y) + height / 2) stroke-width="0.4" stroke=@LINECOLOR></line>
-            }
-        }
-        //vertical
-        @for (int i = 0; i < (gvars.ArenaWidth) / LINESPACE; i++)
-        {
-            if (i % 10 == 0)
-            {
-                <line x1=@(i * LINESPACE -Math.Round(player.X) + width / 2) x2=@(i * LINESPACE -Math.Round(player.X) + width / 2) y1="0" y2=@height stroke-width="0.5" stroke=@LINECOLOR></line>
-            }
-            else
-            {
-                <line x1=@(i * LINESPACE -Math.Round(player.X) + width / 2) x2=@(i * LINESPACE -Math.Round(player.X) + width / 2) y1="0" y2=@height stroke-width="0.4" stroke=@LINECOLOR></line>
-            }
-        }
-        @foreach (Item item in gvars.Items.Values)
-        {
-            if (item.X - item.Shape.ImageWidth - player.X < width / 2 && item.X + item.Shape.ImageWidth - player.X > -width / 2 && item.Y - item.Shape.ImageHeight - player.Y < height / 2 && item.Y + item.Shape.ImageHeight - player.Y > -height / 2)
-            {
-
-                if (item.Id == id || (item is Shot s && id == s.CharacterId))
-                {
-                    strokeColor = item.Shape.StrokeColor;
-                    fillColor = item.Shape.FillColor;
+                    <p>E</p>
                 }
                 else
                 {
-                    strokeColor = item.Shape.StrokeColorEnemy;
-                    fillColor = item.Shape.FillColorEnemy;
+                    <img src="/Images/Abilities/@player.AbilityE.ImageName" />
                 }
-                if (item.Shape.Geometry == Shape.GeometryEnum.circle)
+            </div>
+            @if (player.AbilityE != null && !player.AbilityE.Reloaded)
+            {
+                <div class="abilityLoader abilityE" style="
+                    animation: @(player.AbilityE.Duration)s forwards linear abilityDuration, @(player.AbilityE.ReloadTime)s forwards @(player.AbilityE.Duration)s linear abilityReload;
+                    background-image: conic-gradient(black var(--cone), transparent calc(var(--cone) + 10deg))">
+                </div>
+            }
+            <div class="selectedAbility abilityQ">
+                @if (player.AbilityQ == null)
+                {
+                    <p>Q</p>
+                }
+                else
+                {
+                    <img src="/Images/Abilities/@player.AbilityQ.ImageName" />
+                }
+            </div>
+            @if (player.AbilityQ != null && !player.AbilityQ.Reloaded)
+            {
+                <div class="abilityLoader abilityQ" style="
+                    animation: @(player.AbilityQ.Duration)s forwards linear abilityDuration, @(player.AbilityQ.ReloadTime)s forwards @(player.AbilityQ.Duration)s linear abilityReload;
+                    background-image: conic-gradient(black var(--cone), transparent calc(var(--cone) + 10deg))">
+                </div>
+            }
+        </div>
+
+        <div id="upgradePoints">
+            @player.UpgradePoints
+        </div>
+        <div style="height: @(height)px;" id="upgradeDiv" class="@upgradeDivClass">
+            <div id="classDiv">
+            </div>
+            <div id="abilityDiv">
+                <div id="abilityGrid">
+                    @for (int i = 0; i < ToolsGame.abilities.Count; i++)
+                    {
+                        int j = i;
+                        <div class="ability" @onclick="()=>ObtainAbility(j)" style="background-image: radial-gradient(@(player.UpgradePoints >= ToolsGame.abilities[j].Cost?"rgba(255 132 1/var(--opacity))":"rgba(125 125 125/0.4)") 0%, transparent 70%);">
+                            <img src="/Images/Abilities/@ToolsGame.abilities[j].ImageName" />
+                            <p class="cost">@ToolsGame.abilities[j].Cost</p>
+                            <p class="name">@ToolsGame.abilities[j].Name</p>
+                            <p class="description">@ToolsGame.abilities[j].Description</p>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div id="statsDiv" class="@(player.UpgradePoints > 0 ? "available" : "unavailable")">
+                <div class="statsCoverDiv">
+                    @for (int i = 0; i < ToolsGame.upgrades.Count; i++)
+                    {
+                        //blazor's wierd sometimes...
+                        var j = i;
+                        var stat = ToolsGame.upgrades[j];
+                        <div class="stats" @onclick="()=>UpgradeStat(j)" style="
+    background-image: linear-gradient(to right, @stat.Color, transparent @(10+stat.Points*10)%);">
+                            <div>
+                                @stat.Name
+                            </div>
+                            <div class="upgradedTimes">@(stat.Points)x</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        //main svg
+        <svg x=0 y=0 width="@width" height="@(height)" style="z-index: 0" tabindex="-1" @ref="mySvg">
+
+            <rect x=0 y=0 width="@width" height="@(height)" fill="#CDCDCD"></rect>
+            <rect x=@(-Math.Round(player.X) + width/2-player.Shape.ImageWidth/2) y=@(-Math.Round(player.Y) + height/2-player.Shape.ImageHeight/2) width=@(gvars.ArenaWidth) height=@(gvars.ArenaHeight) fill="#D8EAED"></rect>
+
+            @{
+                string strokeColor;
+                string fillColor;
+                const int LINESPACE = 125;
+                const string LINECOLOR = "lightgrey";
+            }
+            //horizontal
+            @for (int i = 0; i < (gvars.ArenaHeight) / LINESPACE; i++)
+            {
+                if (i % 10 == 0)
+                {
+                    <line x1="0" x2=@width y1=@(i * LINESPACE - Math.Round(player.Y) + height / 2) y2=@(i * LINESPACE - Math.Round(player.Y) + height / 2) stroke-width="0.5" stroke=@LINECOLOR></line>
+                }
+                else
+                {
+                    <line x1="0" x2=@width y1=@(i * LINESPACE - Math.Round(player.Y) + height / 2) y2=@(i * LINESPACE - Math.Round(player.Y) + height / 2) stroke-width="0.4" stroke=@LINECOLOR></line>
+                }
+            }
+            //vertical
+            @for (int i = 0; i < (gvars.ArenaWidth) / LINESPACE; i++)
+            {
+                if (i % 10 == 0)
+                {
+                    <line x1=@(i * LINESPACE -Math.Round(player.X) + width / 2) x2=@(i * LINESPACE -Math.Round(player.X) + width / 2) y1="0" y2=@height stroke-width="0.5" stroke=@LINECOLOR></line>
+                }
+                else
+                {
+                    <line x1=@(i * LINESPACE -Math.Round(player.X) + width / 2) x2=@(i * LINESPACE -Math.Round(player.X) + width / 2) y1="0" y2=@height stroke-width="0.4" stroke=@LINECOLOR></line>
+                }
+            }
+            @foreach (Item item in gvars.Items.Values)
+            {
+                if (item.X - item.Shape.ImageWidth - player.X < width / 2 && item.X + item.Shape.ImageWidth - player.X > -width / 2 && item.Y - item.Shape.ImageHeight - player.Y < height / 2 && item.Y + item.Shape.ImageHeight - player.Y > -height / 2)
                 {
 
-                    var centerX = (item.X - Math.Round(player.X) + width / 2);
-                    var centerY = (item.Y - Math.Round(player.Y) + height / 2);
-
-
-                    //character, shield...
-                    if (item is Character c)
+                    if (item.Id == id || (item is Shot s && id == s.CharacterId))
                     {
-                        var leftEyeX = (centerX + item.Shape.ImageHeight / 2.5 * Math.Cos(c.Angle - Math.PI / 6)).ToString().Replace(',', '.');
-                        var rightEyeX = (centerX + item.Shape.ImageHeight / 2.5 * Math.Cos(c.Angle + Math.PI / 6)).ToString().Replace(',', '.');
-                        var leftEyeY = (centerY - item.Shape.ImageHeight / 2.5 * Math.Sin(c.Angle - Math.PI / 6)).ToString().Replace(',', '.');
-                        var rightEyeY = (centerY - item.Shape.ImageHeight / 2.5 * Math.Sin(c.Angle + Math.PI / 6)).ToString().Replace(',', '.');
-
-
-
-                        <circle cx=@(centerX.ToString().Replace(',','.')) cy=@(centerY.ToString().Replace(',','.')) r=@(item.Shape.ImageHeight / 2) stroke=@strokeColor stroke-width=@(item.Shape.StrokeWidth/2) fill=@fillColor />
-                        <circle cx=@(leftEyeX) cy=@(leftEyeY) r=@(item.Shape.ImageHeight / 9) stroke="white" stroke-width=1 fill=@fillColor />
-                        <circle cx=@(rightEyeX) cy=@(rightEyeY) r=@(item.Shape.ImageHeight / 9) stroke="white" stroke-width=1 fill=@fillColor />
-                        <circle cx=@(leftEyeX) cy=@(leftEyeY) r=@(item.Shape.ImageHeight / 15) stroke="blue" stroke-width=1 fill="blue" />
-                        <circle cx=@(rightEyeX) cy=@(rightEyeY) r=@(item.Shape.ImageHeight / 15) stroke="blue" stroke-width=1 fill="blue" />
-                        if (c.Shield > 0)
-                        {
-                            centerY += item.Shape.ImageHeight * 7 / 10 + 5;
-                            <rect x=@((centerX - item.Shape.ImageWidth / 2).ToString().Replace(',','.')) y=@(centerY.ToString().Replace(',','.')) width=@item.Shape.ImageWidth height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="black"></rect>
-                            <rect x=@((centerX - item.Shape.ImageWidth / 2).ToString().Replace(',','.')) y=@(centerY.ToString().Replace(',','.')) width=@(item.Shape.ImageWidth * c.Shield/c.MaxShield) height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="gray"></rect>
-                        }
+                        strokeColor = item.Shape.StrokeColor;
+                        fillColor = item.Shape.FillColor;
                     }
                     else
                     {
-                        <circle cx=@(centerX.ToString().Replace(',','.')) cy=@(centerY.ToString().Replace(',','.')) r=@(item.Shape.ImageHeight / 2) stroke=@strokeColor stroke-width=@(item.Shape.StrokeWidth/2) fill=@fillColor />
+                        strokeColor = item.Shape.StrokeColorEnemy;
+                        fillColor = item.Shape.FillColorEnemy;
                     }
-
-
-                }
-                else if (item.Shape.Geometry == Shape.GeometryEnum.rectange)
-                {
-                    <rect x=@item.X y=@item.Y width=@item.Shape.ImageWidth height=@item.Shape.ImageHeight stroke=@strokeColor fill=@fillColor stroke-width=@item.Shape.StrokeWidth></rect>
-                }
-                //lives, players name...
-                if (item is ILived l)
-                {
-                    var centerX = (item.X - Math.Round(player.X) - item.Shape.ImageWidth / 2 + width / 2);
-                    var centerY = (item.Y - Math.Round(player.Y) + item.Shape.ImageHeight / 2 + height / 2 + item.Shape.ImageWidth / 10);
-                    <rect x=@(centerX.ToString().Replace(',','.')) y=@(centerY.ToString().Replace(',','.')) width=@item.Shape.ImageWidth height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="black"></rect>
-                    <rect x=@(centerX.ToString().Replace(',','.')) y=@(centerY.ToString().Replace(',','.')) width=@(item.Shape.ImageWidth * l.CurLives/l.MaxLives) height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="lightgreen"></rect>
-
-                    if (item is Player)
+                    if (item.Shape.Geometry == Shape.GeometryEnum.circle)
                     {
-                        centerY = (item.Y - Math.Round(player.Y) - item.Shape.ImageHeight / 2 + height / 2 - item.Shape.ImageWidth / 4);
-                        centerX = (item.X - Math.Round(player.X) + width / 2);
 
-                        <g>
-                            <text x=@(centerX.ToString().Replace(',','.')) y=@(centerY.ToString().Replace(',','.')) style="font-size: 120%; font-family: Verdana, Geneva, Tahoma, sans-serif;" text-anchor="middle">@((item as Player).Name)</text>
-                        </g>
+                        var centerX = (item.X - Math.Round(player.X) + width / 2);
+                        var centerY = (item.Y - Math.Round(player.Y) + height / 2);
+
+
+                        //character, shield...
+                        if (item is Character c)
+                        {
+                            var leftEyeX = (centerX + item.Shape.ImageHeight / 2.5 * Math.Cos(c.Angle - Math.PI / 6)).ToString().Replace(',', '.');
+                            var rightEyeX = (centerX + item.Shape.ImageHeight / 2.5 * Math.Cos(c.Angle + Math.PI / 6)).ToString().Replace(',', '.');
+                            var leftEyeY = (centerY - item.Shape.ImageHeight / 2.5 * Math.Sin(c.Angle - Math.PI / 6)).ToString().Replace(',', '.');
+                            var rightEyeY = (centerY - item.Shape.ImageHeight / 2.5 * Math.Sin(c.Angle + Math.PI / 6)).ToString().Replace(',', '.');
+
+
+
+                            <circle class="character @(c.Immortal ? ("immortal"):(""))" cx=@(centerX.ToString().Replace(',','.')) cy=@(centerY.ToString().Replace(',','.')) r=@(item.Shape.ImageHeight / 2) stroke=@strokeColor stroke-width=@(item.Shape.StrokeWidth/2) fill=@fillColor  />
+                            <circle cx=@(leftEyeX) cy=@(leftEyeY) r=@(item.Shape.ImageHeight / 9) stroke="white" stroke-width=1 fill=@fillColor />
+                            <circle cx=@(rightEyeX) cy=@(rightEyeY) r=@(item.Shape.ImageHeight / 9) stroke="white" stroke-width=1 fill=@fillColor />
+                            <circle cx=@(leftEyeX) cy=@(leftEyeY) r=@(item.Shape.ImageHeight / 15) stroke="blue" stroke-width=1 fill="blue" />
+                            <circle cx=@(rightEyeX) cy=@(rightEyeY) r=@(item.Shape.ImageHeight / 15) stroke="blue" stroke-width=1 fill="blue" />
+                            if (c.Shield > 0)
+                            {
+                                centerY += item.Shape.ImageHeight * 7 / 10 + 5;
+                                <rect x=@((centerX - item.Shape.ImageWidth / 2).ToString().Replace(',','.')) y=@(centerY.ToString().Replace(',','.')) width=@item.Shape.ImageWidth height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="black"></rect>
+                                <rect x=@((centerX - item.Shape.ImageWidth / 2).ToString().Replace(',','.')) y=@(centerY.ToString().Replace(',','.')) width=@(item.Shape.ImageWidth * c.Shield/c.MaxShield) height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="gray"></rect>
+                            }
+                        }
+                        else
+                        {
+                            <circle cx=@(centerX.ToString().Replace(',','.')) cy=@(centerY.ToString().Replace(',','.')) r=@(item.Shape.ImageHeight / 2) stroke=@strokeColor stroke-width=@(item.Shape.StrokeWidth/2) fill=@fillColor />
+                        }
+
+
                     }
+                    else if (item.Shape.Geometry == Shape.GeometryEnum.rectange)
+                    {
+                        <rect x=@item.X y=@item.Y width=@item.Shape.ImageWidth height=@item.Shape.ImageHeight stroke=@strokeColor fill=@fillColor stroke-width=@item.Shape.StrokeWidth></rect>
+                    }
+                    //lives, players name...
+                    if (item is ILived l)
+                    {
+                        var centerX = (item.X - Math.Round(player.X) - item.Shape.ImageWidth / 2 + width / 2);
+                        var centerY = (item.Y - Math.Round(player.Y) + item.Shape.ImageHeight / 2 + height / 2 + item.Shape.ImageWidth / 10);
+                        <rect x=@(centerX.ToString().Replace(',','.')) y=@(centerY.ToString().Replace(',','.')) width=@item.Shape.ImageWidth height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="black"></rect>
+                        <rect x=@(centerX.ToString().Replace(',','.')) y=@(centerY.ToString().Replace(',','.')) width=@(item.Shape.ImageWidth * l.CurLives/l.MaxLives) height=@(item.Shape.ImageWidth/10) stroke="black" stroke-width="1px" fill="lightgreen"></rect>
+
+                        if (item is Player)
+                        {
+                            centerY = (item.Y - Math.Round(player.Y) - item.Shape.ImageHeight / 2 + height / 2 - item.Shape.ImageWidth / 4);
+                            centerX = (item.X - Math.Round(player.X) + width / 2);
+
+                            <g>
+                                <text x=@(centerX.ToString().Replace(',','.')) y=@(centerY.ToString().Replace(',','.')) style="font-size: 120%; font-family: Verdana, Geneva, Tahoma, sans-serif;" text-anchor="middle">@((item as Player).Name)</text>
+                            </g>
+                        }
+                    }
+
                 }
 
             }
 
-        }
-        //Score
-        <rect x=@(width/2 - width / 4) y=@(height - 100) width=@(width / 2) height="40" rx="15" ry="15" stroke="black" stroke-width=5 fill="rgb(155,155,155)" opacity="0.7" />
-        <rect x=@(width/2 - width / 4) y=@(height - 100) width=@(width / 2 * (player.Score-player.PrevLevel) / (player.NextLevel-player.PrevLevel)) height="40" rx="15" ry="15" fill="rgb(255,153,0)" opacity="0.7" style="transition:width 0.2s;"/>
-        <g>
-            <text x=@(width/2) y=@(height - 80) style="font-size: 200%; font-family: Verdana, Geneva, Tahoma, sans-serif;" text-anchor="middle" alignment-baseline="central" opacity="0.9">@(player.Score)</text>
-        </g>
-    </svg>
-}
+        </svg>
+    }
 </div>

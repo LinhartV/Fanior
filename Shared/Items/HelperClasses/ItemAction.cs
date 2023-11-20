@@ -12,8 +12,19 @@ namespace Fanior.Shared
     /// </summary>
     public class ItemAction
     {
-
-        public enum ExecutionType { EveryTime, NotFirstTime, OnlyFirstTime, StopExecuting }
+        /// <summary>
+        /// 
+        /// </summary>
+        public enum ExecutionType {
+            ///<summary>Action executes immidiatelly and repeats infinitely</summary>
+            EveryTime,
+            ///<summary>Action repeats infinitely, but doesn't execute first time</summary>
+            NotFirstTime,
+            ///<summary>Action executes only once after duration time runs out (set duration to 0 to happen at the start of the very next frame)</summary>
+            OnlyFirstTime,
+            ///<summary>Stops execution of selected action</summary>
+            StopExecuting
+        }
         //Action to be executed
         public string ActionName { get; private set; }
         //Parameters

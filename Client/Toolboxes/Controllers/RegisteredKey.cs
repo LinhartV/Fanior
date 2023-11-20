@@ -31,19 +31,24 @@ namespace Fanior.Client
         }
 
         //Constroctur for actions proceeded on both server and client side. So far only name of action enum sent to server. Better idea (PlayerAction.PlayerActionsEnum, bool, long) providing time when it happed
-        public RegisteredKey(PlayerActions.PlayerActionsEnum action, List<(PlayerActions.PlayerActionsEnum, bool)> myActions)
+        public RegisteredKey(PlayerActions.PlayerActionsEnum action, List<(PlayerActions.PlayerActionsEnum, bool)> myActions, Action clientActionDown = null, Action clientActionUp = null)
         {
             this.KeyDown = () =>
             {
                 if (Pressed == false)
                 {
                     Pressed = true;
+                    if (clientActionDown != null)
+                    {
+                        clientActionDown();
+                    }
                     if (action != PlayerActions.PlayerActionsEnum.none)
                     {
                         myActions.Add((action, true));
                         return action;
                         //PlayerAction.InvokeAction(keyDown, true, a, g);
                     }
+                    
                 }
 
                 return PlayerActions.PlayerActionsEnum.none;
@@ -51,12 +56,17 @@ namespace Fanior.Client
             this.KeyUp = () =>
             {
                 Pressed = false;
+                if (clientActionUp != null)
+                {
+                    clientActionUp();
+                }
                 if (action != PlayerActions.PlayerActionsEnum.none)
                 {
                     myActions.Add((action, false));
                     return action;
                     //PlayerAction.InvokeAction(keyUp, false, a, g);
                 }
+                
 
                 return PlayerActions.PlayerActionsEnum.none;
             };

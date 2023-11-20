@@ -39,6 +39,9 @@ namespace Fanior.Shared
             }
             );
             lambdaActions.Add("fire2", ((gvars, id, parameters) => { (gvars.Items[id] as Character).Weapon.Reloaded = true; }));
+            lambdaActions.Add("abilityReload", ((gvars, id, parameters) => { 
+                (parameters[0] as Ability).Reloaded = true; 
+            }));
             lambdaActions.Add("dispose", ((gvars, id, parameters) => { gvars.Items[id].Dispose(); }));
 
             lambdaActions.Add("move", (gvars, id, parameters) =>
@@ -57,7 +60,7 @@ namespace Fanior.Shared
                 Character player = gvars.Items[id] as Character;
                 if (player.X < 0 || player.X > gvars.ArenaWidth || player.Y > gvars.ArenaHeight || player.Y < 0)
                 {
-                    player.ChangeCurLives(-1 * gvars.PercentageOfFrame, null);
+                    player.ReceiveDamage(1 * gvars.PercentageOfFrame, null);
                 }
             }));
 
@@ -83,12 +86,29 @@ namespace Fanior.Shared
                     gvars.ChangeRepeatTime(ToolsGame.random.Next(300, 1000), "createCoin");
                 }
             }));
-
-
+            lambdaActions.Add("abilityRunOut", (gvars, id, parameters) =>
+            {
+                (parameters[0] as Ability).BeingUsed = false;
+            });
+            lambdaActions.Add("just", (gvars, id, parameters) =>
+            {
+                
+            });
+            lambdaActions.Add("Immortality", ((gvars, id, parameters) =>
+            {
+                var character = (gvars.Items[id] as Character);
+                character.Immortal = true;
+                character.AddAction(gvars, new ItemAction("LoseImmortality", (double)parameters[0], ItemAction.ExecutionType.OnlyFirstTime));
+            }));
+            lambdaActions.Add("LoseImmortality", ((gvars, id, parameters) =>
+            {
+                var character = (gvars.Items[id] as Character);
+                character.Immortal = false;
+            }));
 
 
         }
-        public static void ExectureActions(string actionName, Gvars gvars, int id, params object[] parameters)
+        public static void ExecuteActions(string actionName, Gvars gvars, int id, params object[] parameters)
         {
             lambdaActions[actionName].Invoke(gvars, id, parameters);
         }

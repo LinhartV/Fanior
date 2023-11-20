@@ -38,7 +38,7 @@ namespace Fanior.Shared
             }
         }
         [JsonConverter(typeof(StringEnumConverter))]
-        public enum PlayerActionsEnum { none = 0, moveUp = 1, moveDown = 2, moveLeft = 3, moveRight = 4, fire = 5, ability1 = 6, ability2 = 7, other = 8, cheat = 9 }
+        public enum PlayerActionsEnum { none = 0, moveUp = 1, moveDown = 2, moveLeft = 3, moveRight = 4, fire = 5, abilityQ = 6, abilityE = 7, other = 8, cheat = 9 }
 
         static Dictionary<PlayerActionsEnum, KeyCommand> actions = new();
 
@@ -141,6 +141,23 @@ namespace Fanior.Shared
             {
                 
             }));
+
+            actions.Add(PlayerActionsEnum.abilityQ, new KeyCommand((id, gvars) =>
+            {
+                gvars.ItemsPlayers[id].AbilityQ?.UseAbility(gvars, id);
+            },
+            (id, gvars) =>
+            {
+
+            }));
+            actions.Add(PlayerActionsEnum.abilityE, new KeyCommand((id, gvars) =>
+            {
+                gvars.ItemsPlayers[id].AbilityE?.UseAbility(gvars, id);
+            },
+           (id, gvars) =>
+           {
+
+           }));
         }
     }
 }

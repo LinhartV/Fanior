@@ -150,10 +150,30 @@ namespace Fanior.Server.Hubs
             Player p = gameControl.games[gameId].ItemsPlayers[itemId];
             if (p.UpgradePoints > 0)
             {
-                p.Upgrades[statNum].IncreasePoint(p);
+                ToolsGame.upgrades[statNum].IncreasePoint(p);
             }
         }
-
+        /// <summary>
+        /// Receive chosen stat upgrade.
+        /// </summary>
+        public void ObtainAbility(string gameId, int itemId, int abilityNum)
+        {
+            Player p = gameControl.games[gameId].ItemsPlayers[itemId];
+            //Deep copy
+            var ability = JsonConvert.DeserializeObject<Ability>(JsonConvert.SerializeObject(ToolsGame.abilities[abilityNum]));
+            if (p.UpgradePoints >= ability.Cost)
+            {
+                if (p.AbilityE == null)
+                {
+                    p.AbilityE = ability;
+                }
+                else if (p.AbilityQ == null)
+                {
+                    p.AbilityQ = ability;
+                }
+            }
+        }
+        
 
         /// <summary>
         /// Sends all GVars to caller.

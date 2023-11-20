@@ -29,7 +29,7 @@ namespace Fanior.Shared
         {
             foreach (var action in actionsEveryFrame.Values)
             {
-                LambdaActions.ExectureActions(action.ActionName, gvars, id, action.Parameters);
+                LambdaActions.ExecuteActions(action.ActionName, gvars, id, action.Parameters);
             }
 
             Dictionary<string, (double, ItemAction)> tempActions = new Dictionary<string, (double, ItemAction)>(actions);
@@ -39,7 +39,7 @@ namespace Fanior.Shared
                 {
                     if (actions[actionName].Item2.executionType == ItemAction.ExecutionType.EveryTime || (actions[actionName].Item2.Repeat == 0 && actions[actionName].Item2.executionType == ItemAction.ExecutionType.OnlyFirstTime))
                     {
-                        LambdaActions.ExectureActions(actions[actionName].Item2.ActionName, gvars, id, actions[actionName].Item2.Parameters);
+                        LambdaActions.ExecuteActions(actions[actionName].Item2.ActionName, gvars, id, actions[actionName].Item2.Parameters);
                     }
                     else if (actions[actionName].Item2.executionType == ItemAction.ExecutionType.NotFirstTime)
                     {
@@ -52,7 +52,6 @@ namespace Fanior.Shared
                         if (tempActions[actionName].Item2.executionType == ItemAction.ExecutionType.OnlyFirstTime)
                         {
                             tempActions[actionName].Item2.Repeat = 0;
-                            actions[actionName].Item2.executionType = ItemAction.ExecutionType.EveryTime;
                         }
                     }
 

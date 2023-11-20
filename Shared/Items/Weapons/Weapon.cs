@@ -26,7 +26,9 @@ namespace Fanior.Shared
         public bool Reloaded { get; set; } = true;
         //number of frames it takes to reload
         public double ReloadTime { get; set; }
+        [JsonProperty]
         public double WeaponSpeed { get; set; }
+        [JsonProperty]
         public double Damage { get; set; }
         public int CharacterId { get; set; }
         public bool AutoFire { get; set; }

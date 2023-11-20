@@ -35,10 +35,9 @@ namespace Fanior.Shared
         }
         //number of upgrade points
         public int UpgradePoints { get; set; } = 0;
-        //upgrades
-        [JsonIgnore]
-        public List<Upgrades> Upgrades { get; private set; } = ToolsGame.InicializeUpgradeDictionary();
 
+        public Ability AbilityQ { get; set; }
+        public Ability AbilityE { get; set; }
         //score needed to reach next level
         public int NextLevel { get; private set; } = 50;
         public int PrevLevel { get; private set; } = 0;

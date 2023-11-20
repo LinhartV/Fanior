@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Fanior.Shared
 {
@@ -98,19 +97,47 @@ namespace Fanior.Shared
             Console.WriteLine("GameEnded");
         }
 
-        public static List<Upgrades> InicializeUpgradeDictionary()
-        {
-            return new List<Upgrades>
+        public static List<Upgrade> upgrades = new List<Upgrade>
             {
-                { new Upgrades("MAX HEALTH", "pink", (Player player)=>{player.MaxLives += 15; }) },
-                { new Upgrades("REGENERATION", "violet", (Player player)=>{player.Regeneration *= 1.4; }) },
-                { new Upgrades("WEAPON DAMAGE", "red", (Player player) => { player.Weapon.Damage *= 1.1; }) },
-                { new Upgrades("WEAPON SPEED", "orange", (Player player) => { player.Weapon.WeaponSpeed *= 1.1; }) },
-                { new Upgrades("RELOAD", "green", (Player player) => { player.Weapon.ReloadTime *= 0.8; }) },
-                { new Upgrades("BODY DAMAGE", "yellow", (Player player) => { }) },
-                { new Upgrades("MOVEMENT SPEED", "blue", (Player player) => { player.BaseSpeed += 1+1/player.BaseSpeed; player.Friction*=1.1; player.Acceleration+=1.1; }) }
+                { new Upgrade("MAX HEALTH", "pink", (Player player)=>{player.MaxLives += 15; }) },
+                { new Upgrade("REGENERATION", "violet", (Player player)=>{player.Regeneration *= 1.4; }) },
+                { new Upgrade("WEAPON DAMAGE", "red", (Player player) => { player.Weapon.Damage *= 1.1; }) },
+                { new Upgrade("WEAPON SPEED", "orange", (Player player) => { player.Weapon.WeaponSpeed *= 1.1; }) },
+                { new Upgrade("RELOAD", "green", (Player player) => { player.Weapon.ReloadTime *= 0.8; }) },
+                { new Upgrade("BODY DAMAGE", "yellow", (Player player) => { }) },
+                { new Upgrade("MOVEMENT SPEED", "blue", (Player player) => { player.BaseSpeed += 1+1/player.BaseSpeed; player.Friction*=1.1; player.Acceleration+=1.1; }) }
             };
-        }
+
+        /*public static Ability GetAbility(int num)
+        {
+            switch (num)
+            {
+                case 0:
+                    return new Ability(40, 3, "Immortality", 3, "shield.svg", "Three seconds of immortality");
+                case 1:
+                    return new Ability(30, 0, "Bomb", 3, "bomb.svg", "Sets a bomb that savagely damages everything around");
+                case 2:
+                    return new Ability(60, 10, "Empowerment", 3, "damageUpgrade.svg", "Ten seconds of highly boosted damage");
+                case 3:
+                    return new Ability(60, 10, "Rapid Fire", 3, "reloadUpgrade.svg", "Ten seconds of highly boosted reload");
+                case 4:
+                    return new Ability(90, 0, "Insta Heal", 3, "heal.svg", "Instantly recovers 3/4 health");
+                case 5:
+                    return new Ability(20, 10, "Repulsion", 3, "repulsion.svg", "Creates a pressure wave around yourself");
+                default:
+                    return new Ability(20, 10, "Repulsion", 3, "repulsion.svg", "Creates a pressure wave around yourself");
+            }
+        }*/
+        public static List<Ability> abilities = new List<Ability>
+            {
+                { new Ability(40, 3, "Immortality",3, "shield.svg", "Three seconds of immortality") },
+                { new Ability(30, 0, "Bomb", 3, "bomb.svg", "Sets a bomb that savagely damages everything around") },
+                { new Ability(60, 10, "Empowerment", 3, "damageUpgrade.svg", "Ten seconds of highly boosted damage") },
+                { new Ability(60, 10, "Rapid Fire", 3, "reloadUpgrade.svg", "Ten seconds of highly boosted reload") },
+                { new Ability(90, 0, "Insta Heal", 3, "heal.svg", "Instantly recovers 3/4 health") },
+                { new Ability(20, 10, "Repulsion", 3, "repulsion.svg", "Creates a pressure wave around yourself") }
+            };
+
 
         /*static public bool ResetActionByName(Item item, string actionName, bool invokeStartAction)
         {

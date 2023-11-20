@@ -12,9 +12,9 @@ namespace Fanior.Shared
     /// <summary>
     /// Class for player stats upgrade (such as movement speed etc.)
     /// </summary>
-    public class Upgrades
+    public class Upgrade
     {
-        public Upgrades(string name, string color, Action<Player> onIncrease)
+        public Upgrade(string name, string color, Action<Player> onIncrease)
         {
             this.OnIncrease = onIncrease;
             Name = name;

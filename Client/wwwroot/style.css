@@ -1,4 +1,16 @@
-﻿html, body {
+﻿@property --opacity {
+    syntax: '<number>';
+    initial-value: -10;
+    inherits: false;
+}
+
+@property --cone {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+
+html, body {
     margin: 0;
     height: 100%;
     background-image: linear-gradient(to bottom right, lightgreen, lightgrey);
@@ -133,15 +145,15 @@ button {
     transition: transform 0.5s;
 }
 
-#upgradeDiv.active, #upgradeDiv:hover {
-    transform: translate(0, 0)
-}
+    #upgradeDiv.active, #upgradeDiv:hover {
+        transform: translate(0, 0)
+    }
 
 #upgradePoints {
     user-select: none;
     position: absolute;
     top: 20px;
-    left: 20px;
+    left: 52px;
     z-index: 1;
     background-image: radial-gradient(#ff8401 0%, transparent 70%);
     width: 100px;
@@ -151,4 +163,180 @@ button {
     justify-content: center;
     align-items: center;
     font-size: 50px;
+}
+
+#abilityDiv {
+    width: 100%;
+}
+
+#abilityGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: inherit;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    justify-items: center;
+}
+
+.ability {
+    display: flex;
+    --opacity: 0.5;
+    width: 80px;
+    aspect-ratio: 1/1;
+    align-content: center;
+    justify-content: center;
+    transition: --opacity 0.2s;
+    cursor: pointer;
+}
+
+    .ability:hover {
+        --opacity: 1;
+    }
+
+    .ability:active {
+        --opacity: 1;
+        background-image: radial-gradient(rgb(255 var(--opacity) var(--opacity)) 0%, transparent 70%);
+    }
+
+    .ability img {
+        width: 50px;
+        transition: opacity 0.5s;
+        opacity: 1;
+    }
+
+    .ability p:not(.cost) {
+        position: absolute;
+        left: 50%;
+        transform: translate(-50%,0);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.5s, visibility 0.4s 0.1s;
+        cursor: default;
+    }
+
+    .ability:hover p:not(.cost) {
+        opacity: 1;
+        left: 50%;
+        visibility: visible;
+        transition: opacity 0.5s, visibility 0.4s 0.1s;
+    }
+
+    .ability:hover img {
+        opacity: 0.2;
+    }
+
+    .ability:hover .cost {
+        opacity: 1;
+    }
+
+.description {
+    font-size: 80%;
+    font-style: italic;
+    top: calc(50% + 35px);
+    width: 80%;
+    text-align: center;
+}
+
+.name {
+    font-size: 110%;
+    font-weight: bold;
+    top: calc(50% + 1px);
+}
+
+.selectedAbility {
+    position: absolute;
+    bottom: 28px;
+    width: 80px;
+    height: 80px;
+    background-image: radial-gradient(#808080e3 40%, black 68%, transparent 72%);
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    transform: translate(-50%, 0);
+}
+
+    .selectedAbility p {
+        color: white;
+        font-size: 40px;
+        cursor: default;
+    }
+
+    .selectedAbility img {
+        width: 60%;
+        animation: 1s ease-out 0s 1 fadeIn;
+    }
+
+.abilityE {
+    left: calc(80% + 40px);
+}
+
+.abilityQ {
+    left: calc(20% - 40px);
+}
+
+.abilityLoader {
+    transform: translate(-50%, 0);
+    bottom: 28px;
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+}
+
+.cost {
+    transition: opacity 0.5s;
+    opacity: 0;
+    transform: translate(0%,-50%);
+    position: absolute;
+    font-size: 35px;
+    text-shadow: 0px 0px 2px #000, 0px 0px 5px #ff8900;
+}
+.character{
+
+}
+.immortal {
+    animation: 0.4s infinite alternate linear immortality;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes abilityDuration {
+    0% {
+        --cone: 0deg;
+    }
+
+    100% {
+        --cone: 360deg;
+    }
+}
+
+
+@keyframes abilityReload {
+    0% {
+        --cone: 360deg;
+    }
+
+    100% {
+        --cone: 0deg;
+    }
+}
+
+@keyframes immortality {
+    0% {
+        fill: blue;
+    }
+
+    100% {
+        fill:red;
+    }
 }

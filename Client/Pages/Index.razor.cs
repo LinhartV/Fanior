@@ -22,6 +22,10 @@ namespace Fanior.Client.Pages
     public partial class Index
     {
         #region Variables
+        //client action handler
+        ActionHandler cah = new ActionHandler();
+        int abilityPercentageQ = -10;
+        int abilityPercentageE = -10;
         //list of keys that are pressed in the current frame
         List<string> pressedKeys = new List<string>();
         //id of this connection
@@ -131,6 +135,7 @@ namespace Fanior.Client.Pages
 
                 await hubConnection.SendAsync("ExecuteList", gvars.GameId, this.id, player.Angle, sendMessageId);
                 await JS.InvokeVoidAsync("SetFocus", mySvg);
+                cah.ExecuteActions(gvars.GetNow(), gvars, false, -1);
 
                 /* sendMessageId++;
                  gvars.PlayerActions[id] = new List<(PlayerActions.PlayerActionsEnum, bool)>(myActions);
@@ -236,6 +241,10 @@ namespace Fanior.Client.Pages
                         if (item.Value.ContainsKey(Item.ItemProperties.Shield))
                         {
                             (gvars.Items[item.Key] as Character).Shield = item.Value[Item.ItemProperties.Shield];
+                        }
+                        if (item.Value.ContainsKey(Item.ItemProperties.Immortality))
+                        {
+                            (gvars.Items[item.Key] as Character).Immortal = Convert.ToBoolean(item.Value[Item.ItemProperties.Immortality]);
                         }
                     }
                     foreach (var itemId in itemsToDestroy)

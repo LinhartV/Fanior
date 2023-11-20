@@ -37,6 +37,9 @@ namespace Fanior.Shared
             }*/
             return percentage;
         }
+
+
+        
         /*public static void Execute(string actionMethodName, Gvars gvars, int playerId)
         {
             Type thisType = typeof(PlayerAction);

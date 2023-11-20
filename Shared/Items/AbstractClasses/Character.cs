@@ -1,4 +1,5 @@
 ﻿
+
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -49,8 +50,17 @@ namespace Fanior.Shared
             }
         }
 
-
-
+        [JsonProperty]
+        private bool immortal;
+        public bool Immortal
+        {
+            get => immortal;
+            set
+            {
+                immortal = value;
+                gvars?.AddProperty(Id, ItemProperties.Immortality,Convert.ToDouble(immortal));
+            }
+        }
 
 
         public Character() { }
@@ -103,21 +113,25 @@ namespace Fanior.Shared
             }
         }
 
-        protected virtual void ReceiveDamage(double damage, Item killer)
+        public virtual void ReceiveDamage(double damage, Item killer)
         {
-            if (Shield > 0)
+            if (!Immortal)
             {
-                if (Shield - damage < 0)
+                if (Shield > 0)
                 {
-                    this.ChangeCurLives(-(damage - Shield), killer);
+                    if (Shield - damage < 0)
+                    {
+                        this.ChangeCurLives(-(damage - Shield), killer);
+                    }
+                    Shield -= damage;
+                    gvars?.AddProperty(Id, ItemProperties.Shield, Shield);
                 }
-                Shield -= damage;
-                gvars?.AddProperty(Id, ItemProperties.Shield, Shield);
+                else
+                {
+                    this.ChangeCurLives(-damage, killer);
+                }
             }
-            else
-            {
-                this.ChangeCurLives(-damage, killer);
-            }
+            
 
 
         }
