@@ -84,6 +84,7 @@ namespace Fanior.Server
             }
             catch (Exception e)
             {
+                throw;
 
             }
         }
@@ -102,7 +103,7 @@ namespace Fanior.Server
                     double percantage = ToolsSystem.GetPercentageOfFrame(now, game.sw.Elapsed.TotalMilliseconds);
                     now = game.sw.Elapsed.TotalMilliseconds;
                     gvars.PercentageOfFrame = percantage;
-                    ToolsGame.ProceedFrame(gvars, now, Constants.DELAY, true);
+                    ToolsGame.ProceedFrame(gvars, now, Constants.DELAY);
                     gvars.messageId++;
                     foreach (var player in gvars.ItemsPlayers.Values)
                     {
@@ -116,11 +117,12 @@ namespace Fanior.Server
                 }
                 await SendData(game, hub);
                 game.swTest.Stop();
-                Console.WriteLine(game.swTest.Elapsed.TotalMilliseconds);
+                //Console.WriteLine(game.swTest.Elapsed.TotalMilliseconds);
                 game.swTest.Reset();
             }
             catch (Exception e)
             {
+                throw;
             }
         }
 
@@ -157,6 +159,7 @@ namespace Fanior.Server
                 catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
+                    throw;
                 }
             }
         }

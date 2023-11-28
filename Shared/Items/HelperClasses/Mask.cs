@@ -9,8 +9,8 @@ namespace Fanior.Shared
     //ještě předělám na interface. Něco bude kolo, něco čtverec, něco zvláštní maska, ale vždy budu prvně checkovat šířku a výšku.
     public class Mask
     {
-        public double Width {get; }
-        public double Height { get; }
+        public double Width { get; set; }
+        public double Height { get; set; }
         public Shape.GeometryEnum Geometry { get; }
 
         public Mask(double width, double height, Shape.GeometryEnum geometry)

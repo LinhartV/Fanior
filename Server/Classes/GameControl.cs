@@ -37,7 +37,6 @@ namespace Fanior.Server.Classes
             sw.Start();
             PlayerActions.SetupActions();
             LambdaActions.SetupLambdaActions();
-            WeaponTree.SetWeaponTree();
         }
         //adds new player to concrete arena if possible
         public Gvars AddPlayer(string gameId)

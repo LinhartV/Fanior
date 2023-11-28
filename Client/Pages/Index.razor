@@ -26,8 +26,8 @@
                 int barWidth = 55;
             }
             <div style="opacity:0.7; background-color:rgb(155,155,155); border: 5px solid black; border-radius:15px; height:40px; width:@barWidth%; position:absolute; bottom: 40px; left: @((100-@barWidth)/2)%;"></div>
-            <div style="opacity:0.7; background-color:rgb(255,153,0); border-radius:10px; height:40px; width:@(width * barWidth / 100 * (player.Score-player.PrevLevel) / (player.NextLevel-player.PrevLevel))px; position:absolute; bottom: 45px; left: calc(@((100-@barWidth)/2)% + 5px);transition:width 0.2s;"></div>
-            <p style="position:absolute; left:50%; transform:translate(-50%, 60%); bottom:40px; font-size: 200%; font-family: Verdana, Geneva, Tahoma, sans-serif; text-align:center; opacity:0.9;">@(player.Score)</p>
+            <div style="opacity:0.7; background-color:rgb(255,153,0); border-radius:10px; height:40px; width:@(width * barWidth / 100 * (player.GetScore()-player.PrevLevel) / (player.NextLevel-player.PrevLevel))px; position:absolute; bottom: 45px; left: calc(@((100-@barWidth)/2)% + 5px);transition:width 0.2s;"></div>
+            <p style="position:absolute; left:50%; transform:translate(-50%, 60%); bottom:40px; font-size: 200%; font-family: Verdana, Geneva, Tahoma, sans-serif; text-align:center; opacity:0.9;">@(player.GetScore())</p>
             <!--Abilities-->
             <div class="selectedAbility abilityE">
                 @if (player.AbilityE == null)
@@ -68,6 +68,22 @@
         <div id="upgradePoints">
             @player.UpgradePoints
         </div>
+        <div id="weapons" style="@((player.PointsGained >= 5 && player.WeaponNode.Children.Length > 0) ? "top:50px;" : "top:-350px")">
+            @{
+                string[] weaponColors = new string[5] { "#8f3d3dc7", "#6c80d3c7", "#1a811ac7", "#a9ae1cc7", "#42422ec7" };
+
+                for (int i = 0; i < player.WeaponNode.Children.Length; i++)
+                {
+                    var j = i;
+                    var weapon = player.WeaponNode.Children[j];
+
+                    <div class="weaponDiv" style="background-color: @weaponColors[j%5]" @onclick="()=>UpgradeWeapon(j)">
+                        <p>@weapon.Weapon.Name</p>
+                        <img src="/Images/Weapons/@weapon.Weapon.ImageName" />
+                    </div>
+                }
+            }
+        </div>
         <div style="height: @(height)px;" id="upgradeDiv" class="@upgradeDivClass">
             <div id="classDiv">
             </div>
@@ -76,7 +92,7 @@
                     @for (int i = 0; i < ToolsGame.abilities.Count; i++)
                     {
                         int j = i;
-                        <div class="ability" @onclick="()=>ObtainAbility(j)" style="background-image: radial-gradient(@(player.UpgradePoints >= ToolsGame.abilities[j].Cost?"rgba(255 132 1/var(--opacity))":"rgba(125 125 125/0.4)") 0%, transparent 70%);">
+                        <div class="ability" @onclick="()=>ObtainAbility(j)" style="background-image: radial-gradient(@((player.UpgradePoints >= ToolsGame.abilities[j].Cost && (player.AbilityE == null || player.AbilityQ == null) )?"rgba(255 132 1/var(--opacity))":"rgba(125 125 125/0.4)") 0%, transparent 70%);">
                             <img src="/Images/Abilities/@ToolsGame.abilities[j].ImageName" />
                             <p class="cost">@ToolsGame.abilities[j].Cost</p>
                             <p class="name">@ToolsGame.abilities[j].Name</p>
@@ -93,11 +109,11 @@
                         var j = i;
                         var stat = ToolsGame.upgrades[j];
                         <div class="stats" @onclick="()=>UpgradeStat(j)" style="
-    background-image: linear-gradient(to right, @stat.Color, transparent @(10+stat.Points*10)%);">
+    background-image: linear-gradient(to right, @stat.Color, transparent @(10+player.Upgrades[j]*10)%);">
                             <div>
                                 @stat.Name
                             </div>
-                            <div class="upgradedTimes">@(stat.Points)x</div>
+                            <div class="upgradedTimes">@(player.Upgrades[j] < 10 ? player.Upgrades[j] : "ma")x</div>
                         </div>
                     }
                 </div>
@@ -154,6 +170,11 @@
                         strokeColor = item.Shape.StrokeColorEnemy;
                         fillColor = item.Shape.FillColorEnemy;
                     }
+                    if (item is Shot shot && gvars.Items.ContainsKey(shot.CharacterId) && (gvars.Items[shot.CharacterId] as Character).Empowered)
+                    {
+                        strokeColor = "white";
+                        fillColor = "black";
+                    }
                     if (item.Shape.Geometry == Shape.GeometryEnum.circle)
                     {
 
@@ -171,7 +192,7 @@
 
 
 
-                            <circle class="character @(c.Immortal ? ("immortal"):(""))" cx=@(centerX.ToString().Replace(',','.')) cy=@(centerY.ToString().Replace(',','.')) r=@(item.Shape.ImageHeight / 2) stroke=@strokeColor stroke-width=@(item.Shape.StrokeWidth/2) fill=@fillColor  />
+                            <circle class="character @(c.Immortal ? ("immortal"):(""))" cx=@(centerX.ToString().Replace(',','.')) cy=@(centerY.ToString().Replace(',','.')) r=@(item.Shape.ImageHeight / 2) stroke=@strokeColor stroke-width=@(item.Shape.StrokeWidth/2) fill=@fillColor />
                             <circle cx=@(leftEyeX) cy=@(leftEyeY) r=@(item.Shape.ImageHeight / 9) stroke="white" stroke-width=1 fill=@fillColor />
                             <circle cx=@(rightEyeX) cy=@(rightEyeY) r=@(item.Shape.ImageHeight / 9) stroke="white" stroke-width=1 fill=@fillColor />
                             <circle cx=@(leftEyeX) cy=@(leftEyeY) r=@(item.Shape.ImageHeight / 15) stroke="blue" stroke-width=1 fill="blue" />
@@ -185,7 +206,7 @@
                         }
                         else
                         {
-                            <circle cx=@(centerX.ToString().Replace(',','.')) cy=@(centerY.ToString().Replace(',','.')) r=@(item.Shape.ImageHeight / 2) stroke=@strokeColor stroke-width=@(item.Shape.StrokeWidth/2) fill=@fillColor />
+                            <circle cx=@(centerX.ToString().Replace(',','.')) cy=@(centerY.ToString().Replace(',','.')) r=@(item.Shape.ImageHeight / 2) stroke=@strokeColor stroke-width=@(item.Shape.StrokeWidth/2) fill=@fillColor class="@item.GetType().Name" />
                         }
 
 

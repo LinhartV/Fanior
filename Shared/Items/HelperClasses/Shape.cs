@@ -60,8 +60,21 @@ namespace Fanior.Shared
                 StrokeColorEnemy = strokeColor;
             }
         }
+        public Shape(int strokeWidth, int imageWidth, int imageHeight, GeometryEnum shape)
+        {
 
-        
+            this.ImageWidth = imageWidth;
+            this.ImageHeight = imageHeight;
+
+            this.Geometry = shape;
+            this.FillColor = "lightblue";
+            this.StrokeColor = "darkblue";
+            this.StrokeWidth = strokeWidth;
+            this.FillColorEnemy = "rgb(255, 20, 50)";
+            this.StrokeColorEnemy = "darkred";
+        }
+        public Shape() { }
+
         /*public Shape(ShapeEnum shape, Bitmap bmp, int width, int height)
         {
             this.shape = shape;

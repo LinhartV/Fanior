@@ -16,14 +16,23 @@ namespace Fanior.Shared
         public double Damage { get; set; }
 
         public Shot() { }
-        public Shot(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, double acceleration, double friction, double damage, int characterId, double angle, int lifeSpan, bool setAngle,bool isVisible = true)
+        public Shot(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, double acceleration, double friction, double damage, int characterId, double angle, double lifeSpan, bool setAngle,bool isVisible = true)
             : base(gvars, x, y, shape, mask, movementSpeed, null, acceleration, friction, setAngle,isVisible)
         {
             this.Damage = damage;
             ThroughSolid = true;
             this.CharacterId = characterId;
             Solid = false;
-            AddMovement(movementSpeed, angle, acceleration);
+            this.AddAutomatedMovement(new AcceleratedMovement(movementSpeed, angle, acceleration, movementSpeed));
+            this.AddAction(gvars, new ItemAction("dispose", lifeSpan, ItemAction.ExecutionType.OnlyFirstTime), "dispose");
+        }
+        public Shot(Gvars gvars, double x, double y, Shape shape, Mask mask, double baseSpeed, IMovement movement, double acceleration, double friction, double damage, int characterId, double angle, double lifeSpan, bool setAngle, bool isVisible = true)
+            : base(gvars, x, y, shape, mask, baseSpeed, movement, acceleration, friction, setAngle, isVisible)
+        {
+            this.Damage = damage;
+            ThroughSolid = true;
+            this.CharacterId = characterId;
+            Solid = false;
             this.AddAction(gvars, new ItemAction("dispose", lifeSpan, ItemAction.ExecutionType.OnlyFirstTime), "dispose");
         }
         public override void CollideServer(Item collider, double angle)
@@ -32,10 +41,6 @@ namespace Fanior.Shared
             {
                 this.Dispose();
             }
-        }
-        protected virtual void AddMovement(double movementSpeed, double angle, double acceleration)
-        {
-            this.AddAutomatedMovement(new AcceleratedMovement(movementSpeed, angle, acceleration, movementSpeed));
         }
     }
 }

@@ -18,18 +18,11 @@ namespace Fanior.Shared
         {
             this.OnIncrease = onIncrease;
             Name = name;
-            Points = 0;
             Color = color;
         }
-        //value, id, Gvars
+
         public Action<Player> OnIncrease { get; set; }
         public string Name { get; set; }
-        public int Points { get; private set; }
-        public void IncreasePoint(Player player)
-        {
-            this.Points++;
-            OnIncrease(player);
-        }
         public string Color { get; set; }
 
 

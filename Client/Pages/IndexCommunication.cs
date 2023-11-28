@@ -41,7 +41,7 @@ namespace Fanior.Client.Pages
                 {
                     if (item.purpose == "randomAI")
                     {
-                        ((gvars.ItemsStep[item.id] as Enemy).ai as RandomGoingAI).ReceiveRandomNumbers(item.numbers);
+                        ((gvars.ItemsStep[item.id] as Enemy).AI as RandomGoingAI).ReceiveRandomNumbers(item.numbers);
                     }
 
                 }
@@ -83,7 +83,7 @@ namespace Fanior.Client.Pages
 
                     StateHasChanged();
                     sw2.Stop();
-                    Console.WriteLine("list:" + sw2.Elapsed.TotalMilliseconds);
+                    //Console.WriteLine("list:" + sw2.Elapsed.TotalMilliseconds);
 
                     sw2.Reset();
                 }

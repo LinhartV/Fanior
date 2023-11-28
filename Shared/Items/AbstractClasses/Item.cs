@@ -15,7 +15,7 @@ namespace Fanior.Shared
     public abstract class Item : ActionHandler
     {
         [JsonConverter(typeof(StringEnumConverter))]
-        public enum ItemProperties { Angle = 0, X = 1, Y = 2, Lives = 3, Shield = 4, Score = 5, Immortality = 6 }
+        public enum ItemProperties { Angle = 0, X = 1, Y = 2, Lives = 3, Shield = 4, Score = 5, Immortality = 6, Empowerment = 7 }
 
         private double x;
         public double X

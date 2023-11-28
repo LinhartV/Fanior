@@ -19,7 +19,7 @@ namespace Fanior.Shared
             double newAngle;
             if (xlength == 0)
             {
-                newAngle = Math.PI/2;
+                newAngle = Math.PI / 2;
             }
             else
             {
@@ -32,6 +32,15 @@ namespace Fanior.Shared
             else if (xlength <= 0 && ylength >= 0)
                 newAngle = Math.PI - newAngle;
             return newAngle;
+        }
+        /// <summary>
+        /// Calculate angle between two items
+        /// </summary>
+        /// <returns></returns>
+        static public double GetAngleFromLengts(Item it1, Item it2)
+        {
+
+            return GetAngleFromLengts(it2.X - it1.X, it1.Y - it2.Y);
         }
         /// <summary>
         /// Changes speed from polar coordinates to cartesian
@@ -50,5 +59,7 @@ namespace Fanior.Shared
         {
             return time * 1000 / Constants.GAMEPLAY_FRAME_TIME;
         }
+
+
     }
 }

@@ -19,7 +19,7 @@ namespace Fanior.Shared
         {
             baseSpeed = movementSpeed;
         }
-
+        public ConstantMovement() : base(){}
         public override void AntiFrame(double friction)
         {
             

@@ -26,21 +26,22 @@ namespace Fanior.Shared
             lambdaActions.Add("fire1", (gvars, id, parameters) =>
             {
                 Character character = gvars.Items[id] as Character;
-                if (!character.Weapon.Reloaded)
+                if (!character.WeaponNode.Weapon.Reloaded)
                 {
                     character.DeleteAction("fire");
-                    character.Weapon.Reloaded = true;
+                    character.WeaponNode.Weapon.Reloaded = true;
                 }
                 else
                 {
-                    character.Weapon.Fire(gvars);
+                    character.WeaponNode.Weapon.Fire(gvars);
                 }
 
             }
             );
-            lambdaActions.Add("fire2", ((gvars, id, parameters) => { (gvars.Items[id] as Character).Weapon.Reloaded = true; }));
-            lambdaActions.Add("abilityReload", ((gvars, id, parameters) => { 
-                (parameters[0] as Ability).Reloaded = true; 
+            lambdaActions.Add("fire2", ((gvars, id, parameters) => { (gvars.Items[id] as Character).WeaponNode.Weapon.Reloaded = true; }));
+            lambdaActions.Add("abilityReload", ((gvars, id, parameters) =>
+            {
+                (parameters[0] as Ability).Reloaded = true;
             }));
             lambdaActions.Add("dispose", ((gvars, id, parameters) => { gvars.Items[id].Dispose(); }));
 
@@ -64,26 +65,33 @@ namespace Fanior.Shared
                 }
             }));
 
-            lambdaActions.Add("enemyAI", ((gvars, id, parameters) => { (gvars.ItemsStep[id] as Enemy).ai.Control(gvars, gvars.ItemsStep[id] as Enemy); }));
+            lambdaActions.Add("enemyAI", ((gvars, id, parameters) => { (gvars.ItemsStep[id] as Enemy).AI.Control(gvars, gvars.ItemsStep[id] as Enemy); }));
             lambdaActions.Add("createBoss", ((gvars, id, parameters) =>
             {
 
                 if (gvars.CountOfItems[ToolsGame.Counts.enemies] < 1)
                 {
-                    Enemy e = new Enemy(gvars, 0, 0, new Shape("black", "black", 5, 300, 300, Shape.GeometryEnum.circle), new AcceleratedMovement(2, 0, 0.05, 5), 5, 0.05, 0, 200, 0.2, null, 2000, new RandomGoingAI(), true, 100);
+                    Enemy e = new Enemy(gvars, 0, 0, new Shape("black", "black", 5, 300, 300, Shape.GeometryEnum.circle), new ConstantMovement(2, 0), 5, 0.05, 1, 200, 0.2, WeaponTree.GetRoot().Children[0], 2000, new RandomGoingAI(),new ShootBack(), true, 100);
                 }
 
             }));
             lambdaActions.Add("createCoin", ((gvars, id, parameters) =>
             {
-                if (gvars.CountOfItems[ToolsGame.Counts.coins] < 12)
+                if (gvars.CountOfItems[ToolsGame.Counts.coins] < 22)
                 {
                     Coin c;
-                    if (ToolsGame.random.NextDouble() < 0.5)
-                        c = new Coin(10, gvars, (double)(ToolsGame.random.NextDouble() * gvars.ArenaWidth), (double)(ToolsGame.random.NextDouble() * gvars.ArenaHeight), new Shape("yellow", "black", 2, 15, 15, Shape.GeometryEnum.circle));
+                    var rand = ToolsGame.random.NextDouble();
+                    if (rand < 0.25)
+                        c = new Coin(10, gvars, (double)(ToolsGame.random.NextDouble() * gvars.ArenaWidth), (double)(ToolsGame.random.NextDouble() * gvars.ArenaHeight), new Shape("orange", "black", 2, 15, 15, Shape.GeometryEnum.circle));
+                    else if(rand < 0.6)
+                        c = new Coin(20, gvars, (double)(ToolsGame.random.NextDouble() * gvars.ArenaWidth), (double)(ToolsGame.random.NextDouble() * gvars.ArenaHeight), new Shape("yellow", "black", 2, 17, 17, Shape.GeometryEnum.circle));
+                    else if (rand < 0.85)
+                        c = new Coin(40, gvars, (double)(ToolsGame.random.NextDouble() * gvars.ArenaWidth), (double)(ToolsGame.random.NextDouble() * gvars.ArenaHeight), new Shape("green", "black", 2, 18, 18, Shape.GeometryEnum.circle));
                     else
-                        c = new Coin(20, gvars, (double)(ToolsGame.random.NextDouble() * gvars.ArenaWidth), (double)(ToolsGame.random.NextDouble() * gvars.ArenaHeight), new Shape("orange", "black", 2, 17, 17, Shape.GeometryEnum.circle));
-                    gvars.ChangeRepeatTime(ToolsGame.random.Next(300, 1000), "createCoin");
+                        c = new Coin(70, gvars, (double)(ToolsGame.random.NextDouble() * gvars.ArenaWidth), (double)(ToolsGame.random.NextDouble() * gvars.ArenaHeight), new Shape("#D9049E", "black", 2, 19, 19, Shape.GeometryEnum.circle));
+
+
+                    gvars.ChangeRepeatTime(ToolsGame.random.Next(300, 600), "createCoin");
                 }
             }));
             lambdaActions.Add("abilityRunOut", (gvars, id, parameters) =>
@@ -92,21 +100,77 @@ namespace Fanior.Shared
             });
             lambdaActions.Add("just", (gvars, id, parameters) =>
             {
-                
+
             });
             lambdaActions.Add("Immortality", ((gvars, id, parameters) =>
             {
                 var character = (gvars.Items[id] as Character);
                 character.Immortal = true;
-                character.AddAction(gvars, new ItemAction("LoseImmortality", (double)parameters[0], ItemAction.ExecutionType.OnlyFirstTime));
+                character.AddAction(gvars, new ItemAction("loseImmortality", (double)parameters[0], ItemAction.ExecutionType.OnlyFirstTime));
             }));
-            lambdaActions.Add("LoseImmortality", ((gvars, id, parameters) =>
+            lambdaActions.Add("loseImmortality", ((gvars, id, parameters) =>
             {
                 var character = (gvars.Items[id] as Character);
                 character.Immortal = false;
             }));
+            lambdaActions.Add("Bomb", ((gvars, id, parameters) =>
+            {
+                var c = (gvars.Items[id] as Character);
+                new Bomb(gvars, c.X, c.Y, new Shape("#0D1E93", "black", 2, 30, 30, Shape.GeometryEnum.circle, "#760A0A", "black"), new Mask(30, 30, Shape.GeometryEnum.circle), 0, 0, c.Id, 0, 0, 0, ToolsMath.TimeToFrames(2));
+            }));
 
+            lambdaActions.Add("loseEmpowerment", ((gvars, id, parameters) =>
+            {
+                var character = (gvars.Items[id] as Character);
+                character.Damage /= 3;
+                character.Empowered = false;
+            }));
+            lambdaActions.Add("Empowerment", ((gvars, id, parameters) =>
+            {
+                var character = (gvars.Items[id] as Character);
+                character.Empowered = true;
+                character.Damage *= 3;
+                character.AddAction(gvars, new ItemAction("loseEmpowerment", (double)parameters[0], ItemAction.ExecutionType.OnlyFirstTime));
+            }));
+            lambdaActions.Add("Rapid Fire", ((gvars, id, parameters) =>
+            {
+                var character = (gvars.Items[id] as Character);
+                character.ReloadTime /= 4;
+                character.AddAction(gvars, new ItemAction("loseRapid Fire", (double)parameters[0], ItemAction.ExecutionType.OnlyFirstTime), 0, ActionHandler.RewriteEnum.AddNew);
+            }));
+            lambdaActions.Add("loseRapid Fire", ((gvars, id, parameters) =>
+            {
+                var character = (gvars.Items[id] as Character);
+                character.ReloadTime *= 4;
+            }));
+            lambdaActions.Add("Insta Heal", ((gvars, id, parameters) =>
+            {
+                var character = (gvars.Items[id] as Character);
+                character.ChangeCurLives((character.MaxLives - character.CurLives) * 3 / 4, null);
+            }));
+            lambdaActions.Add("Repulsion", ((gvars, id, parameters) =>
+            {
+                var character = (gvars.Items[id] as Character);
+                new PressureWave(gvars, character.X, character.Y, new Shape("black", "black", 0, 1, 1, Shape.GeometryEnum.circle), new Mask(1, 1, Shape.GeometryEnum.circle), id);
+            }));
 
+            lambdaActions.Add("pressureWaveSpreading", ((gvars, id, parameters) =>
+            {
+                var wave = (gvars.Items[id] as PressureWave);
+                wave.Mask.Width += 20;
+                wave.Mask.Height += 20;
+            }));
+            lambdaActions.Add("burn", ((gvars, id, parameters) =>
+            {
+                var bb = (gvars.Items[id] as BurningBoulder);
+                new BasicShot(gvars, bb.X, bb.Y, new Shape(2, 8, 8, Shape.GeometryEnum.circle), new Mask(8, 8, Shape.GeometryEnum.circle), ToolsGame.random.NextDouble() * 4 + 6, 7, bb.CharacterId, ToolsGame.random.NextDouble() * Math.PI * 2, 0, 0.5, 90);
+            }));
+            lambdaActions.Add("slingshot", ((gvars, id, parameters) =>
+            {
+                var c = (gvars.Items[id] as Character);
+                new BasicShot(gvars, c.X, c.Y, new Shape("lightblue", "darkblue", 2, 15, 15, Shape.GeometryEnum.circle, "rgb(255, 20, 50)", "darkred"), new Mask(15, 15, Shape.GeometryEnum.circle), c.WeaponNode.Weapon.WeaponSpeedCoef * c.BulletSpeed, c.WeaponNode.Weapon.DamageCoef * c.Damage, id, (gvars.Items[id] as Movable).Angle + ToolsGame.random.NextDouble() * Math.PI / 3 - Math.PI / 6, 0, 0.4, ToolsGame.random.Next(40, 60));
+
+            }));
         }
         public static void ExecuteActions(string actionName, Gvars gvars, int id, params object[] parameters)
         {

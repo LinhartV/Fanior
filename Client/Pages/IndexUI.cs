@@ -11,6 +11,7 @@ namespace Fanior.Client.Pages
 {
     public partial class Index
     {
+        bool showUpgrades = false;
 
         /// <summary>
         /// Method containing all stuff that are to be proceeded at the start of the load up.
@@ -32,7 +33,6 @@ namespace Fanior.Client.Pages
                     DefaultAssingOfKeys();
                     PlayerActions.SetupActions();
                     LambdaActions.SetupLambdaActions();
-                    WeaponTree.SetWeaponTree();
                 }
                 await InvokeAsync(() => this.StateHasChanged());
                 animEnd = false;
@@ -72,8 +72,8 @@ namespace Fanior.Client.Pages
         {
             ability.BeingUsed = true;
             ability.Reloaded = false;
-            cah.AddAction(gvars, new ItemAction("abilityRunOut", ToolsMath.TimeToFrames(ability.Duration), ItemAction.ExecutionType.OnlyFirstTime, true, ability));
-            cah.AddAction(gvars, new ItemAction("abilityReload", ToolsMath.TimeToFrames(ability.ReloadTime + ability.Duration), ItemAction.ExecutionType.OnlyFirstTime, true, ability));
+            cah.AddAction(gvars, new ItemAction("abilityRunOut", ToolsMath.TimeToFrames(ability.Duration), ItemAction.ExecutionType.OnlyFirstTime, true, ability), ability == player.AbilityE ? "abilityE" : "abilityQ", 0);
+            cah.AddAction(gvars, new ItemAction("abilityReload", ToolsMath.TimeToFrames(ability.ReloadTime + ability.Duration), ItemAction.ExecutionType.OnlyFirstTime, true, ability), ability == player.AbilityE ? "abilityE" : "abilityQ", 0);
         }
 
 
@@ -85,11 +85,12 @@ namespace Fanior.Client.Pages
             {
                 this.player.Angle = ToolsMath.GetAngleFromLengts(x - width / 2, height / 2 - y);
             }
-            if (x < 100)
+            if (x < 168)
             {
                 upgradeDivClass = "active";
+                showUpgrades = false;
             }
-            else
+            else if (!showUpgrades)
             {
                 upgradeDivClass = "";
             }
@@ -197,6 +198,7 @@ namespace Fanior.Client.Pages
             }
             catch (Exception)
             {
+                throw;
             }
         }
 
@@ -258,9 +260,9 @@ namespace Fanior.Client.Pages
         #region Upgrades
         public async void UpgradeStat(int statNum)
         {
-            if (player.UpgradePoints > 0)
+            if (player.UpgradePoints > 0 && player.Upgrades[statNum] < 10)
             {
-                ToolsGame.upgrades[statNum].IncreasePoint(player);
+                player.IncreaseStatPoint(statNum);
                 player.UpgradePoints--;
                 await hubConnection.SendAsync("UpgradeStat", gvars.GameId, this.id, statNum);
             }
@@ -269,7 +271,7 @@ namespace Fanior.Client.Pages
         {
             //Deep copy
             var ability = JsonConvert.DeserializeObject<Ability>(JsonConvert.SerializeObject(ToolsGame.abilities[abilityNum]));
-            if (player.UpgradePoints >= ability.Cost)
+            if (player.UpgradePoints >= ability.Cost && (player.AbilityE == null || player.AbilityQ == null))
             {
                 if (player.AbilityE == null)
                 {
@@ -281,6 +283,16 @@ namespace Fanior.Client.Pages
                 }
                 player.UpgradePoints -= ability.Cost;
                 await hubConnection.SendAsync("ObtainAbility", gvars.GameId, this.id, abilityNum);
+            }
+        }
+        public async void UpgradeWeapon(int childNum)
+        {            
+            if (player.PointsGained >= 5)
+            {
+                player.PointsGained -= 5;
+                player.WeaponNode = player.WeaponNode.Children[childNum];
+                await hubConnection.SendAsync("UpgradeWeapon", gvars.GameId, this.id, childNum);
+                StateHasChanged();
             }
         }
         #endregion

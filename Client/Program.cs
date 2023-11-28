@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +21,10 @@ namespace Fanior.Client
             //builder.Services.AddWorkerFactory();
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
+            CultureInfo.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+            CultureInfo.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
+            CultureInfo.DefaultThreadCurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+            CultureInfo.DefaultThreadCurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
             await builder.Build().RunAsync();
         }
     }

@@ -10,6 +10,7 @@ namespace Fanior.Shared
 {
     public abstract class IMovement
     {
+        public IMovement(){}
         public IMovement(double movementSpeed, double angle)
         {
             this.Angle = angle;

@@ -10,6 +10,10 @@
     inherits: false;
 }
 
+#root {
+    user-select: none;
+}
+
 html, body {
     margin: 0;
     height: 100%;
@@ -125,7 +129,7 @@ button {
 .upgradedTimes {
     font-size: 17px;
     position: absolute;
-    right: -29px;
+    right: -33px;
     top: 0;
 }
 
@@ -293,12 +297,81 @@ button {
     font-size: 35px;
     text-shadow: 0px 0px 2px #000, 0px 0px 5px #ff8900;
 }
-.character{
 
+.character {
 }
+
 .immortal {
     animation: 0.4s infinite alternate linear immortality;
 }
+
+.Bomb {
+    animation: 0.1s infinite alternate ease-out bomb;
+}
+
+.PressureWave {
+    animation: 0.6s forwards linear wave;
+    animation-iteration-count: 1;
+    fill: none;
+}
+
+#weapons {
+    position: absolute;
+    top: 50px;
+    height: 200px;
+    box-shadow: 0px 0px 10px #676d83;
+    background-image: radial-gradient(at 50% 500%,black, transparent);
+    left: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    column-gap: 20px;
+    transition: top 0.5s;
+}
+
+.weaponDiv {
+    box-shadow: inset 0 0 10px #ae9090;
+    position: relative;
+    height: 90%;
+    aspect-ratio: 1/1;
+    border: 2px solid black;
+    display: flex;
+    justify-content: center;
+    transition: top 0.5s, height 0.5s;
+}
+
+    .weaponDiv:hover {
+        cursor: pointer;
+        height: 95%;
+    }
+
+    .weaponDiv p {
+        text-align: center;
+        position: relative;
+        z-index: 2;
+        font-size: 20px;
+        margin: 7px;
+        filter: drop-shadow(0px 0px 2px white);
+        box-shadow: 0 0 10px white;
+        background-color: beige;
+        width: max-content;
+        height: min-content;
+        padding: 1px 15px;
+    }
+
+    .weaponDiv img {
+        width: 70%;
+        position: absolute;
+        top: 60%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation: 3s infinite cubic-bezier(0.36, -0.01, 0.67, 0.98) alternate weaponPulse;
+        z-index: 1;
+        max-height: 70%;
+    }
+
 
 @keyframes fadeIn {
     0% {
@@ -337,6 +410,42 @@ button {
     }
 
     100% {
-        fill:red;
+        fill: red;
+    }
+}
+
+@keyframes bomb {
+    0% {
+        fill: darkblue;
+    }
+
+    100% {
+        fill: darkred;
+    }
+}
+
+@keyframes wave {
+    0% {
+        r: 1px;
+        filter: drop-shadow(0px 0px 2px #a29fde) drop-shadow(0px 0px 1px black);
+        stroke: #a29fde;
+        stroke-width: 5px;
+    }
+
+    100% {
+        stroke-width: 2px;
+        r: 400px;
+        stroke: #a29fde7d;
+        filter: drop-shadow(0px 0px 10px #a29fde) drop-shadow(0px 0px 20px black);
+    }
+}
+
+@keyframes weaponPulse {
+    0% {
+        filter: drop-shadow(0px 0px 2px white) drop-shadow(0px 0px 0px grey);
+    }
+
+    100% {
+        filter: drop-shadow(0px 0px 10px orange) drop-shadow(0px 0px 20px grey);
     }
 }

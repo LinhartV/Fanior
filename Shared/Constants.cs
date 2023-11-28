@@ -19,8 +19,13 @@ namespace Fanior.Shared
         public const int GAMEPLAY_FRAME_TIME = 30;
         public const int DELAY = 0;
         /// <summary>
-        /// Coeficient of number of score needed to reach next level
+        /// Coeficient determining score needed to reach next level
         /// </summary>
-        public const double NEXTLEVELINCRESE = 5;
+        public const double NEXT_LEVEL_INCRESE = 2;
+        /// <summary>
+        /// Initial speed of players
+        /// </summary>
+        public const double INICIAL_MOVEMENT_SPEED = 5;
+
     }
 }

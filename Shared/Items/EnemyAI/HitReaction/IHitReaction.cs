@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Fanior.Shared
 {
-    public interface IEnemyAI
+    public interface IHitReaction
     {
-        public void Control(Gvars gvars, Enemy enemy);
+        public void React(Gvars gvars, int characterId, int shooterId);
     }
 }

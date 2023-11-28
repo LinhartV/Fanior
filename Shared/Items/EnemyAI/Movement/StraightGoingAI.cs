@@ -8,15 +8,14 @@ using System.Threading.Tasks;
 
 namespace Fanior.Shared
 {
-    public class StraightGoingAI : IEnemyAI
+    /// <summary>
+    /// just go forwards (does not make sence, just for testing purposes)
+    /// </summary>
+    public class StraightGoingAI : IEnemyMovementAI
     {
         public void Control(Gvars gvars, Enemy enemy)
         {
             enemy.RotateControlledMovement("default", 0, false);
-            if(enemy.X > gvars.ArenaWidth)
-            {
-                //Console.WriteLine(gvars.GetNow());
-            }
             enemy.UpdateControlledMovement("default", gvars.PercentageOfFrame);
         }
     }

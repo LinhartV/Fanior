@@ -26,9 +26,9 @@ namespace Fanior.Shared
             ReloadTime = reloadTime;
             Duration = duration;
             Name = name;
-            this.lambdaAction = name;
-            this.Cost = cost;
-            this.ImageName = imageName;
+            lambdaAction = name;
+            Cost = cost;
+            ImageName = imageName;
             Description = description;
         }
         public string ImageName { get; set; }
@@ -39,7 +39,18 @@ namespace Fanior.Shared
         //number of frames it takes to reload
         public double ReloadTime { get; set; }
         //number of frames it durates
-        public double Duration { get; set; }
+        private double duration;
+        public double Duration
+        {
+            get => duration;
+            set
+            {
+                if (value <= 0)
+                    duration = 0.1;
+                else
+                    duration = value;
+            }
+        }
         public string Name { get; set; }
         private string lambdaAction;
 
@@ -49,9 +60,9 @@ namespace Fanior.Shared
             {
                 BeingUsed = true;
                 Reloaded = false;
-                gvars.ItemsPlayers[id].AddAction(gvars, new ItemAction("abilityRunOut", ToolsMath.TimeToFrames(Duration), ItemAction.ExecutionType.OnlyFirstTime, false, this));
-                gvars.ItemsPlayers[id].AddAction(gvars, new ItemAction(lambdaAction, 0, ItemAction.ExecutionType.OnlyFirstTime, false, ToolsMath.TimeToFrames(Duration)));
-                gvars.ItemsPlayers[id].AddAction(gvars, new ItemAction("abilityReload", ToolsMath.TimeToFrames(ReloadTime+Duration), ItemAction.ExecutionType.OnlyFirstTime, false, this));
+                gvars.ItemsPlayers[id].AddAction(gvars, new ItemAction("abilityRunOut", ToolsMath.TimeToFrames(Duration), ItemAction.ExecutionType.OnlyFirstTime, false, this), 0, ActionHandler.RewriteEnum.AddNew);
+                gvars.ItemsPlayers[id].AddAction(gvars, new ItemAction(lambdaAction, 0, ItemAction.ExecutionType.OnlyFirstTime, false, ToolsMath.TimeToFrames(Duration)), 0, ActionHandler.RewriteEnum.AddNew);
+                gvars.ItemsPlayers[id].AddAction(gvars, new ItemAction("abilityReload", ToolsMath.TimeToFrames(ReloadTime + Duration), ItemAction.ExecutionType.OnlyFirstTime, false, this), 0, ActionHandler.RewriteEnum.AddNew);
             }
         }
 

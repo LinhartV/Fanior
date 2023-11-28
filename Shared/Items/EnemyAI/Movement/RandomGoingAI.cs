@@ -8,7 +8,10 @@ using System.Threading.Tasks;
 
 namespace Fanior.Shared
 {
-    public class RandomGoingAI : IEnemyAI
+    /// <summary>
+    /// Chooses a point and goes towards it
+    /// </summary>
+    public class RandomGoingAI : IEnemyMovementAI
     {
         int randomX;
         int randomY;
@@ -16,7 +19,7 @@ namespace Fanior.Shared
         {
             enemy.RotateControlledMovement("default", ToolsMath.GetAngleFromLengts(randomX - enemy.X, enemy.Y - randomY), false);
 
-            if (gvars.server && ((Math.Abs(enemy.X - randomX) < enemy.BaseSpeed * gvars.PercentageOfFrame && Math.Abs(enemy.Y - randomY) < enemy.BaseSpeed * gvars.PercentageOfFrame) || (randomX == 0 && randomY == 0)))
+            if (gvars.server && (Math.Abs(enemy.X - randomX) < enemy.BaseSpeed * gvars.PercentageOfFrame && Math.Abs(enemy.Y - randomY) < enemy.BaseSpeed * gvars.PercentageOfFrame || randomX == 0 && randomY == 0))
             {
                 randomX = ToolsGame.random.Next(0, (int)gvars.ArenaWidth);
                 randomY = ToolsGame.random.Next(0, (int)gvars.ArenaWidth);

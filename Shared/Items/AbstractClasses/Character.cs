@@ -28,14 +28,17 @@ namespace Fanior.Shared
             }
         }
         public double MaxLives { get; set; }
-        
-        private Weapon weapon;
-        public Weapon Weapon
+
+        [JsonProperty]
+        private WeaponTree.WeaponNode weaponNode;
+        public WeaponTree.WeaponNode WeaponNode
         {
-            get => weapon;
+            get => weaponNode;
             set
             {
-                weapon = value;
+                weaponNode = value;
+                if (value != null)
+                    weaponNode.Weapon.CharacterId = Id;
             }
         }
         public double Regeneration { get; set; }
@@ -49,7 +52,17 @@ namespace Fanior.Shared
                 curLives = value;
             }
         }
-
+        [JsonProperty]
+        private bool empowered;
+        public bool Empowered
+        {
+            get => empowered;
+            set
+            {
+                empowered = value;
+                gvars?.AddProperty(Id, ItemProperties.Empowerment, Convert.ToDouble(empowered));
+            }
+        }
         [JsonProperty]
         private bool immortal;
         public bool Immortal
@@ -58,13 +71,26 @@ namespace Fanior.Shared
             set
             {
                 immortal = value;
-                gvars?.AddProperty(Id, ItemProperties.Immortality,Convert.ToDouble(immortal));
+                gvars?.AddProperty(Id, ItemProperties.Immortality, Convert.ToDouble(immortal));
             }
         }
-
+        public double Damage { get; set; } = 1;
+        [JsonProperty]
+        private double reloadTime = 1;
+        public double ReloadTime
+        {
+            get => reloadTime;
+            set
+            {
+                reloadTime = value;
+                if (gvars != null && gvars.server)
+                    ChangeRepeatTime(value * weaponNode.Weapon.ReloadTimeCoef, "fire");
+            }
+        }
+        public double BulletSpeed { get; set; } = 1;
 
         public Character() { }
-        public Character(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, double acceleration, double friction, double lives, double regeneration, Weapon weapon, bool setAngle, double shield = 0, IMovement defaultMovement = null, bool isVisible = true) :
+        public Character(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, double acceleration, double friction, double lives, double regeneration, WeaponTree.WeaponNode weaponNode, bool setAngle, double shield = 0, IMovement defaultMovement = null, bool isVisible = true) :
             base(gvars, x, y, shape, mask, movementSpeed, defaultMovement, acceleration, friction, setAngle, isVisible)
         {
             this.MaxShield = shield;
@@ -72,10 +98,10 @@ namespace Fanior.Shared
             this.Regeneration = regeneration;
             MaxLives = lives;
             this.curLives = lives;
-            this.Weapon = weapon;
-            if (Weapon != null)
+            this.WeaponNode = weaponNode;
+            if (weaponNode != null)
             {
-                weapon.CharacterId = this.Id;
+                weaponNode.Weapon.CharacterId = this.Id;
             }
             this.AddAction(gvars, new ItemAction("regenerate", 1));
         }
@@ -86,7 +112,7 @@ namespace Fanior.Shared
 
         public abstract int Bounty();
 
-        public void ChangeCurLives(double amount, Item killer)
+        public void ChangeCurLives(double amount, Item killer = null)
         {
             curLives += amount;
             if (curLives < 0)
@@ -95,7 +121,7 @@ namespace Fanior.Shared
                 Death();
                 if (killer is Player p)
                 {
-                    p.Score += this.Bounty();
+                    p.IncreaseScore(this.Bounty());
                 }
             }
             if (curLives > MaxLives)
@@ -131,7 +157,7 @@ namespace Fanior.Shared
                     this.ChangeCurLives(-damage, killer);
                 }
             }
-            
+
 
 
         }

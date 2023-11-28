@@ -9,6 +9,7 @@ using System.Xml.Linq;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 
 namespace Fanior.Shared
 {
@@ -17,42 +18,63 @@ namespace Fanior.Shared
 
         [JsonProperty]
         private int score;
-        public int Score
+        public int GetScore()
         {
-            get => score; set
-            {
+            return score;
+        }
+        /// <summary>
+        /// Increase player score
+        /// </summary>
+        /// <param name="value">Amount of score to increase by</param>
+        /// <param name="increase">Whether to increase value (true) or absolutely set (false)</param>
+        /// <returns>Whether player gained Upgrade point</returns>
+        public bool IncreaseScore(int value, bool increase = true)
+        {
+            int tempScore = score;
+            bool gainedPoint = false;
+            if (increase)
+                score += value;
+            else
                 score = value;
-                gvars?.AddProperty(Id, ItemProperties.Score, score);
-                //this.BaseSpeed = BaseSpeed - (2 - (2000 / (score + 1000)));
-                while (score >= NextLevel)
-                {
-                    PrevLevel = NextLevel;
-                    NextLevel = (int)(NextLevel * (2 + Constants.NEXTLEVELINCRESE / NextLevel));
-
-                    UpgradePoints++;
-                }
+            gvars?.AddProperty(Id, ItemProperties.Score, score);
+            this.BaseSpeed -= (Math.Log10(0.01 * (score + 1)) - Math.Log10(0.01 * (tempScore + 1)));
+            while (score >= NextLevel)
+            {
+                PrevLevel = NextLevel;
+                NextLevel = (int)(NextLevel * 2 + Constants.NEXT_LEVEL_INCRESE);
+                gainedPoint = true;
+                UpgradePoints++;
+                PointsGained++;
             }
+            return gainedPoint;
         }
         //number of upgrade points
         public int UpgradePoints { get; set; } = 0;
+        public List<int> Upgrades { get; set; } = new List<int>();
 
+        /// <summary>
+        /// Sum of all upgrade points gained so far
+        /// </summary>
+        public int PointsGained { get; set; } = 0; 
         public Ability AbilityQ { get; set; }
         public Ability AbilityE { get; set; }
         //score needed to reach next level
-        public int NextLevel { get; private set; } = 50;
+        public int NextLevel { get; private set; } = 15;
         public int PrevLevel { get; private set; } = 0;
         public bool MovementEnabled { get; set; } = true;
         public string ConnectionId { get; set; }
         public string Name { get; set; }
+
+
         public Player() { }
-        public Player(string name, string connectionId, Gvars gvars, double x, double y, Shape shape, Mask mask, IMovement defaultMovement, double movementSpeed, double acceleration, double friction, double lives, double regeneration, Weapon weapon, double shield, bool isVisible = true)
+        public Player(string name, string connectionId, Gvars gvars, double x, double y, Shape shape, Mask mask, IMovement defaultMovement, double movementSpeed, double acceleration, double friction, double lives, double regeneration, WeaponTree.WeaponNode weapon, double shield, bool isVisible = true)
             : base(gvars, x, y, shape, mask, movementSpeed, acceleration, friction, lives, regeneration, weapon, false, shield, defaultMovement, isVisible)
         {
             this.Name = name;
             SetPlayer(gvars, connectionId);
         }
 
-        public Player(string name, string connectionId, Gvars gvars, double x, double y, Shape shape, IMovement defaultMovement, double movementSpeed, double acceleration, double friction, double lives, double regeneration, Weapon weapon, double shield, bool isVisible = true)
+        public Player(string name, string connectionId, Gvars gvars, double x, double y, Shape shape, IMovement defaultMovement, double movementSpeed, double acceleration, double friction, double lives, double regeneration, WeaponTree.WeaponNode weapon, double shield, bool isVisible = true)
             : base(gvars, x, y, shape, new Mask(shape.ImageWidth, shape.ImageHeight, shape.Geometry), movementSpeed, acceleration, friction, lives, regeneration, weapon, false, shield, defaultMovement, isVisible)
         {
             this.Name = name;
@@ -61,7 +83,7 @@ namespace Fanior.Shared
 
         private void SetPlayer(Gvars gvars, string connectionId)
         {
-            Score = 0;
+            IncreaseScore(0, false);
             this.ConnectionId = connectionId;
             Solid = true;
             gvars.ItemsPlayers.Add(this.Id, this);
@@ -74,7 +96,10 @@ namespace Fanior.Shared
             this.AddControlledMovement(new AcceleratedMovement(0, 3 * Math.PI / 2, this.Acceleration, BaseSpeed), "down");
             this.AddControlledMovement(new AcceleratedMovement(0, Math.PI, this.Acceleration, BaseSpeed), "left");
             this.AddAction(gvars, new ItemAction("outsideArena", 1, ItemAction.ExecutionType.EveryTime), "outsideArena");
-
+            for (int i = 0; i < ToolsGame.upgrades.Count; i++)
+            {
+                this.Upgrades.Add(0);
+            }
         }
         public override void SetItemFromClient(Gvars gvars)
         {
@@ -83,6 +108,11 @@ namespace Fanior.Shared
             {
                 gvars.ItemsPlayers.Add(this.Id, this);
             }
+        }
+        public void IncreaseStatPoint(int statNum)
+        {
+            Upgrades[statNum]++;
+            ToolsGame.upgrades[statNum].OnIncrease(this);
         }
 
         public override void Death()
@@ -93,12 +123,12 @@ namespace Fanior.Shared
 
         public override int Bounty()
         {
-            if (Score < 100)
+            if (GetScore() < 100)
                 return 100;
-            else if (Score < 1000)
-                return Score;
+            else if (GetScore() < 2000)
+                return GetScore();
             else
-                return 1000;
+                return 2000;
         }
 
         public override void CollideServer(Item collider, double angle)
@@ -106,7 +136,7 @@ namespace Fanior.Shared
             base.CollideServer(collider, angle);
             if (collider is Coin c)
             {
-                this.Score += c.Value;
+                this.IncreaseScore(c.Value);
             }
             if (collider is Enemy e)
             {

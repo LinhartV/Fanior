@@ -14,11 +14,23 @@ namespace Fanior.Shared
         private double maxSpeed;
         [JsonProperty]
         public double Acceleration { get; set; }
+        /// <summary>
+        /// Movement constantly slowing by friction but accelerates when updated
+        /// </summary>
         public AcceleratedMovement(double initialSpeed, double angle, double acceleration, double maxSpeed) : base(initialSpeed, angle)
         {
             this.Acceleration = acceleration;
             this.maxSpeed = maxSpeed;
         }
+        /// <summary>
+        /// Only slowing movement
+        /// </summary>
+        public AcceleratedMovement(double initialSpeed, double angle) : base(initialSpeed, angle)
+        {
+            this.Acceleration = 0;
+            this.maxSpeed = initialSpeed;
+        }
+        public AcceleratedMovement():base(){}
 
         public override void AntiFrame(double friction)
         {

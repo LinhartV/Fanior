@@ -54,7 +54,7 @@ namespace Fanior.Server.Hubs
             }
             catch (Exception e)
             {
-
+                throw;
             }
 
         }
@@ -145,12 +145,24 @@ namespace Fanior.Server.Hubs
         /// <summary>
         /// Receive chosen stat upgrade.
         /// </summary>
+        public void UpgradeWeapon(string gameId, int itemId, int childNum)
+        {
+            Player p = gameControl.games[gameId].ItemsPlayers[itemId];
+            if (p.PointsGained >= 5)
+            {
+                p.PointsGained -= 5;
+                p.WeaponNode = p.WeaponNode.Children[childNum];
+            }
+        }
+        /// <summary>
+        /// Receive chosen stat upgrade.
+        /// </summary>
         public void UpgradeStat(string gameId, int itemId, int statNum)
         {
             Player p = gameControl.games[gameId].ItemsPlayers[itemId];
             if (p.UpgradePoints > 0)
             {
-                ToolsGame.upgrades[statNum].IncreasePoint(p);
+                p.IncreaseStatPoint(statNum);
             }
         }
         /// <summary>

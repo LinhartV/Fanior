@@ -87,12 +87,15 @@ namespace Fanior.Shared
             this.AddAction(gvars, new ItemAction("move", 1, ItemAction.ExecutionType.EveryTime, true, false));
         }
         /// <summary>
-        /// Creates new movement
+        /// Creates new movement which is controlled only by movement itself (deletes itself when 0)
         /// </summary>
         public void AddAutomatedMovement(IMovement movement)
         {
             MovementsAutomated.Add(movement);
         }
+        /// <summary>
+        /// Cretes new movement which can be controlled by other events (key press etc.)
+        /// </summary>
         public void AddControlledMovement(IMovement movement, string movementName)
         {
             if (!MovementsControlled.ContainsKey(movementName))

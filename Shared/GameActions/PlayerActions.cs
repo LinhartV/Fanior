@@ -70,27 +70,27 @@ namespace Fanior.Shared
         {
             actions.Add(PlayerActionsEnum.fire, new KeyCommand((id, gvars) =>
               {
-                  if (gvars.ItemsPlayers[id].Weapon.Reloaded)
+                  if (gvars.ItemsPlayers[id].WeaponNode.Weapon.Reloaded)
                   {
-                      if (gvars.ItemsPlayers[id].Weapon.AutoFire)
+                      if (gvars.ItemsPlayers[id].WeaponNode.Weapon.AutoFire)
                       {
-                          gvars.ItemsPlayers[id].AddAction(gvars, new ItemAction("fire1", gvars.ItemsPlayers[id].Weapon.ReloadTime, ItemAction.ExecutionType.EveryTime), "fire");
+                          gvars.ItemsPlayers[id].AddAction(gvars, new ItemAction("fire1", gvars.ItemsPlayers[id].WeaponNode.Weapon.ReloadTimeCoef * gvars.ItemsPlayers[id].ReloadTime, ItemAction.ExecutionType.EveryTime), "fire");
                       }
                       else
                       {
-                          gvars.ItemsPlayers[id].Weapon.Fire(gvars);
-                          gvars.ItemsPlayers[id].Weapon.Reloaded = false;
-                          gvars.ItemsPlayers[id].AddAction(gvars, new ItemAction("fire2", gvars.ItemsPlayers[id].Weapon.ReloadTime, ItemAction.ExecutionType.OnlyFirstTime), "fire");
+                          gvars.ItemsPlayers[id].WeaponNode.Weapon.Fire(gvars);
+                          gvars.ItemsPlayers[id].WeaponNode.Weapon.Reloaded = false;
+                          gvars.ItemsPlayers[id].AddAction(gvars, new ItemAction("fire2", gvars.ItemsPlayers[id].WeaponNode.Weapon.ReloadTimeCoef * gvars.ItemsPlayers[id].ReloadTime, ItemAction.ExecutionType.OnlyFirstTime), "fire");
                       }
                   }
                   else
                   {
-                      gvars.ItemsPlayers[id].Weapon.Reloaded = true;
+                      gvars.ItemsPlayers[id].WeaponNode.Weapon.Reloaded = true;
                   }
               },
             (id, gvars) =>
             {
-                gvars.ItemsPlayers[id].Weapon.Reloaded = false;
+                gvars.ItemsPlayers[id].WeaponNode.Weapon.Reloaded = false;
             }));
             //Movements
             actions.Add(PlayerActionsEnum.moveUp, new KeyCommand((id, gvars) =>
@@ -135,7 +135,7 @@ namespace Fanior.Shared
 
             actions.Add(PlayerActionsEnum.cheat, new KeyCommand((id, gvars) =>
             {
-                gvars.ItemsPlayers[id].Score += 1000;
+                gvars.ItemsPlayers[id].IncreaseScore(1000);
             },
             (id, gvars) =>
             {

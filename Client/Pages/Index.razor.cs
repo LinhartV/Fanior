@@ -135,7 +135,7 @@ namespace Fanior.Client.Pages
 
                 await hubConnection.SendAsync("ExecuteList", gvars.GameId, this.id, player.Angle, sendMessageId);
                 await JS.InvokeVoidAsync("SetFocus", mySvg);
-                cah.ExecuteActions(gvars.GetNow(), gvars, false, -1);
+                cah.ExecuteActions(gvars.GetNow(), gvars, -1);
 
                 /* sendMessageId++;
                  gvars.PlayerActions[id] = new List<(PlayerActions.PlayerActionsEnum, bool)>(myActions);
@@ -218,6 +218,7 @@ namespace Fanior.Client.Pages
                     }*/
                     foreach (var item in info)
                     {
+
                         if (item.Value.ContainsKey(Item.ItemProperties.X))
                         {
                             gvars.Items[item.Key].X = (double)item.Value[Item.ItemProperties.X];
@@ -236,7 +237,11 @@ namespace Fanior.Client.Pages
                         }
                         if (item.Value.ContainsKey(Item.ItemProperties.Score))
                         {
-                            (gvars.Items[item.Key] as Player).Score = (int)item.Value[Item.ItemProperties.Score];
+                            if((gvars.Items[item.Key] as Player).IncreaseScore((int)item.Value[Item.ItemProperties.Score], false) && this.id == item.Key)
+                            {
+                                showUpgrades = true;
+                                upgradeDivClass = "active";
+                            }
                         }
                         if (item.Value.ContainsKey(Item.ItemProperties.Shield))
                         {
@@ -245,6 +250,10 @@ namespace Fanior.Client.Pages
                         if (item.Value.ContainsKey(Item.ItemProperties.Immortality))
                         {
                             (gvars.Items[item.Key] as Character).Immortal = Convert.ToBoolean(item.Value[Item.ItemProperties.Immortality]);
+                        }
+                        if (item.Value.ContainsKey(Item.ItemProperties.Empowerment))
+                        {
+                            (gvars.Items[item.Key] as Character).Empowered = Convert.ToBoolean(item.Value[Item.ItemProperties.Empowerment]);
                         }
                     }
                     foreach (var itemId in itemsToDestroy)
@@ -260,6 +269,7 @@ namespace Fanior.Client.Pages
             catch (Exception e)
             {
 
+                throw;
             }
         }
         void ExecuteAction(PlayerActions.PlayerActionsEnum action, bool down, int itemId, double angle, double x, double y, int actionIdReceived)
