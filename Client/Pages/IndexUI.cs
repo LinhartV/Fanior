@@ -56,6 +56,7 @@ namespace Fanior.Client.Pages
             KeyController.AddKey("e", new RegisteredKey(PlayerActions.PlayerActionsEnum.abilityE, myActions, AbilityPressedE));
             KeyController.AddKey("q", new RegisteredKey(PlayerActions.PlayerActionsEnum.abilityQ, myActions, AbilityPressedQ));
             KeyController.AddKey(" ", new RegisteredKey(PlayerActions.PlayerActionsEnum.fire, myActions));
+            KeyController.AddKey("click", new RegisteredKey(PlayerActions.PlayerActionsEnum.fire, myActions));
         }
 
         void AbilityPressedE()
@@ -157,11 +158,6 @@ namespace Fanior.Client.Pages
             selfReference?.Dispose();
             timer?.Dispose();
         }
-        protected async Task MouseDown(MouseEventArgs e)
-        {
-
-
-        }
 
         async void JsSetup()
         {
@@ -175,6 +171,10 @@ namespace Fanior.Client.Pages
                 await JS.InvokeVoidAsync("onKeyDown",
                     mySvg, selfReference);
                 await JS.InvokeVoidAsync("onKeyUp",
+                    mySvg, selfReference);
+                await JS.InvokeVoidAsync("onMouseDown",
+                    mySvg, selfReference);
+                await JS.InvokeVoidAsync("onMouseUp",
                     mySvg, selfReference);
                 await JS.InvokeVoidAsync("onResize", selfReference);
             }
@@ -204,6 +204,7 @@ namespace Fanior.Client.Pages
 
         protected async override Task OnAfterRenderAsync(bool firstRender)
         {
+            if (firstRender) { await JS.InvokeVoidAsync("SetFocus", textBox); }
 
         }
         private async Task Animate(bool down)
@@ -236,6 +237,7 @@ namespace Fanior.Client.Pages
         {
             try
             {
+                scoreGained = player.GetScore();
                 animEnd = true;
                 timer.Change(Timeout.Infinite, Timeout.Infinite);
                 firstConnect = 1;
@@ -248,6 +250,7 @@ namespace Fanior.Client.Pages
                 myActions.Clear();
                 this.id = 0;
                 await Animate(true);
+                await JS.InvokeVoidAsync("SetFocus", textBox);
             }
             catch (Exception e)
             {
@@ -286,7 +289,7 @@ namespace Fanior.Client.Pages
             }
         }
         public async void UpgradeWeapon(int childNum)
-        {            
+        {
             if (player.PointsGained >= 5)
             {
                 player.PointsGained -= 5;

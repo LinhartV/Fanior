@@ -9,7 +9,11 @@
     {
         <div id="introDiv">
             <div id="fanior">FANIOR</div>
-            <InputText id="name" @bind-Value="@name" placeholder="Fighter's name" maxlength="10" />
+            @if (scoreGained > -1)
+            {
+                <div id="scoreDiv">Your score: @scoreGained</div>
+            }
+            <input type="text" id="name" @bind-value=name @ref="textBox" placeholder="Fighter's name" maxlength="10" @onkeydown='(e)=> {if(e.Key == "Enter") Start();}' />
             <button @onclick=Start>START IT</button>
         </div>
     }

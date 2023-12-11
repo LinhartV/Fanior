@@ -23,7 +23,7 @@ namespace Fanior.Shared
             {
                 for (int i = 0; i < 12; i++)
                 {
-                    new BasicShot(gvars, this.X, this.Y, new Shape("lightblue", "darkblue", 2, 10, 10, Shape.GeometryEnum.circle, "rgb(255, 20, 50)", "darkred"), new Mask(10, 10, Shape.GeometryEnum.circle), 20, damageCoef * 20, -1, 2 * Math.PI * i / 12, 0, 0.5, 60);
+                    new BasicShot(gvars, this.X, this.Y, new Shape("lightblue", "darkblue", 2, 10, 10, Shape.GeometryEnum.circle, "rgb(255, 20, 50)", "darkred"), new Mask(10, 10, Shape.GeometryEnum.circle), 20, damageCoef * 20, CharacterId, 2 * Math.PI * i / 12, 0, 0.5, 60);
                 }
             }
             base.Dispose();

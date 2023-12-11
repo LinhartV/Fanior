@@ -22,7 +22,14 @@ html, body {
 }
 
 #introDiv {
+    height: 100%;
     font-size: 200%;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 button {
@@ -33,9 +40,6 @@ button {
     background-color: white;
     font-size: 200%;
     font-weight: bolder;
-    top: 70%;
-    left: 50%;
-    transform: translate(-50%, -50%);
 }
 
     button:hover {
@@ -52,8 +56,10 @@ button {
 }
 
 #introDiv * {
-    margin: 0;
-    position: absolute;
+}
+
+#scoreDiv {
+    margin: 10px;
 }
 
 #loading {
@@ -67,20 +73,12 @@ button {
 
 #fanior {
     font-size: 500%;
-    margin: 0;
-    position: absolute;
-    top: 20%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    margin: 50px;
 }
 
 #name {
     font-size: 150%;
-    margin: 0;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    margin: 30px;
 }
 
 #coverDiv {

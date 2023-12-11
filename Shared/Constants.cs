@@ -21,7 +21,7 @@ namespace Fanior.Shared
         /// <summary>
         /// Coeficient determining score needed to reach next level
         /// </summary>
-        public const double NEXT_LEVEL_INCRESE = -8;
+        public const double NEXT_LEVEL_INCRESE = -9;
         /// <summary>
         /// How much score is needed to reach first level
         /// </summary>

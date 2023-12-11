@@ -32,6 +32,8 @@ namespace Fanior.Client.Pages
         int id = 0;
         //name of the player
         public string name;
+        //score to show after dying
+        public int scoreGained = -1;
         //intro animation
         private double opacity = 0;
         private int zindex = -100;
@@ -48,6 +50,7 @@ namespace Fanior.Client.Pages
         private int height = 500;
         //reference to canvas
         public ElementReference mySvg;
+        public ElementReference textBox;
         public ElementReference root;
         public HubConnection hubConnection;
         long currentMessageId = 0;
