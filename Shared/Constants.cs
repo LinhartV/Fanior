@@ -21,11 +21,15 @@ namespace Fanior.Shared
         /// <summary>
         /// Coeficient determining score needed to reach next level
         /// </summary>
-        public const double NEXT_LEVEL_INCRESE = 2;
+        public const double NEXT_LEVEL_INCRESE = -8;
+        /// <summary>
+        /// How much score is needed to reach first level
+        /// </summary>
+        public const int FIRST_LEVEL = 10;
         /// <summary>
         /// Initial speed of players
         /// </summary>
-        public const double INICIAL_MOVEMENT_SPEED = 5;
+        public const double INICIAL_MOVEMENT_SPEED = 6;
 
     }
 }

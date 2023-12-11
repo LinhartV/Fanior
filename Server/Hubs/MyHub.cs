@@ -54,7 +54,7 @@ namespace Fanior.Server.Hubs
             }
             catch (Exception e)
             {
-                throw;
+                Console.WriteLine(e.Message + " " + e.Source + " " + e.StackTrace);
             }
 
         }

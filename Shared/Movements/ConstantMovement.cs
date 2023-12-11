@@ -30,16 +30,18 @@ namespace Fanior.Shared
             stopMovement = 0;
         }
 
-        public override void Frame(double friction, double percentage)
+        public override bool Frame(double friction, double percentage)
         {
             stopMovement++;
             if (stopMovement > 1)
             {
                 MovementSpeed = 0;
+                return true;
             }
             else
             {
                 MovementSpeed = baseSpeed;
+                return false;
             }
         }
 

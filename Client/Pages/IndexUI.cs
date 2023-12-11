@@ -39,8 +39,8 @@ namespace Fanior.Client.Pages
             }
             catch (Exception e)
             {
-                // JS.InvokeVoidAsync("Alert", e.Message);
-                throw;
+                // JS.InvokeVoidAsync("Alert", e.Message + " " + e.Source + " " + e.StackTrace);
+                Console.WriteLine(e.Message + " " + e.Source + " " + e.StackTrace);
             }
         }
         #region Input control
@@ -181,7 +181,7 @@ namespace Fanior.Client.Pages
             catch (Exception e)
             {
 
-                throw;
+                Console.WriteLine(e.Message + " " + e.Source + " " + e.StackTrace);
             }
         }
 
@@ -196,9 +196,9 @@ namespace Fanior.Client.Pages
                 height = dimension.Height;
                 width = dimension.Width;
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                throw;
+                Console.WriteLine(e.Message + " " + e.Source + " " + e.StackTrace);
             }
         }
 
@@ -252,7 +252,7 @@ namespace Fanior.Client.Pages
             catch (Exception e)
             {
 
-                throw;
+                Console.WriteLine(e.Message + " " + e.Source + " " + e.StackTrace);
             }
 
         }

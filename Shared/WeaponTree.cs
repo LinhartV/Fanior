@@ -15,9 +15,9 @@ namespace Fanior.Shared
         {
             //lvl2
             var burningBoulder = new WeaponNode(new BurningBoulderWeapon(true, 70, 13, 15, 100, "Fireball", "fireball.svg"));
-            var bomber = new WeaponNode(new BombWeapon(true, 70, 15, 15, 50, "Bomber", "bombWeapon.svg"));
+            var bomber = new WeaponNode(new BombWeapon(true, 70, 10, 1, 50, "Bomber", "bombWeapon.svg"));
             //lvl1
-            var flameBow = new WeaponNode(new BasicWeapon(true, 35, 14, 7, 220, "Flame bow", "fireArrow.png"), bomber, burningBoulder);
+            var flameBow = new WeaponNode(new FireBowWeapon(true, 35, 14, 7, 220, "Flame bow", "fireArrow.png"), bomber, burningBoulder);
             var crossbow = new WeaponNode(new CrossbowWeapon(true, 55, 25, 17, 70, "Crossbow", "crossbow.svg"));
             var slingshot = new WeaponNode(new SlingshotWeapon(true, 60, 17, 7, 120, "Slingshot", "slingshot.svg"));
             //root

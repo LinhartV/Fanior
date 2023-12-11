@@ -71,7 +71,9 @@ namespace Fanior.Shared
 
                 if (gvars.CountOfItems[ToolsGame.Counts.enemies] < 1)
                 {
-                    Enemy e = new Enemy(gvars, 0, 0, new Shape("black", "black", 5, 300, 300, Shape.GeometryEnum.circle), new ConstantMovement(2, 0), 5, 0.05, 1, 200, 0.2, WeaponTree.GetRoot().Children[0], 2000, new RandomGoingAI(),new ShootBack(), true, 100);
+                    double angle = ToolsGame.random.NextDouble() * Math.PI * 2;
+
+                    Enemy e = new Enemy(gvars, Math.Sin(angle) * gvars.ArenaWidth * 2 + gvars.ArenaWidth / 2, Math.Cos(angle) * gvars.ArenaHeight * 2 + gvars.ArenaHeight / 2, new Shape("black", "black", 5, 300, 300, Shape.GeometryEnum.circle), new ConstantMovement(5, 0), 5, 0.05, 1, 500, 0.2, WeaponTree.GetRoot(), 2000, new RandomGoingAI(), new Chase(), true, 5, 1.9, 100);
                 }
 
             }));
@@ -83,7 +85,7 @@ namespace Fanior.Shared
                     var rand = ToolsGame.random.NextDouble();
                     if (rand < 0.25)
                         c = new Coin(10, gvars, (double)(ToolsGame.random.NextDouble() * gvars.ArenaWidth), (double)(ToolsGame.random.NextDouble() * gvars.ArenaHeight), new Shape("orange", "black", 2, 15, 15, Shape.GeometryEnum.circle));
-                    else if(rand < 0.6)
+                    else if (rand < 0.6)
                         c = new Coin(20, gvars, (double)(ToolsGame.random.NextDouble() * gvars.ArenaWidth), (double)(ToolsGame.random.NextDouble() * gvars.ArenaHeight), new Shape("yellow", "black", 2, 17, 17, Shape.GeometryEnum.circle));
                     else if (rand < 0.85)
                         c = new Coin(40, gvars, (double)(ToolsGame.random.NextDouble() * gvars.ArenaWidth), (double)(ToolsGame.random.NextDouble() * gvars.ArenaHeight), new Shape("green", "black", 2, 18, 18, Shape.GeometryEnum.circle));
@@ -98,9 +100,13 @@ namespace Fanior.Shared
             {
                 (parameters[0] as Ability).BeingUsed = false;
             });
-            lambdaActions.Add("just", (gvars, id, parameters) =>
+            lambdaActions.Add("disposeOnStop", (gvars, id, parameters) =>
             {
-
+                Movable m = gvars.Items[id] as Movable;
+                if (m.MovementsAutomated.Count == 0)
+                {
+                    m.Dispose();
+                }
             });
             lambdaActions.Add("Immortality", ((gvars, id, parameters) =>
             {
@@ -162,13 +168,27 @@ namespace Fanior.Shared
             }));
             lambdaActions.Add("burn", ((gvars, id, parameters) =>
             {
-                var bb = (gvars.Items[id] as BurningBoulder);
-                new BasicShot(gvars, bb.X, bb.Y, new Shape(2, 8, 8, Shape.GeometryEnum.circle), new Mask(8, 8, Shape.GeometryEnum.circle), ToolsGame.random.NextDouble() * 4 + 6, 7, bb.CharacterId, ToolsGame.random.NextDouble() * Math.PI * 2, 0, 0.5, 90);
+                if (gvars.Items.ContainsKey(id))
+                {
+                    var bb = (gvars.Items[id] as BurningBoulder);
+                    new BasicShot(gvars, bb.X, bb.Y, new Shape(2, 8, 8, Shape.GeometryEnum.circle), new Mask(8, 8, Shape.GeometryEnum.circle), ToolsGame.random.NextDouble() * 4 + 6, 7, bb.CharacterId, ToolsGame.random.NextDouble() * Math.PI * 2, 0, 0.5, 90);
+                }
             }));
             lambdaActions.Add("slingshot", ((gvars, id, parameters) =>
             {
                 var c = (gvars.Items[id] as Character);
                 new BasicShot(gvars, c.X, c.Y, new Shape("lightblue", "darkblue", 2, 15, 15, Shape.GeometryEnum.circle, "rgb(255, 20, 50)", "darkred"), new Mask(15, 15, Shape.GeometryEnum.circle), c.WeaponNode.Weapon.WeaponSpeedCoef * c.BulletSpeed, c.WeaponNode.Weapon.DamageCoef * c.Damage, id, (gvars.Items[id] as Movable).Angle + ToolsGame.random.NextDouble() * Math.PI / 3 - Math.PI / 6, 0, 0.4, ToolsGame.random.Next(40, 60));
+
+            }));
+            lambdaActions.Add("chase", ((gvars, id, parameters) =>
+            {
+                var c = (gvars.Items[id] as Character);
+                c.UpdateControlledMovement("chase", gvars.PercentageOfFrame);
+            }));
+            lambdaActions.Add("stopChase", ((gvars, id, parameters) =>
+            {
+                var c = (gvars.Items[id] as Character);
+                c.DeleteAction("chase");
 
             }));
         }

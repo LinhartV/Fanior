@@ -84,7 +84,7 @@ namespace Fanior.Server
             }
             catch (Exception e)
             {
-                throw;
+                Console.WriteLine(e.Message + " " + e.Source + " " + e.StackTrace);
 
             }
         }
@@ -97,6 +97,7 @@ namespace Fanior.Server
         {
             try
             {
+                int count = 0;
                 game.swTest.Start();
                 foreach (Gvars gvars in game.games.Values)
                 {
@@ -114,15 +115,16 @@ namespace Fanior.Server
                             break;
                         }
                     }
+                    count = gvars.Items.Count;
                 }
                 await SendData(game, hub);
                 game.swTest.Stop();
-                //Console.WriteLine(game.swTest.Elapsed.TotalMilliseconds);
+                //Console.WriteLine("time: "+game.swTest.Elapsed.TotalMilliseconds+"; item count: " + count);
                 game.swTest.Reset();
             }
             catch (Exception e)
             {
-                throw;
+                Console.WriteLine(e.Message + " " + e.Source + " " + e.StackTrace);
             }
         }
 
@@ -158,8 +160,8 @@ namespace Fanior.Server
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.Message);
-                    throw;
+                    Console.WriteLine(e.Message + " " + e.Source + " " + e.StackTrace);
+                    Console.WriteLine(e.Message + " " + e.Source + " " + e.StackTrace);
                 }
             }
         }

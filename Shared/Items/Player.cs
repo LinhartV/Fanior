@@ -37,7 +37,7 @@ namespace Fanior.Shared
             else
                 score = value;
             gvars?.AddProperty(Id, ItemProperties.Score, score);
-            this.BaseSpeed -= (Math.Log10(0.01 * (score + 1)) - Math.Log10(0.01 * (tempScore + 1)));
+            this.BaseSpeed -= (Math.Log10(0.01 * (score + 2)) - Math.Log10(0.01 * (tempScore + 2)));
             while (score >= NextLevel)
             {
                 PrevLevel = NextLevel;
@@ -59,7 +59,7 @@ namespace Fanior.Shared
         public Ability AbilityQ { get; set; }
         public Ability AbilityE { get; set; }
         //score needed to reach next level
-        public int NextLevel { get; private set; } = 15;
+        public int NextLevel { get; private set; } = Constants.FIRST_LEVEL;
         public int PrevLevel { get; private set; } = 0;
         public bool MovementEnabled { get; set; } = true;
         public string ConnectionId { get; set; }
@@ -120,7 +120,10 @@ namespace Fanior.Shared
             //base.Death(gvars);
             ToolsGame.EndGame();
         }
-
+        public override void Dispose()
+        {
+            base.Dispose();
+        }
         public override int Bounty()
         {
             if (GetScore() < 100)

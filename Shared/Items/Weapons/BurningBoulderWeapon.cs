@@ -26,7 +26,7 @@ namespace Fanior.Shared
             catch (Exception e)
             {
 
-                throw;
+                Console.WriteLine(e.Message + " " + e.Source + " " + e.StackTrace);
             }
         }
     }

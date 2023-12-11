@@ -372,6 +372,15 @@ button {
         max-height: 70%;
     }
 
+#weaponNameDiv {
+    position: absolute;
+    bottom: 100px;
+    font-size: 20px;
+    left: 50%;
+    filter: drop-shadow(0px 0px 6px black);
+    transform: translate(-50%, 0);
+}
+
 
 @keyframes fadeIn {
     0% {

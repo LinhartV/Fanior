@@ -9,7 +9,7 @@ namespace Fanior.Shared
     /// <summary>
     /// Rotates to face the shooter and shoots back with it's weapon
     /// </summary>
-    public class ShootBack : IHitReaction
+    public class Chase : IHitReaction
     {
         public void React(Gvars gvars, int characterId, int shooterId)
         {
@@ -17,11 +17,10 @@ namespace Fanior.Shared
             {
                 var enemy = gvars.Items[characterId] as Enemy;
                 enemy.Angle = ToolsMath.GetAngleFromLengts(enemy, shooter);
-                enemy.RotateControlledMovement("default", enemy.Angle, false);
-                if (enemy.WeaponNode != null)
-                {
-                    enemy.WeaponNode.Weapon.Fire(gvars);
-                }
+                enemy.AddControlledMovement(new AcceleratedMovement(0, enemy.Angle, 3, 40), "chase");
+                enemy.RotateControlledMovement("chase", enemy.Angle, false);
+                enemy.AddAction(gvars, new ItemAction("chase", 1, ItemAction.ExecutionType.EveryTime));
+                enemy.AddAction(gvars, new ItemAction("stopChase", 20, ItemAction.ExecutionType.OnlyFirstTime), 0, ActionHandler.RewriteEnum.Ignore);
             }
         }
     }

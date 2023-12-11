@@ -21,15 +21,15 @@ namespace Fanior.Shared
             {
                 lock (gvars.frameLock)
                 {
-                    ProcedeGameAlgorithms(gvars, now);
                     ProcedePlayerActions(gvars, delay);
+                    ProcedeGameAlgorithms(gvars, now);
                     ProcedeItemActions(now, gvars);
                 }
             }
             catch (Exception e)
             {
 
-                throw;
+                Console.WriteLine(e.Message + " " + e.Source + " " + e.StackTrace);
 
             }
             gvars.ExecuteActions(now, gvars, -1);
@@ -78,7 +78,7 @@ namespace Fanior.Shared
             catch (Exception e)
             {
 
-                throw;
+                Console.WriteLine(e.Message + " " + e.Source + " " + e.StackTrace);
             }
         }
 
@@ -108,7 +108,7 @@ namespace Fanior.Shared
                 { new Upgrade("WEAPON SPEED", "orange", (Player player) => { player.BulletSpeed *= 1.1; }) },
                 { new Upgrade("RELOAD", "green", (Player player) => { player.ReloadTime *= 0.9; }) },
                 { new Upgrade("BODY DAMAGE", "yellow", (Player player) => { }) },
-                { new Upgrade("MOVEMENT SPEED", "blue", (Player player) => { player.BaseSpeed += 1+1/player.BaseSpeed; player.Friction*=1.2; player.Acceleration+=1.1; }) }
+                { new Upgrade("MOVEMENT SPEED", "blue", (Player player) => { player.BaseSpeed += 1+1/player.BaseSpeed; player.Friction*=1.2; player.Acceleration*=1.2; }) }
             };
 
         /*public static Ability GetAbility(int num)

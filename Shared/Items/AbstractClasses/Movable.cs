@@ -48,21 +48,22 @@ namespace Fanior.Shared
         public double Acceleration
         {
             get => acceleration;
-            set {
+            set
+            {
                 acceleration = value;
                 foreach (var movement in MovementsControlled.Values)
                 {
-                    if(movement is AcceleratedMovement am)
+                    if (movement is AcceleratedMovement am)
                         am.Acceleration = value;
                 }
             }
         }
         //Movements once set and controlled just by the movement itself. It deletes itself when speed is 0. (e.g. explosion)
         [JsonProperty]
-        protected List<IMovement> MovementsAutomated { get; set; } = new List<IMovement>();
+        public List<IMovement> MovementsAutomated { get; set; } = new List<IMovement>();
         //Movements controlled by other actions, such as player control. Accesed by id and not deleted even when speed is 0.
         [JsonProperty]
-        protected Dictionary<string, IMovement> MovementsControlled { get; set; } = new Dictionary<string, IMovement>();
+        public Dictionary<string, IMovement> MovementsControlled { get; set; } = new Dictionary<string, IMovement>();
         public bool ThroughSolid { get; set; } = false;
         public Movable() { }
         public Movable(Gvars gvars, double x, double y, Shape shape, Mask mask, double baseSpeed, IMovement movement, double acceleration, double friction, bool setAngle, bool isVisible = true) : base(gvars, x, y, shape, mask, isVisible)
@@ -186,7 +187,10 @@ namespace Fanior.Shared
             double y = 0;
             foreach (var movement in allMovements)
             {
-                movement.Frame(friction, percentage);
+                if (movement.Frame(friction, percentage) && MovementsAutomated.Contains(movement))
+                {
+                    MovementsAutomated.Remove(movement);
+                }
                 xy = movement.Move(percentage); //ToolsMath.PolarToCartesian(movement.Angle, movement.MovementSpeed);
                 x += xy.Item1;
                 y -= xy.Item2;

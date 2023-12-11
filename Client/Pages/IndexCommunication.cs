@@ -83,14 +83,14 @@ namespace Fanior.Client.Pages
 
                     StateHasChanged();
                     sw2.Stop();
-                    //Console.WriteLine("list:" + sw2.Elapsed.TotalMilliseconds);
+                    Console.WriteLine("list:" + sw2.Elapsed.TotalMilliseconds);
 
                     sw2.Reset();
                 }
                 catch (Exception e)
                 {
 
-                    throw;
+                    Console.WriteLine(e.Message + " " + e.Source + " " + e.StackTrace);
                 }
 
             });
@@ -110,7 +110,7 @@ namespace Fanior.Client.Pages
                 catch (Exception e)
                 {
 
-                    throw;
+                    Console.WriteLine(e.Message + " " + e.Source + " " + e.StackTrace);
                 }
 
             });
@@ -206,7 +206,7 @@ namespace Fanior.Client.Pages
             }
             catch (Exception e)
             {
-                throw;
+                Console.WriteLine(e.Message + " " + e.Source + " " + e.StackTrace);
             }
             StateHasChanged();
         }

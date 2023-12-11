@@ -162,8 +162,8 @@ namespace Fanior.Client.Pages
             }
             catch (Exception e)
             {
-                //JS.InvokeVoidAsync("Alert", e.Message);
-                throw;
+                //JS.InvokeVoidAsync("Alert", e.Message + " " + e.Source + " " + e.StackTrace);
+                Console.WriteLine(e.Message + " " + e.Source + " " + e.StackTrace);
             }
         }
         private void GetAllItems(string itemsJson)
@@ -269,7 +269,7 @@ namespace Fanior.Client.Pages
             catch (Exception e)
             {
 
-                throw;
+                Console.WriteLine(e.Message + " " + e.Source + " " + e.StackTrace);
             }
         }
         void ExecuteAction(PlayerActions.PlayerActionsEnum action, bool down, int itemId, double angle, double x, double y, int actionIdReceived)
