@@ -70,11 +70,11 @@ namespace Fanior.Shared
         {
             this.Friction = friction;
             this.Acceleration = acceleration;
-            this.BaseSpeed = baseSpeed;
             if (movement != null)
             {
                 AddControlledMovement(movement, "default");
             }
+            this.BaseSpeed = baseSpeed;
             this.AddAction(gvars, new ItemAction("move", 1, ItemAction.ExecutionType.EveryTime, true, setAngle));
             gvars.ItemsStep.Add(Id, this);
         }

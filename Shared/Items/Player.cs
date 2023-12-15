@@ -141,10 +141,6 @@ namespace Fanior.Shared
             {
                 this.IncreaseScore(c.Value);
             }
-            if (collider is Enemy e)
-            {
-                ReceiveDamage(2, e);
-            }
         }
         /*public override void Collide(Item collider, double angle, params Globals.ActionsAtCollision[] actionsNotToPerform)
         {

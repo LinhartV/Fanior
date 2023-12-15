@@ -69,12 +69,59 @@ namespace Fanior.Shared
             lambdaActions.Add("createBoss", ((gvars, id, parameters) =>
             {
 
-                if (gvars.CountOfItems[ToolsGame.Counts.enemies] < 1)
+                int bounty = 2000;
+                
+                IHitReaction hr = null;
+                WeaponTree.WeaponNode wn = WeaponTree.GetRoot();
+                double damage = 4 + ToolsGame.random.NextDouble() * 3;
+                double weaponSpeed = 1 + ToolsGame.random.NextDouble() * 2;
+                switch (ToolsGame.random.Next(0, 2))
                 {
-                    double angle = ToolsGame.random.NextDouble() * Math.PI * 2;
-
-                    Enemy e = new Enemy(gvars, Math.Sin(angle) * gvars.ArenaWidth * 2 + gvars.ArenaWidth / 2, Math.Cos(angle) * gvars.ArenaHeight * 2 + gvars.ArenaHeight / 2, new Shape("black", "black", 5, 300, 300, Shape.GeometryEnum.circle), new ConstantMovement(5, 0), 5, 0.05, 1, 500, 0.2, WeaponTree.GetRoot(), 2000, new RandomGoingAI(), new Chase(), true, 5, 1.9, 100);
+                    case 0:
+                        hr = new Chase();
+                        bounty += 500;
+                        break;
+                    case 1:
+                        hr = new ShootBack();
+                        bounty += (int)(damage * 100);
+                        bounty += (int)(weaponSpeed * 100);
+                        while (wn.Children.Length > 0 && ToolsGame.random.NextDouble() > 0.5)
+                        {
+                            wn = wn.Children[ToolsGame.random.Next(0, wn.Children.Length)];
+                            bounty += 200;
+                        }
+                        break;
+                    default:
+                        bounty -= 500;
+                        hr = null;
+                        break;
                 }
+                double bodyDamage = 0.5 + ToolsGame.random.NextDouble() * 2;
+                bounty += (int)(bodyDamage * 300);
+                double lives = 400 + ToolsGame.random.NextDouble() * 400;
+                bounty += (int)(lives);
+                double movementSpeed = 2 + ToolsGame.random.NextDouble() * 6;
+                bounty += (int)(movementSpeed * 100);
+                double angle = ToolsGame.random.NextDouble() * Math.PI * 2;
+                IEnemyMovementAI emai = null;
+                switch (ToolsGame.random.Next(0, 2))
+                {
+                    case 0:
+                        emai = new RandomGoingAI();
+                        break;
+                    default:
+                        emai = new FollowClosestAI();
+                        movementSpeed *= 0.6;
+                        break;
+                }
+                int r = ToolsGame.random.Next(0, 256);
+                int g = ToolsGame.random.Next(0, 256);
+                int b = ToolsGame.random.Next(0, 256);
+                int rs = ToolsGame.random.Next(0, 256);
+                int gs = ToolsGame.random.Next(0, 256);
+                int bs = ToolsGame.random.Next(0, 256);
+                Enemy e = new Enemy(gvars, Math.Sin(angle) * gvars.ArenaWidth * 2 + gvars.ArenaWidth / 2, Math.Cos(angle) * gvars.ArenaHeight * 2 + gvars.ArenaHeight / 2, new Shape("rgb(" + r.ToString() + "," + g.ToString() + "," + b.ToString() + ")", "rgb(" + rs.ToString() + "," + gs.ToString() + "," + bs.ToString() + ")", 5, 300, 300, Shape.GeometryEnum.circle), new ConstantMovement(movementSpeed, 0), movementSpeed, 0.05, 1, lives, 0.2, wn, bounty, emai, hr, true, damage, bodyDamage, weaponSpeed, 500);
+
 
             }));
             lambdaActions.Add("createCoin", ((gvars, id, parameters) =>

@@ -75,6 +75,7 @@ namespace Fanior.Shared
             }
         }
         public double Damage { get; set; } = 1;
+        public double BodyDamage { get; set; } = 0.5;
         [JsonProperty]
         private double reloadTime = 1;
         public double ReloadTime
@@ -136,6 +137,10 @@ namespace Fanior.Shared
             if (collider is Shot s && s.CharacterId != this.Id)
             {
                 this.ReceiveDamage(s.Damage, gvars.ItemsPlayers.ContainsKey(s.CharacterId) ? gvars.ItemsPlayers[s.CharacterId] : null);
+            }
+            if (collider is Character c)
+            {
+                this.ReceiveDamage(c.BodyDamage, c);
             }
         }
 

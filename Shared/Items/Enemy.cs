@@ -15,9 +15,10 @@ namespace Fanior.Shared
         public IEnemyMovementAI AI { get; private set; }
         public IHitReaction HitReaction { get; private set; }
         public Enemy() : base() { }
-        public Enemy(Gvars gvars, double x, double y, Shape shape, IMovement defaultMovement, double movementSpeed, double acceleration, double friction, double lives, double regeneration, WeaponTree.WeaponNode weaponNode, int bounty, IEnemyMovementAI ai, IHitReaction hitReaction, bool setAngle, double damage, double weaponSpeed, double shield = 0, bool isVisible = true)
+        public Enemy(Gvars gvars, double x, double y, Shape shape, IMovement defaultMovement, double movementSpeed, double acceleration, double friction, double lives, double regeneration, WeaponTree.WeaponNode weaponNode, int bounty, IEnemyMovementAI ai, IHitReaction hitReaction, bool setAngle, double damage, double bodyDamage, double weaponSpeed, double shield = 0, bool isVisible = true)
             : base(gvars, x, y, shape, new Mask(shape.ImageWidth, shape.ImageHeight, shape.Geometry), movementSpeed, acceleration, friction, lives, regeneration, weaponNode, setAngle, shield, defaultMovement, isVisible)
         {
+            this.BodyDamage = bodyDamage;
             this.Damage = damage;
             this.BulletSpeed = weaponSpeed;
             scoreToReturn = bounty;

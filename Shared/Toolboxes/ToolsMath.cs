@@ -36,6 +36,8 @@ namespace Fanior.Shared
         /// <summary>
         /// Calculate angle between two items
         /// </summary>
+        /// <param name="it1">"Yourself"</param>
+        /// <param name="it2">"The other one"</param>
         /// <returns></returns>
         static public double GetAngleFromLengts(Item it1, Item it2)
         {
@@ -59,7 +61,10 @@ namespace Fanior.Shared
         {
             return time * 1000 / Constants.GAMEPLAY_FRAME_TIME;
         }
-
+        public static double GetDistance(Item it1, Item it2)
+        {
+            return Math.Sqrt(Math.Pow(it1.X - it2.X, 2)+ Math.Pow(it1.Y - it2.Y, 2));
+        }
 
     }
 }

@@ -73,7 +73,7 @@
         <div id="upgradePoints">
             @player.UpgradePoints
         </div>
-        <div id="weapons" style="@((player.PointsGained >= 5 && player.WeaponNode.Children.Length > 0) ? "top:50px;" : "top:-350px")">
+        <div id="weapons" style="@((player.PointsGained >= Constants.POINTS_NEEDED_TO_UPGRADE_WEAPON && player.WeaponNode.Children.Length > 0) ? "top:50px;" : "top:-350px")">
             @{
                 string[] weaponColors = new string[5] { "#8f3d3dc7", "#6c80d3c7", "#1a811ac7", "#a9ae1cc7", "#42422ec7" };
 

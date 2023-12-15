@@ -48,15 +48,14 @@ namespace Fanior.Client.Pages
         public void DefaultAssingOfKeys()
         {
             //set keys here
-            KeyController.AddKey("w", new RegisteredKey(PlayerActions.PlayerActionsEnum.moveUp, myActions));
-            KeyController.AddKey("s", new RegisteredKey(PlayerActions.PlayerActionsEnum.moveDown, myActions));
-            KeyController.AddKey("d", new RegisteredKey(PlayerActions.PlayerActionsEnum.moveRight, myActions));
-            KeyController.AddKey("a", new RegisteredKey(PlayerActions.PlayerActionsEnum.moveLeft, myActions));
+            KeyController.AddKey("w", new RegisteredKey(PlayerActions.PlayerActionsEnum.moveUp, myActions),"arrowup");
+            KeyController.AddKey("s", new RegisteredKey(PlayerActions.PlayerActionsEnum.moveDown, myActions), "arrowdown");
+            KeyController.AddKey("d", new RegisteredKey(PlayerActions.PlayerActionsEnum.moveRight, myActions), "arrowright");
+            KeyController.AddKey("a", new RegisteredKey(PlayerActions.PlayerActionsEnum.moveLeft, myActions), "arrowleft");
             KeyController.AddKey("c", new RegisteredKey(PlayerActions.PlayerActionsEnum.cheat, myActions));
             KeyController.AddKey("e", new RegisteredKey(PlayerActions.PlayerActionsEnum.abilityE, myActions, AbilityPressedE));
             KeyController.AddKey("q", new RegisteredKey(PlayerActions.PlayerActionsEnum.abilityQ, myActions, AbilityPressedQ));
-            KeyController.AddKey(" ", new RegisteredKey(PlayerActions.PlayerActionsEnum.fire, myActions));
-            KeyController.AddKey("click", new RegisteredKey(PlayerActions.PlayerActionsEnum.fire, myActions));
+            KeyController.AddKey(" ", new RegisteredKey(PlayerActions.PlayerActionsEnum.fire, myActions), "click");
         }
 
         void AbilityPressedE()
@@ -290,9 +289,9 @@ namespace Fanior.Client.Pages
         }
         public async void UpgradeWeapon(int childNum)
         {
-            if (player.PointsGained >= 5)
+            if (player.PointsGained >= Constants.POINTS_NEEDED_TO_UPGRADE_WEAPON)
             {
-                player.PointsGained -= 5;
+                player.PointsGained -= Constants.POINTS_NEEDED_TO_UPGRADE_WEAPON;
                 player.WeaponNode = player.WeaponNode.Children[childNum];
                 await hubConnection.SendAsync("UpgradeWeapon", gvars.GameId, this.id, childNum);
                 StateHasChanged();

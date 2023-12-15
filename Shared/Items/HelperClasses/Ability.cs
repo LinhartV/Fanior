@@ -46,7 +46,7 @@ namespace Fanior.Shared
             set
             {
                 if (value <= 0)
-                    duration = 0.1;
+                    duration = 0.5;
                 else
                     duration = value;
             }

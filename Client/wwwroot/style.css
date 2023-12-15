@@ -32,6 +32,14 @@ html, body {
     flex-wrap: wrap;
 }
 
+#faniorLoading {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%,0);
+    font-size: 150%;
+}
+
 button {
     padding: 10px 100px;
     white-space: nowrap;

@@ -34,11 +34,18 @@ namespace Fanior.Client
         /// </summary>
         /// <param name="keyName">Name of key (lowercase)</param>
         /// <param name="registeredKey"></param>
-        public static void AddKey(string keyName, RegisteredKey registeredKey)
+        /// <param name="additionalKeys">List of keys to do the same</param>
+        public static void AddKey(string keyName, RegisteredKey registeredKey, params string[] additionalKeys)
         {
             if (!registeredKeys.ContainsKey(keyName))
                 registeredKeys.Add(keyName, new Stack<RegisteredKey>());
             registeredKeys[keyName].Push(registeredKey);
+            foreach (var item in additionalKeys)
+            {
+                if (!registeredKeys.ContainsKey(item))
+                    registeredKeys.Add(item, new Stack<RegisteredKey>());
+                registeredKeys[item].Push(registeredKey);
+            }
         }
     }
 }

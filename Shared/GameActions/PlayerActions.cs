@@ -136,6 +136,7 @@ namespace Fanior.Shared
             actions.Add(PlayerActionsEnum.cheat, new KeyCommand((id, gvars) =>
             {
                 gvars.ItemsPlayers[id].IncreaseScore(1000);
+                gvars.ItemsPlayers[id].Immortal = !gvars.ItemsPlayers[id].Immortal;
             },
             (id, gvars) =>
             {

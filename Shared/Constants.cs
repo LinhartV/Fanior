@@ -30,6 +30,7 @@ namespace Fanior.Shared
         /// Initial speed of players
         /// </summary>
         public const double INICIAL_MOVEMENT_SPEED = 6;
+        public const int POINTS_NEEDED_TO_UPGRADE_WEAPON = 7;
 
     }
 }

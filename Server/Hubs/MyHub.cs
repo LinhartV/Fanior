@@ -148,9 +148,9 @@ namespace Fanior.Server.Hubs
         public void UpgradeWeapon(string gameId, int itemId, int childNum)
         {
             Player p = gameControl.games[gameId].ItemsPlayers[itemId];
-            if (p.PointsGained >= 5)
+            if (p.PointsGained >= Constants.POINTS_NEEDED_TO_UPGRADE_WEAPON)
             {
-                p.PointsGained -= 5;
+                p.PointsGained -= Constants.POINTS_NEEDED_TO_UPGRADE_WEAPON;
                 p.WeaponNode = p.WeaponNode.Children[childNum];
             }
         }

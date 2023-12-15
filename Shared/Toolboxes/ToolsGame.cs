@@ -107,7 +107,7 @@ namespace Fanior.Shared
                 { new Upgrade("WEAPON DAMAGE", "red", (Player player) => { player.Damage *= 1.3; }) },
                 { new Upgrade("WEAPON SPEED", "orange", (Player player) => { player.BulletSpeed *= 1.1; }) },
                 { new Upgrade("RELOAD", "green", (Player player) => { player.ReloadTime *= 0.9; }) },
-                { new Upgrade("BODY DAMAGE", "yellow", (Player player) => { }) },
+                { new Upgrade("BODY DAMAGE", "yellow", (Player player) => { player.BodyDamage += 0.5; }) },
                 { new Upgrade("MOVEMENT SPEED", "blue", (Player player) => { player.BaseSpeed += 1+1/player.BaseSpeed; player.Friction*=1.2; player.Acceleration*=1.2; }) }
             };
 
@@ -134,11 +134,11 @@ namespace Fanior.Shared
         public static List<Ability> abilities = new List<Ability>
             {
                 { new Ability(40, 3, "Immortality",2 , "shield.svg", "Three seconds of immortality") },
-                { new Ability(30, 0, "Bomb", 2, "bomb.svg", "Sets a bomb that savagely damages everything around") },
-                { new Ability(50, 3, "Empowerment", 2, "damageUpgrade.svg", "Ten seconds of highly boosted damage") },
-                { new Ability(50, 3, "Rapid Fire", 3, "reloadUpgrade.svg", "Ten seconds of highly boosted reload") },
-                { new Ability(20, 0, "Insta Heal", 2, "heal.svg", "Instantly recovers 3/4 health") },
-                { new Ability(20, 0, "Repulsion", 3, "repulsion.svg", "Creates a pressure wave that repels everything in radius") }
+                { new Ability(30, 0, "Bomb", 1, "bomb.svg", "Sets a bomb that savagely damages everything around") },
+                { new Ability(50, 3, "Empowerment", 2, "damageUpgrade.svg", "Three seconds of highly boosted damage") },
+                { new Ability(50, 3, "Rapid Fire", 3, "reloadUpgrade.svg", "Three seconds of highly boosted reload") },
+                { new Ability(20, 0, "Insta Heal", 3, "heal.svg", "Instantly recovers 3/4 health") },
+                { new Ability(20, 0, "Repulsion", 2, "repulsion.svg", "Creates a pressure wave that repels everything in radius") }
             };
 
 
