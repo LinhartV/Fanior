@@ -30,7 +30,13 @@ namespace Fanior.Client
             this.KeyPressed = keyPressed;
         }
 
-        //Constroctur for actions proceeded on both server and client side. So far only name of action enum sent to server. Better idea (PlayerAction.PlayerActionsEnum, bool, long) providing time when it happed
+        /// <summary>
+        /// Bind up new key to action
+        /// </summary>
+        /// <param name="action">Action to execute</param>
+        /// <param name="myActions">"List where this new action will be added"</param>
+        /// <param name="clientActionDown">Optional action to happen only on client side (for key press)</param>
+        /// <param name="clientActionUp">Optional action to happen only on client side (for key release)</param>
         public RegisteredKey(PlayerActions.PlayerActionsEnum action, List<(PlayerActions.PlayerActionsEnum, bool)> myActions, Action clientActionDown = null, Action clientActionUp = null)
         {
             this.KeyDown = () =>

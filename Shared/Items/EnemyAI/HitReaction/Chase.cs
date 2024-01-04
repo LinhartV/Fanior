@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Fanior.Shared
 {
     /// <summary>
-    /// Rotates to face the shooter and shoots back with it's weapon
+    /// Sprint in attackers direction
     /// </summary>
     public class Chase : IHitReaction
     {

@@ -40,6 +40,13 @@
         };
     </script>
     <script type="text/javascript">
+        function onAnimationEnd(elem, component) {
+            elem.addEventListener('animationiteration', e => {
+                component.invokeMethodAsync('HandleTutorial');
+            });
+        }
+    </script>
+    <script type="text/javascript">
         window.SetFocus = (element) => {
             element.focus();
         };

@@ -1,2 +1,446 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ClassDiagram /> 
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Fanior.Shared.LambdaActions" Collapsed="true">
+    <Position X="32.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAEAA=</HashCode>
+      <FileName>GameActions\LambdaActions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.PlayerActions" Collapsed="true">
+    <Position X="36" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAAECAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameActions\PlayerActions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.ActionHandler" Collapsed="true">
+    <Position X="10.25" Y="1.5" Width="1.5" />
+    <AssociationLine Name="ItemAction" Type="Fanior.Shared.ItemAction" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="11.438" Y="2.062" />
+        <Point X="11.438" Y="2.688" />
+        <Point X="12.25" Y="2.688" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-5.49" Y="-15.474" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAEAACAADAAACAAAAAAAgAAAAAAAABAgAAA=</HashCode>
+      <FileName>Items\AbstractClasses\ActionHandler.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="ItemAction" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Fanior.Shared.Character" Collapsed="true">
+    <Position X="13.5" Y="9.25" Width="1.5" />
+    <AssociationLine Name="WeaponNode" Type="Fanior.Shared.WeaponNode">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.67" Y="-16.203" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAABgACAAUkAAAIBAgIAAAICiIACAAKgBAIAACAAAAA=</HashCode>
+      <FileName>Items\AbstractClasses\Character.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="WeaponNode" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.1" />
+  </Class>
+  <Class Name="Fanior.Shared.Item" Collapsed="true">
+    <Position X="11.5" Y="4" Width="1.5" />
+    <AssociationLine Name="Mask" Type="Fanior.Shared.Mask">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-17.949" Y="-0.104" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="Shape" Type="Fanior.Shared.Shape">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-18.351" Y="-1.217" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAgmAAAAACAAEgEAAAAAAAAACAAAAAAIAADgAAAAYAA=</HashCode>
+      <FileName>Items\AbstractClasses\Item.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Mask" />
+      <Property Name="Shape" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Fanior.Shared.Movable" Collapsed="true">
+    <Position X="13.75" Y="6.25" Width="1.5" />
+    <AssociationLine Name="IMovement" Type="Fanior.Shared.IMovement">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-16.7" Y="-1.748" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>EAAAAggIAIAAAgAAAEAAAAAAAQACQAWAAEQEgABAQIY=</HashCode>
+      <FileName>Items\AbstractClasses\Movable.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="IMovement" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Fanior.Shared.Chase" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="9.25" Y="13.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Items\EnemyAI\HitReaction\Chase.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Fanior.Shared.ShootBack" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="9.25" Y="14.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Items\EnemyAI\HitReaction\ShootBack.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.197" />
+  </Class>
+  <Class Name="Fanior.Shared.FollowClosestAI" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="11" Y="14.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Items\EnemyAI\Movement\FollowClosestAI.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Fanior.Shared.RandomGoingAI" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="11" Y="13.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAEAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Items\EnemyAI\Movement\RandomGoingAI.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Fanior.Shared.Ability" Collapsed="true">
+    <Position X="13" Y="12.25" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIAAAAiAAIAAAAAABQAIAAABAAAAAAAABAAQIA=</HashCode>
+      <FileName>Items\HelperClasses\Ability.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.ItemAction" Collapsed="true">
+    <Position X="12.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAggAAAIIEAAAAAAA=</HashCode>
+      <FileName>Items\HelperClasses\ItemAction.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.Mask" Collapsed="true">
+    <Position X="14" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAgAA=</HashCode>
+      <FileName>Items\HelperClasses\Mask.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.Shape" Collapsed="true">
+    <Position X="14" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABACAAAAAAAAAEAAAAgAAAAAAAAgAgEE=</HashCode>
+      <FileName>Items\HelperClasses\Shape.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.Upgrade" Collapsed="true">
+    <Position X="14.5" Y="12.25" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAAAAAAAAAAAAAAQAAAAAAAAAAAAAgAAAAAA=</HashCode>
+      <FileName>Items\HelperClasses\Upgrade.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.BasicShot" Collapsed="true">
+    <Position X="18.5" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Items\Shots\BasicShot.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.Bomb" Collapsed="true">
+    <Position X="20.5" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Items\Shots\Bomb.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.BurningArrow" Collapsed="true">
+    <Position X="20.5" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Items\Shots\BurningArrow.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.BurningBoulder" Collapsed="true">
+    <Position X="18.5" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Items\Shots\BurningBoulder.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.Shot" Collapsed="true">
+    <Position X="19.5" Y="8.25" Width="1.5" />
+    <InheritanceLine Type="Fanior.Shared.Movable" FixedToPoint="true">
+      <Path>
+        <Point X="14.5" Y="6.941" />
+        <Point X="14.5" Y="8.375" />
+        <Point X="19.5" Y="8.375" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAAAAAAAAAAAAAAAASAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Items\Shots\Shot.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.BasicWeapon" Collapsed="true">
+    <Position X="16.75" Y="13.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Items\Weapons\BasicWeapon.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.BombWeapon" Collapsed="true">
+    <Position X="15.75" Y="15.75" Width="1.5" />
+    <InheritanceLine Type="Fanior.Shared.Weapon" FixedToPoint="true">
+      <Path>
+        <Point X="17" Y="13.062" />
+        <Point X="17" Y="13.375" />
+        <Point X="16.625" Y="13.375" />
+        <Point X="16.625" Y="15.75" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Items\Weapons\BombWeapon.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.BurningBoulderWeapon" Collapsed="true">
+    <Position X="14" Y="15.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Items\Weapons\BurningBoulderWeapon.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.CrossbowWeapon" Collapsed="true">
+    <Position X="16.75" Y="14.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Items\Weapons\CrossbowWeapon.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.FireBowWeapon" Collapsed="true">
+    <Position X="15" Y="14.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Items\Weapons\FireBowWeapon.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.SlingshotWeapon" Collapsed="true">
+    <Position X="18.5" Y="14.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Items\Weapons\SlingshotWeapon.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.Weapon" Collapsed="true">
+    <Position X="16.25" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAEAAAAAAAAAAAQAwAAEBAAABIAAAAAASIA=</HashCode>
+      <FileName>Items\Weapons\Weapon.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.Coin" Collapsed="true">
+    <Position X="11.5" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAAAAAAAAAAAACAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Items\Coin.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.Enemy" Collapsed="true">
+    <Position X="10.25" Y="11.25" Width="1.5" />
+    <AssociationLine Name="AI" Type="Fanior.Shared.IEnemyMovementAI" ManuallyRouted="true" FixedFromPoint="true">
+      <Path>
+        <Point X="11.562" Y="11.941" />
+        <Point X="11.562" Y="12.25" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-22.45" Y="6.542" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="HitReaction" Type="Fanior.Shared.IHitReaction" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="10.5" Y="11.941" />
+        <Point X="10.5" Y="12.096" />
+        <Point X="10" Y="12.096" />
+        <Point X="10" Y="12.25" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-28.297" Y="2.664" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AQAgAABAACAAAAAAAAAAAAAACAgCAAAgAAAAAAAAAAA=</HashCode>
+      <FileName>Items\Enemy.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="AI" />
+      <Property Name="HitReaction" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Fanior.Shared.Player" Collapsed="true">
+    <Position X="13.5" Y="11" Width="1.5" />
+    <AssociationLine Name="AbilityQ" Type="Fanior.Shared.Ability">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-19.628" Y="1.82" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="Upgrade" Type="Fanior.Shared.Upgrade">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-18.293" Y="-1.391" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEQKAAAhAgAJAoAQQQCAACGAAgEAAAgAAAAAA=</HashCode>
+      <FileName>Items\Player.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="AbilityQ" />
+      <Property Name="Upgrade" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Fanior.Shared.PressureWave" Collapsed="true">
+    <Position X="9.25" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAAEAAAAAAAAAAAAA=</HashCode>
+      <FileName>Items\PressureWave.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.AcceleratedMovement" Collapsed="true">
+    <Position X="19.25" Y="7.25" Width="1.5" />
+    <InheritanceLine Type="Fanior.Shared.IMovement" FixedToPoint="true">
+      <Path>
+        <Point X="19" Y="6.812" />
+        <Point X="19" Y="7.625" />
+        <Point X="19.25" Y="7.625" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAAACQAAAAAABAEAAAAFAAAAAAEAAAAAAE=</HashCode>
+      <FileName>Movements\AcceleratedMovement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.ConstantMovement" Collapsed="true">
+    <Position X="17.25" Y="7.25" Width="1.5" />
+    <InheritanceLine Type="Fanior.Shared.IMovement" FixedToPoint="true">
+      <Path>
+        <Point X="19" Y="6.812" />
+        <Point X="19" Y="7.625" />
+        <Point X="18.75" Y="7.625" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAAACAAAAAAABAEAAAAFAAAAAEAAAAAAIE=</HashCode>
+      <FileName>Movements\ConstantMovement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.IMovement" Collapsed="true">
+    <Position X="18.25" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAAACAAAAAAABAEAAgAFAAAAEAAAABEAAE=</HashCode>
+      <FileName>Movements\IMovement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.ToolsGame" Collapsed="true">
+    <Position X="34.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAMAAAgAAAEAAAAAAAAAEAQAACAAAAAQAAAAQAAE=</HashCode>
+      <FileName>Toolboxes\ToolsGame.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.ToolsItem" Collapsed="true">
+    <Position X="36" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ=</HashCode>
+      <FileName>Toolboxes\ToolsItem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.ToolsMath" Collapsed="true">
+    <Position X="37.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAABAAAAABAAAAAAAAABAAAAAAACAAAAAAAAAAAA=</HashCode>
+      <FileName>Toolboxes\ToolsMath.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.ToolsMovable" Collapsed="true">
+    <Position X="39.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Toolboxes\ToolsMovable.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.ToolsSystem" Collapsed="true">
+    <Position X="32.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIEBAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Toolboxes\ToolsSystem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.Constants" Collapsed="true">
+    <Position X="34.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAACAAAAAAAAAECAAAAAAgAAAAIAAAAAABAAg=</HashCode>
+      <FileName>Constants.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.Gvars" Collapsed="true">
+    <Position X="9.25" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAECOQAAAQACCAAAAAEAIAACAAgABAEIAAEAREAg4AI=</HashCode>
+      <FileName>Gvars.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fanior.Shared.WeaponNode" Collapsed="true">
+    <Position X="16" Y="11.25" Width="2" />
+    <AssociationLine Name="Weapon" Type="Fanior.Shared.Weapon" FixedToPoint="true">
+      <Path>
+        <Point X="17" Y="11.941" />
+        <Point X="17" Y="12.5" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-15.448" Y="-0.404" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAA=</HashCode>
+      <FileName>WeaponNode.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Weapon" />
+    </ShowAsAssociation>
+  </Class>
+  <Interface Name="Fanior.Shared.ILived" Collapsed="true">
+    <Position X="11.75" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAgAAAAAAgAAIAACAAAAA=</HashCode>
+      <FileName>Items\AbstractClasses\ILived.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Fanior.Shared.IHitReaction" Collapsed="true">
+    <Position X="9.25" Y="12.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Items\EnemyAI\HitReaction\IHitReaction.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Fanior.Shared.IEnemyMovementAI" Collapsed="true">
+    <Position X="11" Y="12.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Items\EnemyAI\Movement\IEnemyMovementAI.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

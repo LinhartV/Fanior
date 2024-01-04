@@ -30,8 +30,8 @@ namespace Fanior.Shared
         public double MaxLives { get; set; }
 
         [JsonProperty]
-        private WeaponTree.WeaponNode weaponNode;
-        public WeaponTree.WeaponNode WeaponNode
+        private WeaponNode weaponNode;
+        public WeaponNode WeaponNode
         {
             get => weaponNode;
             set
@@ -91,7 +91,7 @@ namespace Fanior.Shared
         public double BulletSpeed { get; set; } = 1;
 
         public Character() { }
-        public Character(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, double acceleration, double friction, double lives, double regeneration, WeaponTree.WeaponNode weaponNode, bool setAngle, double shield = 0, IMovement defaultMovement = null, bool isVisible = true) :
+        public Character(Gvars gvars, double x, double y, Shape shape, Mask mask, double movementSpeed, double acceleration, double friction, double lives, double regeneration, WeaponNode weaponNode, bool setAngle, double shield = 0, IMovement defaultMovement = null, bool isVisible = true) :
             base(gvars, x, y, shape, mask, movementSpeed, defaultMovement, acceleration, friction, setAngle, isVisible)
         {
             this.MaxShield = shield;

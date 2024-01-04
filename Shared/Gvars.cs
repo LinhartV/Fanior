@@ -55,7 +55,7 @@ namespace Fanior.Shared
             }
         }
 
-
+        public bool Cheating { get; set; } = false;
         public readonly object frameLock = new object();
         public readonly object addPropertyLock = new object();
         //id of sent messages

@@ -41,8 +41,8 @@ namespace Fanior.Shared
         public bool Solid { get; set; }
         public bool IsVisible { get; set; }
         public Mask Mask { get; set; }
-        public Shape Shape { get; set; }
 
+        public Shape Shape { get; set; }
         //reference to game variables
         [JsonIgnore]
         protected Gvars gvars;
@@ -145,5 +145,7 @@ namespace Fanior.Shared
                 gvars.Msg.itemsToCreate.Add(this);
             }
         }
+
+        
     }
 }

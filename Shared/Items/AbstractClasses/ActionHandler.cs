@@ -27,6 +27,8 @@ namespace Fanior.Shared
         //actions of this item to be executed everyFrame
         [JsonProperty]
         protected Dictionary<string, ItemAction> actionsEveryFrame = new();
+
+
         /// <summary>
         /// Actions to be executed in the current frame. Is action is supposed to repeat, it will be added again to the list.
         /// Due to possible differences in duration of particular frames, actions will be executed be number of frames, not real time

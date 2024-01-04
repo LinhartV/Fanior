@@ -50,6 +50,7 @@ namespace Fanior.Client.Pages
         private int height = 500;
         //reference to canvas
         public ElementReference mySvg;
+        public ElementReference tutorial;
         public ElementReference textBox;
         public ElementReference root;
         public HubConnection hubConnection;

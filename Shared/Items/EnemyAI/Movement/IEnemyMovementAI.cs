@@ -8,6 +8,7 @@ namespace Fanior.Shared
 {
     public interface IEnemyMovementAI
     {
+
         public void Control(Gvars gvars, Enemy enemy);
     }
 }

@@ -11,7 +11,7 @@ namespace Fanior.Shared
     /// <summary>
     /// Class for every Action delegate used in the game (for the case of JSON)
     /// </summary>
-    public class LambdaActions
+    public static class LambdaActions
     {
         delegate void LambdaAction(Gvars gvars, int id, params object[] parameters);
         /// <summary>
@@ -68,11 +68,12 @@ namespace Fanior.Shared
             lambdaActions.Add("enemyAI", ((gvars, id, parameters) => { (gvars.ItemsStep[id] as Enemy).AI.Control(gvars, gvars.ItemsStep[id] as Enemy); }));
             lambdaActions.Add("createBoss", ((gvars, id, parameters) =>
             {
-
+                if (gvars.Cheating)
+                    return;
                 int bounty = 2000;
                 
                 IHitReaction hr = null;
-                WeaponTree.WeaponNode wn = WeaponTree.GetRoot();
+                WeaponNode wn = ToolsGame.GetWeaponTreeRoot();
                 double damage = 4 + ToolsGame.random.NextDouble() * 3;
                 double weaponSpeed = 1 + ToolsGame.random.NextDouble() * 2;
                 switch (ToolsGame.random.Next(0, 2))
@@ -111,7 +112,7 @@ namespace Fanior.Shared
                         break;
                     default:
                         emai = new FollowClosestAI();
-                        movementSpeed *= 0.6;
+                        movementSpeed *= 0.5;
                         break;
                 }
                 int r = ToolsGame.random.Next(0, 256);

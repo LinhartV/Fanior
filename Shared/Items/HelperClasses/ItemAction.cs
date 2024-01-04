@@ -71,6 +71,5 @@ namespace Fanior.Shared
                 }
             }
         }
-
     }
 }

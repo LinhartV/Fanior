@@ -16,6 +16,12 @@
             <input type="text" id="name" @bind-value=name @ref="textBox" placeholder="Fighter's name" maxlength="10" @onkeydown='(e)=> {if(e.Key == "Enter") Start();}' />
             <button @onclick=Start>START IT</button>
         </div>
+        <div id="tutorialDiv" @ref="tutorial">
+            <p>
+                @images[pointer].Item2
+            </p>
+            <img src="/Images/Tutorial/@images[pointer].Item1" />
+        </div>
     }
     @if (opacity > 0)
     {

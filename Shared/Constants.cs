@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Fanior.Shared
 {
-    public class Constants
+    public static class Constants
     {
         public const int PLAYERS_LIMIT = 50;
         /// <summary>
@@ -30,7 +30,7 @@ namespace Fanior.Shared
         /// Initial speed of players
         /// </summary>
         public const double INICIAL_MOVEMENT_SPEED = 6;
-        public const int POINTS_NEEDED_TO_UPGRADE_WEAPON = 7;
+        public const int POINTS_NEEDED_TO_UPGRADE_WEAPON = 5;
 
     }
 }

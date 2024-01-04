@@ -226,5 +226,13 @@ namespace Fanior.Shared
             MovementsAutomated.Clear();
             MovementsControlled.Clear();
         }
+
+        public IMovement IMovement
+        {
+            get => default;
+            set
+            {
+            }
+        }
     }
 }

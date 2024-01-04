@@ -12,7 +12,8 @@ namespace Fanior.Client.Pages
     public partial class Index
     {
         bool showUpgrades = false;
-
+        (string, string)[] images = { ("collect.bmp", "Collect gems to gain score"),("enemy.bmp","Fight other players and guardians"), ("select.bmp", "Gain score to upgrade weapon"), ("upgrade.bmp","Upgrade your stats or gain abilities"),("use.bmp","Use your abilities by pressing Q or E") };
+        int pointer = 0;
         /// <summary>
         /// Method containing all stuff that are to be proceeded at the start of the load up.
         /// </summary>
@@ -151,7 +152,15 @@ namespace Fanior.Client.Pages
             this.width = width;
             this.height = height;
         }
-
+        [JSInvokable]
+        public void HandleTutorial()
+        {
+            pointer++;
+            if(pointer >= images.Length)
+                pointer = 0;
+            StateHasChanged();
+        }
+        
         public void Dispose()
         {
             selfReference?.Dispose();
@@ -162,7 +171,6 @@ namespace Fanior.Client.Pages
         {
             try
             {
-                selfReference = DotNetObjectReference.Create(this);
 
                 var minInterval = 20;
                 await JS.InvokeVoidAsync("onThrottledMouseMove",
@@ -203,9 +211,16 @@ namespace Fanior.Client.Pages
 
         protected async override Task OnAfterRenderAsync(bool firstRender)
         {
-            if (firstRender) { await JS.InvokeVoidAsync("SetFocus", textBox); }
+            if (firstRender)
+            {
+                selfReference = DotNetObjectReference.Create(this);
+                await JS.InvokeVoidAsync("SetFocus", textBox);
+                await JS.InvokeVoidAsync("onAnimationEnd",
+                    tutorial, selfReference);
+            }
 
         }
+        
         private async Task Animate(bool down)
         {
             zindex = 100;

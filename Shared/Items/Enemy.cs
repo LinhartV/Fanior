@@ -12,10 +12,13 @@ namespace Fanior.Shared
     {
         [JsonProperty]
         private int scoreToReturn;
+
         public IEnemyMovementAI AI { get; private set; }
+
         public IHitReaction HitReaction { get; private set; }
+
         public Enemy() : base() { }
-        public Enemy(Gvars gvars, double x, double y, Shape shape, IMovement defaultMovement, double movementSpeed, double acceleration, double friction, double lives, double regeneration, WeaponTree.WeaponNode weaponNode, int bounty, IEnemyMovementAI ai, IHitReaction hitReaction, bool setAngle, double damage, double bodyDamage, double weaponSpeed, double shield = 0, bool isVisible = true)
+        public Enemy(Gvars gvars, double x, double y, Shape shape, IMovement defaultMovement, double movementSpeed, double acceleration, double friction, double lives, double regeneration, WeaponNode weaponNode, int bounty, IEnemyMovementAI ai, IHitReaction hitReaction, bool setAngle, double damage, double bodyDamage, double weaponSpeed, double shield = 0, bool isVisible = true)
             : base(gvars, x, y, shape, new Mask(shape.ImageWidth, shape.ImageHeight, shape.Geometry), movementSpeed, acceleration, friction, lives, regeneration, weaponNode, setAngle, shield, defaultMovement, isVisible)
         {
             this.BodyDamage = bodyDamage;
@@ -48,7 +51,7 @@ namespace Fanior.Shared
         public override void CollideServer(Item collider, double angle)
         {
             base.CollideServer(collider, angle);
-            if(collider is Shot s && s.CharacterId != this.Id)
+            if (collider is Shot s && s.CharacterId != this.Id)
                 HitReaction?.React(this.gvars, this.Id, s.CharacterId);
         }
         public override void Death()

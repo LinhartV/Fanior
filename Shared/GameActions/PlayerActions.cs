@@ -135,8 +135,24 @@ namespace Fanior.Shared
 
             actions.Add(PlayerActionsEnum.cheat, new KeyCommand((id, gvars) =>
             {
+                gvars.Cheating = !gvars.Cheating;
                 gvars.ItemsPlayers[id].IncreaseScore(1000);
                 gvars.ItemsPlayers[id].Immortal = !gvars.ItemsPlayers[id].Immortal;
+                if (gvars.Cheating)
+                {
+                    foreach (var item in gvars.Items.Values)
+                    {
+                        if (item is Enemy)
+                        {
+                            item.Dispose();
+                        }
+                    }
+                }
+                else
+                {
+                    LambdaActions.ExecuteActions("createBoss", gvars, -1);
+                }
+                
             },
             (id, gvars) =>
             {

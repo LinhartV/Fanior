@@ -13,7 +13,7 @@ namespace Fanior.Shared
         public static Random random = new();
         public static Player CreateNewPlayer(Gvars gvars, string connectionId, string name)
         {
-            return new Player(name, connectionId, gvars, (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", 1, 40, 40, Shape.GeometryEnum.circle, "red", "darkred"), null, Constants.INICIAL_MOVEMENT_SPEED, 1, 0.2, 100, 0.02, WeaponTree.GetRoot(), 50);
+            return new Player(name, connectionId, gvars, (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), (double)(random.NextDouble() * (gvars.ArenaWidth - 50 - 10) + 10), new Shape("blue", "darkblue", 1, 40, 40, Shape.GeometryEnum.circle, "red", "darkred"), null, Constants.INICIAL_MOVEMENT_SPEED, 1, 0.2, 100, 0.02, ToolsGame.GetWeaponTreeRoot(), 50);
         }
         public static void ProceedFrame(Gvars gvars, double now, int delay)
         {
@@ -102,8 +102,8 @@ namespace Fanior.Shared
 
         public static List<Upgrade> upgrades = new List<Upgrade>
             {
-                { new Upgrade("MAX HEALTH", "pink", (Player player)=>{player.MaxLives += 15; }) },
-                { new Upgrade("REGENERATION", "violet", (Player player)=>{player.Regeneration *= 1.4; }) },
+                { new Upgrade("MAX HEALTH", "pink", (Player player) => {player.MaxLives += 15; }) },
+                { new Upgrade("REGENERATION", "violet", (Player player) => {player.Regeneration *= 1.4; }) },
                 { new Upgrade("WEAPON DAMAGE", "red", (Player player) => { player.Damage *= 1.3; }) },
                 { new Upgrade("WEAPON SPEED", "orange", (Player player) => { player.BulletSpeed *= 1.1; }) },
                 { new Upgrade("RELOAD", "green", (Player player) => { player.ReloadTime *= 0.9; }) },
@@ -141,7 +141,19 @@ namespace Fanior.Shared
                 { new Ability(20, 0, "Repulsion", 2, "repulsion.svg", "Creates a pressure wave that repels everything in radius") }
             };
 
-
+        public static WeaponNode GetWeaponTreeRoot()
+        {
+            //lvl2
+            var burningBoulder = new WeaponNode(new BurningBoulderWeapon(true, 70, 13, 15, 100, "Fireball", "fireball.svg"));
+            var bomber = new WeaponNode(new BombWeapon(true, 70, 10, 1, 50, "Bomber", "bombWeapon.svg"));
+            //lvl1
+            var flameBow = new WeaponNode(new FireBowWeapon(true, 35, 14, 7, 220, "Flame bow", "fireArrow.png"), bomber, burningBoulder);
+            var crossbow = new WeaponNode(new CrossbowWeapon(true, 55, 25, 17, 70, "Crossbow", "crossbow.svg"));
+            var slingshot = new WeaponNode(new SlingshotWeapon(true, 60, 17, 7, 120, "Slingshot", "slingshot.svg"));
+            //root
+            var root = new WeaponNode(new BasicWeapon(true, 30, 13, 5, 40, "Stone thrower", "none"), flameBow, crossbow, slingshot);
+            return root;
+        }
         /*static public bool ResetActionByName(Item item, string actionName, bool invokeStartAction)
         {
             for (int i = 0; i < item.gameActions.Count; i++)
